@@ -17,5 +17,5 @@ export const auth = betterAuth({
     enabled: true,
   },
   secret: env.BETTER_AUTH_SECRET,
-  baseURL: `${env.PUBLIC_SERVER_URL}:${env.SERVER_PORT}`,
+  baseURL: env.PUBLIC_SERVER_URL,
 });
