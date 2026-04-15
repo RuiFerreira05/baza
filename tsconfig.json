@@ -1,0 +1,11 @@
+// This is the *root* TypeScript configuration file for the project. All other packages will usually
+// have one of these as well, and inside them, they will extend this one. This way we can have some
+// shared configuration across all packages, and also have package-specific configuration when
+// needed.
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2020",
+    "skipLibCheck": true
+  }
+}
