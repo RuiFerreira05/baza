@@ -48,4 +48,4 @@ app.route({
   },
 });
 
-app.register(userRoutes, { prefix: "/users" });
+app.register(userRoutes, { prefix: "/restricted/users" });

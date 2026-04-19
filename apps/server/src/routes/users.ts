@@ -3,6 +3,7 @@ import { getUsersResponseSchema } from "@baza/shared-types";
 import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
 import { db } from "../lib/db";
+// import { getUserById } from "../services/userServices";
 
 export const userRoutes: FastifyPluginAsync = async (fastify) => {
   const app = fastify.withTypeProvider<TypeBoxTypeProvider>();
@@ -26,4 +27,21 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
       res.code(200).send(data);
     },
   );
+
+  // app.get(
+  //   "/:id/",
+  //   {
+  //     schema: {
+  //       description: "This route fetches all users from the app",
+  //       tags: ["users"],
+  //       response: {
+  //         200: getUserByIdResponseSchema,
+  //       },
+  //     },
+  //   },
+  //   async (req, res) => {
+  //     const { id } = req.params as { id: string };
+  //     return getUserById(id);
+  //   }
+  // );
 };
