@@ -1,9 +1,8 @@
-import { defineRelations, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { pgTable, text, varchar, timestamp, date, time, boolean, pgEnum, primaryKey, check } from "drizzle-orm/pg-core";
 import { profiles } from "./profile";
 import { groups } from "./group";
 import { plans } from "./plan";
-import { preferences } from "./preference";
 
 export const events = pgTable("events", {
   id: text("id").primaryKey(),
@@ -67,39 +66,4 @@ export const eventConfirmations = pgTable("event_confirmations", {
   (t) => [
     primaryKey({ columns: [t.groupId, t.username]}),
   ]
-);
-
-
-export const eventRelations = defineRelations(
-  {personalEvents, groupEvents, groupEventsFinal, profiles, groups, plans, preferences},
-  (r) => ({
-    personalEvents: {
-      profiles: r.one.profiles({
-        from: r.personalEvents.username,
-        to: r.profiles.username,
-      })
-    },
-    groupEvents: {
-      groups: r.one.groups({
-        from: r.groupEvents.groupId,
-        to: r.groups.id,
-      }),
-      profiles: r.one.profiles({
-        from: r.groupEvents.createdBy,
-        to: r.profiles.username,
-      }),
-      plans: r.many.plans(),
-      preferences: r.many.plans(),
-    },
-    groupEventsFinal: {
-      groups: r.one.groups({
-        from: r.groupEventsFinal.groupId,
-        to: r.groups.id,
-      }),
-      plans: r.one.plans({
-        from: r.groupEventsFinal.planId,
-        to: r.plans.id,
-      })
-    }
-  })
 );

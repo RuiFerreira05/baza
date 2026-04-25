@@ -1,10 +1,6 @@
-import { defineRelations, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { pgTable, text, timestamp, json, pgEnum, primaryKey, check } from "drizzle-orm/pg-core";
 import { users } from "./auth";
-// import { groupMembers } from "./group";
-// import { personalEvents, groupEvents } from "./event";
-// import { plans } from "./plan";
-// import { preferences } from "./preference";
 
 export const profiles = pgTable("profiles", {
   username: text("username").references(() => users.name).primaryKey(),
@@ -32,31 +28,3 @@ export const friends = pgTable("friends", {
   ]
 );
 
-export const profileRelations = defineRelations(
-  {profiles, users, friends},
-  (r) => ({
-    profiles: {
-      users: r.one.users({
-        from: r.profiles.username,
-        to: r.users.name,
-      }),
-      friends: r.many.friends(),
-      // groupMembers: r.many.groupMembers(),
-      // personalEvents: r.many.personalEvents(),
-      // groupEvents: r.many.groupEvents(),
-      // plans: r.many.plans(),
-      // votes: r.many.plans(),
-      // preferences: r.many.preferences(),
-    },
-    friends: {
-      profile1: r.one.profiles({
-        from: r.friends.sentBy,
-        to: r.profiles.username,
-      }),
-      profile2: r.one.profiles({
-        from: r.friends.receivedBy,
-        to: r.profiles.username,
-      })
-    }
-  })
-);

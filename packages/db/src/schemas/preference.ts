@@ -1,5 +1,4 @@
-import { defineRelations, sql } from "drizzle-orm";
-import { pgTable, text, json, boolean, varchar, timestamp, date, time, integer, primaryKey, check } from "drizzle-orm/pg-core";
+import { pgTable, text, json, boolean, timestamp, primaryKey} from "drizzle-orm/pg-core";
 import { profiles } from "./profile";
 import { groupEvents } from "./event";
 
@@ -14,20 +13,4 @@ export const preferences = pgTable("preferences", {
   (t) => [
     primaryKey({ columns: [t.username, t.groupEventId]}),
   ]
-);
-
-export const preferenceRelations = defineRelations(
-  {preferences, profiles, groupEvents},
-  (r) => ({
-    preferences: {
-      profiles: r.one.profiles({
-        from: r.preferences.username,
-        to: r.profiles.username,
-      }),
-      groupEvents: r.one.groupEvents({
-        from: r.preferences.groupEventId,
-        to: r.groupEvents.id,
-      })
-    }
-  })
 );

@@ -1,0 +1,190 @@
+import { defineRelations } from "drizzle-orm";
+import { users, sessions, accounts } from "./auth";
+import { profiles, friends } from "./profile";
+import { groups, groupMembers } from "./group";
+import { personalEvents, groupEvents, groupEventsFinal } from "./event";
+import { plans, votes } from "./plan";
+import { preferences } from "./preference";
+
+export const authRelations = defineRelations(
+  { users, sessions, accounts, profiles},
+  (r) => ({
+    users: {
+      sessions: r.many.sessions(),
+      accounts: r.many.accounts(),
+      profiles: r.one.profiles({
+        from: r.users.name,
+        to: r.profiles.username,
+      }),
+    },
+    sessions: {
+      users: r.one.users({
+        from: r.sessions.userId,
+        to: r.users.id,
+      }),
+    },
+    accounts: {
+      users: r.one.users({
+        from: r.accounts.userId,
+        to: r.users.id,
+      }),
+    },
+  }),
+);
+
+export const profileRelations = defineRelations(
+  {profiles, users, friends, groupEvents, personalEvents, groupMembers, plans, preferences, votes},
+  (r) => ({
+    profiles: {
+      users: r.one.users({
+        from: r.profiles.username,
+        to: r.users.name,
+      }),
+      friends1: r.many.friends({
+        from: r.profiles.username,
+        to: r.friends.sentBy,
+      }),
+      friends2: r.many.friends({
+        from: r.profiles.username,
+        to: r.friends.receivedBy,
+      }),
+      groupMembers: r.many.groupMembers({
+        from: r.profiles.username,
+        to: r.groupMembers.username,
+      }),
+      personalEvents: r.many.personalEvents({
+        from: r.profiles.username,
+        to: r.personalEvents.username,
+      }),
+      groupEvents: r.many.groupEvents({
+        from: r.profiles.username,
+        to: r.groupEvents.createdBy,
+      }),
+      plans: r.many.plans({
+        from: r.profiles.username,
+        to: r.plans.username,
+      }),
+      votes: r.many.plans({
+        from: r.profiles.username.through(r.votes.username),
+        to: r.plans.id.through(r.votes.planId),
+      }),
+      preferences: r.many.preferences({
+        from: r.profiles.username,
+        to: r.preferences.username,
+      }),
+    },
+    friends: {
+      profile1: r.one.profiles({
+        from: r.friends.sentBy,
+        to: r.profiles.username,
+      }),
+      profile2: r.one.profiles({
+        from: r.friends.receivedBy,
+        to: r.profiles.username,
+      })
+    }
+  })
+);
+
+export const groupRelations = defineRelations(
+  {groups, groupMembers, profiles, groupEvents},
+  (r) => ({
+    groups: {
+      groupMembers: r.many.groupMembers(),
+      groupEvents: r.many.groupEvents({
+        from: r.groups.id,
+        to: r.groupEvents.groupId,
+      }),
+    },
+    groupMembers:{
+      groups: r.one.groups({
+        from: r.groupMembers.groupId,
+        to: r.groups.id,
+      }),
+      profiles: r.one.profiles({
+        from: r.groupMembers.username,
+        to: r.profiles.username,
+      }),
+    }
+  })
+);
+
+export const eventRelations = defineRelations(
+  {personalEvents, groupEvents, groupEventsFinal, profiles, groups, plans, preferences},
+  (r) => ({
+    personalEvents: {
+      profiles: r.one.profiles({
+        from: r.personalEvents.username,
+        to: r.profiles.username,
+      })
+    },
+    groupEvents: {
+      groups: r.one.groups({
+        from: r.groupEvents.groupId,
+        to: r.groups.id,
+      }),
+      profiles: r.one.profiles({
+        from: r.groupEvents.createdBy,
+        to: r.profiles.username,
+      }),
+      plans: r.many.plans({
+        from: r.groupEvents.id,
+        to: r.plans.groupEventId,
+      }),
+      preferences: r.many.preferences({
+        from: r.groupEvents.id,
+        to: r.preferences.groupEventId,
+      }),
+    },
+    groupEventsFinal: {
+      groups: r.one.groups({
+        from: r.groupEventsFinal.groupId,
+        to: r.groups.id,
+      }),
+      plans: r.one.plans({
+        from: r.groupEventsFinal.planId,
+        to: r.plans.id,
+      })
+    }
+  })
+);
+
+export const planRelations = defineRelations(
+  {plans, profiles, groupEvents, groupEventsFinal, votes},
+  (r) => ({
+    plans: {
+      groupEvents: r.one.groupEvents({
+        from: r.plans.groupEventId,
+        to: r.groupEvents.id
+      }),
+      groupEventsFinal: r.one.groupEventsFinal({
+        from: r.plans.id,
+        to: r.groupEventsFinal.planId,
+      }),
+      profiles: r.one.profiles({
+        from: r.plans.username,
+        to: r.profiles.username,
+      }),
+      votes: r.many.profiles({
+        from: r.plans.id.through(r.votes.planId),
+        to: r.profiles.username.through(r.votes.username),
+      })
+    }
+  })
+);
+
+export const preferenceRelations = defineRelations(
+  {preferences, profiles, groupEvents},
+  (r) => ({
+    preferences: {
+      profiles: r.one.profiles({
+        from: r.preferences.username,
+        to: r.profiles.username,
+      }),
+      groupEvents: r.one.groupEvents({
+        from: r.preferences.groupEventId,
+        to: r.groupEvents.id,
+      })
+    }
+  })
+);

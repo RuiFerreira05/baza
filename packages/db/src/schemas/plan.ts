@@ -1,7 +1,7 @@
-import { defineRelations, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { pgTable, text, varchar, timestamp, date, time, integer, primaryKey, check } from "drizzle-orm/pg-core";
 import { profiles } from "./profile";
-import { groupEvents, groupEventsFinal } from "./event";
+import { groupEvents } from "./event";
 
 export const plans = pgTable("plans", {
   id: text("id"),
@@ -32,28 +32,4 @@ export const votes = pgTable("votes", {
   (t) => [
     primaryKey({ columns: [t.planId, t.username]}),
   ]
-);
-
-export const planRelations = defineRelations(
-  {plans, profiles, groupEvents, groupEventsFinal, votes},
-  (r) => ({
-    plans: {
-      groupEvents: r.one.groupEvents({
-        from: r.plans.groupEventId,
-        to: r.groupEvents.id
-      }),
-      groupEventsFinal: r.one.groupEventsFinal({
-        from: r.plans.id,
-        to: r.groupEventsFinal.planId,
-      }),
-      profiles: r.one.profiles({
-        from: r.plans.username,
-        to: r.profiles.username,
-      }),
-      votes: r.many.profiles({
-        from: r.plans.id.through(r.votes.planId),
-        to: r.profiles.username.through(r.votes.username),
-      })
-    }
-  })
 );
