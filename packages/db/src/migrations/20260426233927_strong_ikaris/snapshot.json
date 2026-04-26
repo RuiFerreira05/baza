@@ -1,9 +1,9 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "882518e6-6597-4146-bf75-61b92468e718",
+  "id": "b980654d-8468-42b2-b9ec-fc1ca5ef5726",
   "prevIds": [
-    "b3b90cb9-229f-4cab-b503-d63d1db6cbde"
+    "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
     {
@@ -2251,7 +2251,7 @@
       "table": "group_members"
     },
     {
-      "value": "\"group_name\" REGEXP '^[A-Za-z0-9_\\'\\-\\.]{3,}$'",
+      "value": "\"group_name\" REGEXP '^[A-Za-z0-9_\\-\\.]{3,}$'",
       "name": "group_name_check",
       "entityType": "checks",
       "schema": "public",

@@ -1,1 +1,0 @@
-ALTER TABLE "groups" DROP CONSTRAINT "group_name_check", ADD CONSTRAINT "group_name_check" CHECK ("group_name" REGEXP '^[A-Za-z0-9_\-\.]{3,}$');

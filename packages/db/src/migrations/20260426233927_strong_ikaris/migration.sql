@@ -1,5 +1,73 @@
+CREATE TYPE "status" AS ENUM('accepted', 'pending', 'rejected', 'blocked');--> statement-breakpoint
 CREATE TYPE "every" AS ENUM('day', 'week', 'month', 'year', 'never');--> statement-breakpoint
 CREATE TYPE "state" AS ENUM('finished', 'unfinished');--> statement-breakpoint
+CREATE TABLE "accounts" (
+	"id" text PRIMARY KEY,
+	"account_id" text NOT NULL,
+	"provider_id" text NOT NULL,
+	"user_id" text NOT NULL,
+	"access_token" text,
+	"refresh_token" text,
+	"id_token" text,
+	"access_token_expires_at" timestamp,
+	"refresh_token_expires_at" timestamp,
+	"scope" text,
+	"password" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "sessions" (
+	"id" text PRIMARY KEY,
+	"expires_at" timestamp NOT NULL,
+	"token" text NOT NULL UNIQUE,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp NOT NULL,
+	"ip_address" text,
+	"user_agent" text,
+	"user_id" text NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "users" (
+	"id" text PRIMARY KEY,
+	"name" text NOT NULL,
+	"email" text NOT NULL UNIQUE,
+	"email_verified" boolean DEFAULT false NOT NULL,
+	"image" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "verifications" (
+	"id" text PRIMARY KEY,
+	"identifier" text NOT NULL,
+	"value" text NOT NULL,
+	"expires_at" timestamp NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "friends" (
+	"sent_by" text,
+	"received_by" text,
+	"friend_status" "status" NOT NULL,
+	"request_accepted_at" timestamp,
+	"request_sent_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp,
+	CONSTRAINT "friends_pkey" PRIMARY KEY("sent_by","received_by"),
+	CONSTRAINT "banned_check" CHECK ((("friend_status" = "accepted" OR "friend_status" = "blocked") AND "request_accepted_at" IS NOT NULL) OR "friend_status" = "pending" OR "friend_status" = "rejected")
+);
+--> statement-breakpoint
+CREATE TABLE "profiles" (
+	"username" text PRIMARY KEY,
+	"photo" text,
+	"description" text,
+	"settings" json NOT NULL,
+	"user_id" text NOT NULL UNIQUE,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp
+);
+--> statement-breakpoint
 CREATE TABLE "group_members" (
 	"username" text,
 	"group_id" text,
@@ -21,7 +89,7 @@ CREATE TABLE "groups" (
 	"photo" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp,
-	CONSTRAINT "group_name_check" CHECK ("group_name" REGEXP '^[A-Za-z0-9_'-.]{3,}$')
+	CONSTRAINT "group_name_check" CHECK ("group_name" REGEXP '^[A-Za-z0-9_\-\.]{3,}$')
 );
 --> statement-breakpoint
 CREATE TABLE "event_confirmations" (
@@ -107,6 +175,16 @@ CREATE TABLE "preferences" (
 	CONSTRAINT "preferences_pkey" PRIMARY KEY("username","group_event_id")
 );
 --> statement-breakpoint
+CREATE INDEX "accounts_userId_idx" ON "accounts" ("user_id");--> statement-breakpoint
+CREATE INDEX "sessions_userId_idx" ON "sessions" ("user_id");--> statement-breakpoint
+CREATE INDEX "verifications_identifier_idx" ON "verifications" ("identifier");--> statement-breakpoint
+ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "friends" ADD CONSTRAINT "friends_sent_by_profiles_username_fkey" FOREIGN KEY ("sent_by") REFERENCES "profiles"("username");--> statement-breakpoint
+ALTER TABLE "friends" ADD CONSTRAINT "friends_received_by_profiles_username_fkey" FOREIGN KEY ("received_by") REFERENCES "profiles"("username");--> statement-breakpoint
+ALTER TABLE "profiles" ADD CONSTRAINT "profiles_username_users_name_fkey" FOREIGN KEY ("username") REFERENCES "users"("name");--> statement-breakpoint
+ALTER TABLE "profiles" ADD CONSTRAINT "profiles_photo_users_image_fkey" FOREIGN KEY ("photo") REFERENCES "users"("image");--> statement-breakpoint
+ALTER TABLE "profiles" ADD CONSTRAINT "profiles_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id");--> statement-breakpoint
 ALTER TABLE "group_members" ADD CONSTRAINT "group_members_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username");--> statement-breakpoint
 ALTER TABLE "group_members" ADD CONSTRAINT "group_members_group_id_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "groups"("id");--> statement-breakpoint
 ALTER TABLE "event_confirmations" ADD CONSTRAINT "event_confirmations_group_id_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "groups"("id");--> statement-breakpoint
