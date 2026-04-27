@@ -11,7 +11,7 @@ export const groups = pgTable("groups", {
   updatedAt: timestamp("updated_at")
 },
   (t) => [
-    check("group_name_check", sql`${t.groupname} REGEXP '^[A-Za-z0-9_\\-\\.]{3,}$'`),
+    check("group_name_check", sql`${t.groupname} ~ '^[A-Za-z0-9_\\-\\.]{3,}$'`),
   ]
 );
 

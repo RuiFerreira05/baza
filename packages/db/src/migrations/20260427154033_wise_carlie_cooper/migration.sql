@@ -55,7 +55,7 @@ CREATE TABLE "friends" (
 	"request_sent_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp,
 	CONSTRAINT "friends_pkey" PRIMARY KEY("sent_by","received_by"),
-	CONSTRAINT "banned_check" CHECK ((("friend_status" = "accepted" OR "friend_status" = "blocked") AND "request_accepted_at" IS NOT NULL) OR "friend_status" = "pending" OR "friend_status" = "rejected")
+	CONSTRAINT "banned_check" CHECK ((("friend_status" = 'accepted' OR "friend_status" = 'blocked') AND "request_accepted_at" IS NOT NULL) OR "friend_status" = 'pending' OR "friend_status" = 'rejected')
 );
 --> statement-breakpoint
 CREATE TABLE "profiles" (
@@ -89,7 +89,7 @@ CREATE TABLE "groups" (
 	"photo" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp,
-	CONSTRAINT "group_name_check" CHECK ("group_name" REGEXP '^[A-Za-z0-9_\-\.]{3,}$')
+	CONSTRAINT "group_name_check" CHECK ("group_name" ~ '^[A-Za-z0-9_\-\.]{3,}$')
 );
 --> statement-breakpoint
 CREATE TABLE "event_confirmations" (
@@ -108,23 +108,21 @@ CREATE TABLE "events" (
 );
 --> statement-breakpoint
 CREATE TABLE "group_events" (
-	"id" text,
+	"id" text PRIMARY KEY,
 	"group_id" text,
 	"start_date" date NOT NULL,
 	"end_date" date NOT NULL,
 	"state" "state" NOT NULL,
 	"voting_end_time" timestamp,
 	"createdBy" text NOT NULL,
-	CONSTRAINT "group_events_pkey" PRIMARY KEY("id","group_id"),
-	CONSTRAINT "voting_time_check" CHECK ((("voting_end_time" > CURRENT_TIMESTAMP()) AND "state" = "unfinished") OR 
-         (("voting_end_time" < CURRENT_TIMESTAMP()) AND "state" = "finished"))
+	CONSTRAINT "voting_time_check" CHECK ((("voting_end_time" > CURRENT_TIMESTAMP) AND "state" = 'unfinished') OR 
+         (("voting_end_time" < CURRENT_TIMESTAMP) AND "state" = 'finished'))
 );
 --> statement-breakpoint
 CREATE TABLE "group_events_final" (
-	"id" text,
+	"id" text PRIMARY KEY,
 	"group_id" text,
-	"plan_id" text,
-	CONSTRAINT "group_events_final_pkey" PRIMARY KEY("id","group_id")
+	"plan_id" text
 );
 --> statement-breakpoint
 CREATE TABLE "personal_events" (
@@ -141,7 +139,7 @@ CREATE TABLE "personal_events" (
 );
 --> statement-breakpoint
 CREATE TABLE "plans" (
-	"id" text,
+	"id" text PRIMARY KEY,
 	"group_event_id" text,
 	"username" text,
 	"title" varchar(64) NOT NULL,
@@ -154,7 +152,6 @@ CREATE TABLE "plans" (
 	"max_budget" integer,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp,
-	CONSTRAINT "plans_pkey" PRIMARY KEY("id","username","group_event_id"),
 	CONSTRAINT "time_check" CHECK ("start_time" < "end_time"),
 	CONSTRAINT "budget_check" CHECK ("min_budget" < "max_budget")
 );
@@ -182,8 +179,6 @@ ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fkey" FOREIGN K
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "friends" ADD CONSTRAINT "friends_sent_by_profiles_username_fkey" FOREIGN KEY ("sent_by") REFERENCES "profiles"("username");--> statement-breakpoint
 ALTER TABLE "friends" ADD CONSTRAINT "friends_received_by_profiles_username_fkey" FOREIGN KEY ("received_by") REFERENCES "profiles"("username");--> statement-breakpoint
-ALTER TABLE "profiles" ADD CONSTRAINT "profiles_username_users_name_fkey" FOREIGN KEY ("username") REFERENCES "users"("name");--> statement-breakpoint
-ALTER TABLE "profiles" ADD CONSTRAINT "profiles_photo_users_image_fkey" FOREIGN KEY ("photo") REFERENCES "users"("image");--> statement-breakpoint
 ALTER TABLE "profiles" ADD CONSTRAINT "profiles_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id");--> statement-breakpoint
 ALTER TABLE "group_members" ADD CONSTRAINT "group_members_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username");--> statement-breakpoint
 ALTER TABLE "group_members" ADD CONSTRAINT "group_members_group_id_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "groups"("id");--> statement-breakpoint

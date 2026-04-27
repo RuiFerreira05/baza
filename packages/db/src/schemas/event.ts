@@ -12,7 +12,7 @@ export const events = pgTable("events", {
   updatedAt: timestamp("updated_at")
 });
 
-export const repeatEnum = pgEnum("every", ["day", "week", "month", "year", "never"]);
+export const repeatEnum = pgEnum("every", ['day', 'week', 'month', 'year', 'never']);
 
 export const personalEvents = pgTable("personal_events", {
   id: text("id").references(() => events.id),
@@ -30,10 +30,10 @@ export const personalEvents = pgTable("personal_events", {
   ]
 );
 
-export const stateEnum = pgEnum("state", ["finished", "unfinished"]);
+export const stateEnum = pgEnum("state", ['finished', 'unfinished']);
 
 export const groupEvents = pgTable("group_events", {
-  id: text("id").references(() => events.id),
+  id: text("id").references(() => events.id).primaryKey(),
   groupId: text("group_id").references(() => groups.id),
   startDate: date("start_date").notNull(),
   endDate: date("end_date").notNull(),
@@ -42,9 +42,8 @@ export const groupEvents = pgTable("group_events", {
   createdBy: text("createdBy").notNull().references(() => profiles.username),
 },
   (t) => [
-    primaryKey({ columns: [t.id, t.groupId]}),
-    check("voting_time_check", sql`((${t.votingEndTime} > CURRENT_TIMESTAMP()) AND ${t.state} = "unfinished") OR 
-         ((${t.votingEndTime} < CURRENT_TIMESTAMP()) AND ${t.state} = "finished")`)
+    check("voting_time_check", sql`((${t.votingEndTime} > CURRENT_TIMESTAMP) AND ${t.state} = 'unfinished') OR 
+         ((${t.votingEndTime} < CURRENT_TIMESTAMP) AND ${t.state} = 'finished')`)
   ]
 );
 
@@ -52,11 +51,7 @@ export const groupEventsFinal = pgTable("group_events_final", {
   id: text("id").references(() => events.id).primaryKey(),
   groupId: text("group_id").references(() => groups.id),
   planId: text("plan_id").references(() => plans.id)
-},
-  (t) => [
-    primaryKey({ columns: [t.id, t.groupId]}),
-  ]
-);
+});
 
 export const eventConfirmations = pgTable("event_confirmations", {
   groupId: text("group_id").references(() => groups.id),

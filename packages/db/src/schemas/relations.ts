@@ -13,8 +13,8 @@ export const authRelations = defineRelations(
       sessions: r.many.sessions(),
       accounts: r.many.accounts(),
       profiles: r.one.profiles({
-        from: r.users.name,
-        to: r.profiles.username,
+        from: r.users.id,
+        to: r.profiles.userId,
       }),
     },
     sessions: {
@@ -37,8 +37,8 @@ export const profileRelations = defineRelations(
   (r) => ({
     profiles: {
       users: r.one.users({
-        from: r.profiles.username,
-        to: r.users.name,
+        from: r.profiles.userId,
+        to: r.users.id,
       }),
       friends1: r.many.friends({
         from: r.profiles.username,

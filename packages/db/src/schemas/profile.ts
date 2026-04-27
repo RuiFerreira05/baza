@@ -3,8 +3,8 @@ import { pgTable, text, timestamp, json, pgEnum, primaryKey, check } from "drizz
 import { users } from "./auth";
 
 export const profiles = pgTable("profiles", {
-  username: text("username").references(() => users.name).primaryKey(),
-  photo: text("photo").references(() => users.image),
+  username: text("username").primaryKey(),
+  photo: text("photo"),
   description: text("description"),
   settings: json("settings").notNull(),
   userId: text("user_id").unique().notNull().references(() => users.id),
@@ -12,7 +12,7 @@ export const profiles = pgTable("profiles", {
   updatedAt: timestamp("updated_at")
 });
 
-export const friendStatusEnum = pgEnum("status", ["accepted", "pending", "rejected", "blocked"]);
+export const friendStatusEnum = pgEnum("status", ['accepted', 'pending', 'rejected', 'blocked']);
 
 export const friends = pgTable("friends", {
   sentBy: text("sent_by").references(() => profiles.username),
@@ -24,7 +24,7 @@ export const friends = pgTable("friends", {
 },
   (t) => [
     primaryKey({ columns: [t.sentBy, t.receivedBy]}),
-    check("banned_check", sql`((${t.friendStatus} = "accepted" OR ${t.friendStatus} = "blocked") AND ${t.requestAcceptedAt} IS NOT NULL) OR ${t.friendStatus} = "pending" OR ${t.friendStatus} = "rejected"`)
+    check("banned_check", sql`((${t.friendStatus} = 'accepted' OR ${t.friendStatus} = 'blocked') AND ${t.requestAcceptedAt} IS NOT NULL) OR ${t.friendStatus} = 'pending' OR ${t.friendStatus} = 'rejected'`)
   ]
 );
 

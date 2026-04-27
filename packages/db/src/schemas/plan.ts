@@ -4,7 +4,7 @@ import { profiles } from "./profile";
 import { groupEvents } from "./event";
 
 export const plans = pgTable("plans", {
-  id: text("id"),
+  id: text("id").primaryKey(),
   groupEventId: text("group_event_id").references(() => groupEvents.id),
   username: text("username").references(() => profiles.username),
   title: varchar("title", { length: 64 }).notNull(),
@@ -19,7 +19,6 @@ export const plans = pgTable("plans", {
   updatedAt: timestamp("updated_at"),
 },
   (t) => [
-    primaryKey({ columns: [t.id, t.username, t.groupEventId]}),
     check("time_check", sql`${t.startTime} < ${t.endTime}`),
     check("budget_check", sql`${t.minBudget} < ${t.maxBudget}`)
   ]
