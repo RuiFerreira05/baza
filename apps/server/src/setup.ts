@@ -3,13 +3,15 @@ import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 import fastify from "fastify";
 import { auth } from "./lib/auth";
 import { userRoutes } from "./routes/users";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
 
 export const app = fastify({ logger: true });
 app.setValidatorCompiler(TypeBoxValidatorCompiler);
 
-await app.register(import("@fastify/swagger"));
+await app.register(fastifySwagger);
 
-await app.register(import("@fastify/swagger-ui"), {
+await app.register(fastifySwaggerUi, {
   routePrefix: "/docs",
 });
 
