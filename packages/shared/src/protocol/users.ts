@@ -1,5 +1,14 @@
 import Type from "typebox";
 
+export function SafeDate(
+  options?: Parameters<typeof Type.Unsafe<Date>>[0] & {
+    /** The date serialization format. Defaults to `datetime` (ISO-8601). */
+    format: "date" | "datetime";
+  },
+) {
+  return Type.Unsafe<Date>({ type: "string", format: "datetime", ...options });
+}
+
 // ####### DTO #######
 export const userPublicSchema = Type.Object({
   id: Type.String({
@@ -18,6 +27,19 @@ export const userPublicSchema = Type.Object({
 });
 export type UserDTO = Type.Static<typeof userPublicSchema>;
 
+export const userProfilePublicSchema = Type.Object({
+  username: Type.String({description: "username of user", example: "random_user123"}),
+  photo: Type.Union([ Type.String({description: "profile photo of the user"}), Type.Null() ]),
+  description: Type.Union([ Type.String({description: "Profile description of user", example: "Hi, i'm random_user123!"}), Type.Null() ]),
+  userId: Type.String({description: "user ID (randomly given)", example: "1y9889192bfb987"}),
+  createdAt: SafeDate(),
+  updatedAt: Type.Union([SafeDate(), Type.Null()]),
+}, {
+  description: "Public user profile data, without sensitive information",
+  title: "UserProfileDTO",
+});
+export type UserProfileDTO = Type.Static<typeof userProfilePublicSchema>;
+
 // ####### Route Specific Schemas #######
 
 // GET /users
@@ -35,3 +57,7 @@ export const createUserRequestSchema = Type.Object({
   passwordHash: Type.String(),
 });
 export type CreateUserRequest = Type.Static<typeof createUserRequestSchema>;
+
+// GET /users/:id
+export const getUserProfileResponseSchema = userProfilePublicSchema
+export type GetUserProfileResponse = Type.Static<typeof getUserProfileResponseSchema>;

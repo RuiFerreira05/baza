@@ -2,7 +2,7 @@ import { TypeBoxValidatorCompiler } from "@fastify/type-provider-typebox";
 import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 import fastify from "fastify";
 import { auth } from "./lib/auth";
-import { userRoutes } from "./routes/users";
+import { userRoutes } from "./routes/profiles";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 
@@ -50,4 +50,4 @@ app.route({
   },
 });
 
-app.register(userRoutes, { prefix: "/restricted/users" });
+app.register(userRoutes, { prefix: "/restricted/users/" });
