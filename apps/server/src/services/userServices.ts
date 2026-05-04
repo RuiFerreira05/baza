@@ -1,20 +1,34 @@
 import { profiles, users } from "@baza/db/schemas";
 import { db } from "../lib/db";
-import { eq, sql} from 'drizzle-orm';
+import { eq, getColumns } from 'drizzle-orm';
+import type { createUserProfileRequest } from "@baza/shared-types";
 
 // export function getUserById(userId: String) {
 //   return db.select().from(users).where(users.id.equals(userId)).first();
 // }
 
-export const getUserById = async (userId: String) => {
-  const result = await db.select({
-      username: profiles.username,
-      photo: profiles.photo,
-      description: profiles.description,
-      userId: profiles.userId,
-      createdAt: profiles.createdAt,
-      updatedAt: profiles.updatedAt,
-    }).from(profiles).where(sql`${profiles.userId} = ${userId}`);
+export const getUserById = async (userId: string) => {
+  const { settings, ...rest } = getColumns(profiles)
+  const result = await db.select({...rest}).from(profiles).where(eq(profiles.userId, userId));
 
-  return result
+  return result;
+}
+
+export const createUserProfile = async (userProfile: createUserProfileRequest) => {
+  const user = await db.select().from(users).where(eq(users.id, userProfile.userId))
+
+  if(user.length == 1){
+    const result = await db.insert(profiles).values({
+      username: userProfile.username,
+      photo: userProfile.photo,
+      description: userProfile.description,
+      userId: userProfile.userId,
+      createdAt: userProfile.createdAt,
+      updatedAt: userProfile.updatedAt,
+      settings: {},
+    }).returning();
+
+    return result;
+  }
+   return null;
 }

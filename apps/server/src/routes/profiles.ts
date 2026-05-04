@@ -1,14 +1,14 @@
-import { getUserProfileResponseSchema } from "@baza/shared-types";
+import { getUserProfileResponseSchema, createUserProfileRequestSchema, createUserProfileResponseSchema } from "@baza/shared-types";
 import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
-import { getUserByIdHandler } from "../handlers/profiles";
+import { getUserByIdHandler, createUserProfileHandler } from "../handlers/profiles";
 
 
 export const userRoutes: FastifyPluginAsync = async (fastify) => {
   const app = fastify.withTypeProvider<TypeBoxTypeProvider>();
 
   app.get(
-    "/users/:id",
+    "/:id",
     {
       schema: {
         description: "This route fetches profile information from a user of the app",
@@ -32,4 +32,27 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     },
     getUserByIdHandler
   );
+
+  app.post(
+    "/create",
+    {
+      schema: {
+        description: "This route creates a profile for a user of the app",
+        tags: ["users"],
+        body: createUserProfileRequestSchema,
+        response: {
+          201: createUserProfileResponseSchema,
+          400: {
+            desctiption: "Bad request"
+          }
+        },
+      },
+    },
+    createUserProfileHandler
+  );
+
+  // app.get(
+  //   "/:id/events",
+     
+  // );
 }

@@ -25,7 +25,7 @@ export const userPublicSchema = Type.Object({
   description: "Public user data, without sensitive information like password",
   title: "UserDTO",
 });
-export type UserDTO = Type.Static<typeof userPublicSchema>;
+export type UserDTO = Type.Static<typeof userPublicSchema>; 
 
 export const userProfilePublicSchema = Type.Object({
   username: Type.String({description: "username of user", example: "random_user123"}),
@@ -61,3 +61,10 @@ export type CreateUserRequest = Type.Static<typeof createUserRequestSchema>;
 // GET /users/:id
 export const getUserProfileResponseSchema = userProfilePublicSchema
 export type GetUserProfileResponse = Type.Static<typeof getUserProfileResponseSchema>;
+
+// POST /users/createProfile
+export const createUserProfileRequestSchema = userProfilePublicSchema
+export type createUserProfileRequest = Type.Static<typeof createUserProfileRequestSchema>;
+
+export const createUserProfileResponseSchema = userProfilePublicSchema
+export type createUserProfileResponse = Type.Static<typeof createUserProfileResponseSchema>;
