@@ -1,10 +1,11 @@
-import { TypeBoxValidatorCompiler } from "@fastify/type-provider-typebox";
-import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
-import fastify from "fastify";
-import { auth } from "./lib/auth";
-import { userRoutes } from "./routes/profiles";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
+import { TypeBoxValidatorCompiler } from "@fastify/type-provider-typebox";
+import { fromNodeHeaders } from "better-auth/node";
+import fastify from "fastify";
+import { auth } from "./lib/auth";
+import { userRoutes } from "./routes/profileRoutes";
+import { groupRoutes } from "./routes/groupRoutes";
 
 export const app = fastify({ logger: true });
 app.setValidatorCompiler(TypeBoxValidatorCompiler);
@@ -51,3 +52,4 @@ app.route({
 });
 
 app.register(userRoutes, { prefix: "/v1/restricted/users/" });
+app.register(groupRoutes, { prefix: "/v1/restricted/groups/" });
