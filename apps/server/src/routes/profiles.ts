@@ -43,7 +43,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         response: {
           201: createUserProfileResponseSchema,
           400: {
-            desctiption: "Bad request"
+            description: "Bad request"
           }
         },
       },
