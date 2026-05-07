@@ -1,7 +1,7 @@
 import { getUserProfileResponseSchema, createUserProfileRequestSchema, createUserProfileResponseSchema } from "@baza/shared-types";
 import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
-import { getUserByIdHandler, createUserProfileHandler } from "../handlers/profiles";
+import { getUserByIdHandler, createUserProfileHandler } from "../handlers/profileHandlers";
 
 
 export const userRoutes: FastifyPluginAsync = async (fastify) => {

@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { getUserById, createUserProfile } from "../services/userServices";
+import { getUserById, createUserProfile } from "../services/profileServices";
 import type { UserProfileDTO } from "@baza/shared-types";
 
 export const getUserByIdHandler = async (req: FastifyRequest, res: FastifyReply) => {
