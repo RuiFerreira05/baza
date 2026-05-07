@@ -12,7 +12,7 @@ app.setValidatorCompiler(TypeBoxValidatorCompiler);
 await app.register(fastifySwagger);
 
 await app.register(fastifySwaggerUi, {
-  routePrefix: "/docs",
+  routePrefix: "v1/docs",
 });
 
 app.route({
