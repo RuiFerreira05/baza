@@ -1,14 +1,5 @@
 import { Type } from "typebox";
 
-export function SafeDate(
-  options?: Parameters<typeof Type.Unsafe<Date>>[0] & {
-    /** The date serialization format. Defaults to `datetime` (ISO-8601). */
-    format: "date" | "datetime";
-  },
-) {
-  return Type.Unsafe<Date>({ type: "string", format: "datetime", ...options });
-}
-
 // ########### DTO ##########
 export const groupDTO = Type.Object({
   id: Type.String({

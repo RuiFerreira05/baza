@@ -1,8 +1,7 @@
-import type { getGroupByIdParams, GroupDTO } from "@baza/shared-types";
+import { ErrorTypes, type getGroupByIdParams } from "@baza/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { getGroupById } from "../services/groupServices";
 import { app } from "../setup";
-import { Err, ErrorTypes } from "../lib/types";
 
 // /groups/:id
 export const getGroupByIdHandler = async (
