@@ -1,4 +1,4 @@
-import { getGroupByIdParams, groupDTO } from "@baza/shared-types";
+import { ErrorTypes, getGroupByIdParams, groupDTO } from "@baza/shared-types";
 import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
 import { getGroupByIdHandler } from "../handlers/groupHandlers";
@@ -14,12 +14,29 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         tags: ["groups"],
         response: {
           200: groupDTO,
-          404: Type.String({
-            description: "if no group with the provided id was found",
-          }),
-          500: Type.String({
-            description: "if an error occurred while fetching the group",
-          }),
+          404: Type.Object(
+            {
+              type: Type.Literal(ErrorTypes.UnknownIdError),
+              message: Type.String({
+                description: "A human readable error message",
+              }),
+            },
+            {
+              description: "if no group with the provided id was found",
+            },
+          ),
+          500: Type.Object(
+            {
+              type: Type.Literal(ErrorTypes.ConversionError),
+              message: Type.String({
+                description: "A human readable error message",
+              }),
+            },
+            {
+              description:
+                "if the group was found but there was an error converting it to the expected format",
+            },
+          ),
         },
         params: getGroupByIdParams,
       },

@@ -18,11 +18,17 @@ export const getGroupByIdHandler = async (
     switch (group.error) {
       case ErrorTypes.UnknownIdError:
         app.log.warn(`Group not found`);
-        return res.status(404).send(`Group not found`); // TODO: specific error return schemas
+        return res.status(404).send({
+          type: ErrorTypes.UnknownIdError,
+          message: `A group with the provided id was not found`,
+        });
 
       case ErrorTypes.ConversionError:
         app.log.error(`Failed to convert group`);
-        return res.status(500).send(`Failed to convert group`); // TODO: specific error return schemas
+        return res.status(500).send({
+          type: ErrorTypes.ConversionError,
+          message: `An error occurred while converting the group data`,
+        });
     }
   }
 
