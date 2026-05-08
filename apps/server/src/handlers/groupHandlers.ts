@@ -1,6 +1,6 @@
-import { ErrorTypes, type getGroupByIdParams } from "@baza/shared-types";
+import { createGroupBody, ErrorTypes, type getGroupByIdParams } from "@baza/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { getGroupById } from "../services/groupServices";
+import { createGroup, getGroupById } from "../services/groupServices";
 import { app } from "../setup";
 
 // /groups/:id
@@ -30,7 +30,35 @@ export const getGroupByIdHandler = async (
           message: `An error occurred while converting the group data`,
         });
     }
+  } else {
+    return res.send(group.value);
   }
-
-  return res.send(group.value);
 };
+
+export const createGroupHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  app.log.info("Received Create Group request")
+  const { groupName } = req.body as createGroupBody;
+  const result = await createGroup(groupName);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.ConversionError:
+        app.log.error(`Failed to convert created group`);
+        return res.status(500).send({
+          type: ErrorTypes.ConversionError,
+          message: `An error occurred while converting the created group data`,
+        });
+      case ErrorTypes.ResourceCreationError:
+        app.log.error(`Failed to create group`);
+        return res.status(500).send({
+          type: ErrorTypes.ResourceCreationError,
+          message: `An error occurred while creating the group`,
+        });
+    }
+  } else {
+    return res.send(result.value);
+  }
+}

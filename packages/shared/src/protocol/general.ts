@@ -3,6 +3,7 @@ import { Type } from "typebox";
 export enum ErrorTypes {
   UnknownIdError,
   ConversionError,
+  ResourceCreationError,
 }
 
 export const errorSchema = Type.Object({
@@ -15,5 +16,4 @@ export const errorSchema = Type.Object({
 }, {
   description: "A generic error schema that can be used for all routes",
 });
-
 export type ErrorSchema = Type.Static<typeof errorSchema>;

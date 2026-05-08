@@ -17,16 +17,23 @@ export const groupDTO = Type.Object({
     format: "uuid",
   }))
 });
-
 export type GroupDTO = Type.Static<typeof groupDTO>;
 
 // #### Route specific Schemas ####
 
+// GET /groups/:id
 export const getGroupByIdParams = Type.Object({
   id: Type.String({
     description: "Group UUID",
     format: "uuid",
   }),
 });
+export type getGroupByIdParams = Type.Static<typeof getGroupByIdParams>;
 
-export type getGroupByIdParams = Type.Static<typeof groupDTO>;
+// POST /groups/create
+export const createGroupBody = Type.Object({
+  groupName: Type.String({
+    description: "The name of the group being created"
+  })
+})
+export type createGroupBody = Type.Static<typeof createGroupBody>;
