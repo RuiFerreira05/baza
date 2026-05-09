@@ -1,4 +1,5 @@
 import { Type } from "typebox";
+import { nullable } from "./general";
 
 // ########### DTO ##########
 export const groupDTO = Type.Object({
@@ -9,12 +10,11 @@ export const groupDTO = Type.Object({
   groupname: Type.String({
     description: "The name of the group",
   }),
-  description: Type.Optional(Type.String({
-    description: "The group's description"
+  description: nullable(Type.String({
+    description: "A short description of the group"
   })),
-  photo: Type.Optional(Type.String({
-    description: "The uuid of the group's photo inside the server",
-    format: "uuid",
+  photo: nullable(Type.String({
+    description: "A URL to the group's photo"
   }))
 });
 export type GroupDTO = Type.Static<typeof groupDTO>;

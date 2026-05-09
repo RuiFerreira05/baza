@@ -17,3 +17,5 @@ export const errorSchema = Type.Object({
   description: "A generic error schema that can be used for all routes",
 });
 export type ErrorSchema = Type.Static<typeof errorSchema>;
+
+export const nullable = <T extends Type.TSchema>(schema: T) => Type.Union([schema, Type.Null()]);
