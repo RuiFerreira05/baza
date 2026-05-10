@@ -6,8 +6,18 @@ import fastify from "fastify";
 import { auth } from "./lib/auth";
 import { userRoutes } from "./routes/profileRoutes";
 import { groupRoutes } from "./routes/groupRoutes";
+import fs from "fs";
 
-export const app = fastify({ logger: true });
+if (!fs.existsSync("./logs")) {
+  fs.mkdirSync("./logs");
+}
+
+export const app = fastify({
+  logger: {
+    level: "info",
+    file: "./logs/server.log",
+  },
+});
 app.setValidatorCompiler(TypeBoxValidatorCompiler);
 
 await app.register(fastifySwagger);
