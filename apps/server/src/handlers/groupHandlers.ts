@@ -1,6 +1,6 @@
-import { createGroupBody, ErrorTypes, type getGroupByIdParams } from "@baza/shared-types";
+import { createGroupBody, editGroupPhotoParams, ErrorTypes, type getGroupByIdParams } from "@baza/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { createGroup, getGroupById } from "../services/groupServices";
+import { createGroup, getGroupById, saveGroupPhoto } from "../services/groupServices";
 import { app } from "../setup";
 
 // /groups/:id
@@ -60,5 +60,48 @@ export const createGroupHandler = async (
     }
   } else {
     return res.send(result.value);
+  }
+}
+
+export const editGroupPhotoHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  app.log.info("Received Edit Group Photo request");
+  const { id } = req.params as editGroupPhotoParams;
+  const photo = await req.file();
+
+  if (!photo) {
+    return res.status(400).send({
+      type: ErrorTypes.MalformedRequestError,
+      message: "No photo file uploaded",
+    });
+  }
+
+  const group = await saveGroupPhoto(id, photo);
+
+  if (!group.ok) {
+    switch (group.error) {
+      case ErrorTypes.UnknownIdError:
+        app.log.warn(`Group not found`);
+        return res.status(404).send({
+          type: ErrorTypes.UnknownIdError,
+          message: `A group with the provided id was not found`,
+        });
+      case ErrorTypes.ResourceCreationError:
+        app.log.error(`Failed to save group photo or update group with new photo`);
+        return res.status(500).send({
+          type: ErrorTypes.ResourceCreationError,
+          message: `An error occurred while saving the group photo or updating the group with the new photo`,
+        });
+      case ErrorTypes.ConversionError:
+        app.log.error(`Failed to convert updated group data`);
+        return res.status(500).send({
+          type: ErrorTypes.ConversionError,
+          message: `An error occurred while converting the updated group data`,
+        });
+    }
+  } else {
+    return res.status(201).send(group.value);
   }
 }

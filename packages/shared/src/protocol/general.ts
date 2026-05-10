@@ -1,21 +1,17 @@
 import { Type } from "typebox";
 
 export enum ErrorTypes {
-  UnknownIdError,
-  ConversionError,
-  ResourceCreationError,
+  UnknownIdError = "UnknownIdError",
+  ConversionError = "ConversionError",
+  ResourceCreationError = "ResourceCreationError",
+  MalformedRequestError = "MalformedRequestError",
 }
 
-export const errorSchema = Type.Object({
-  type: Type.Enum({ ...ErrorTypes }, {
-    description: "The type of the error",
-  }),
+export const genericError = (type: ErrorTypes) => Type.Object({
+  type: Type.Literal(type),
   message: Type.String({
-    description: "A human readable error message",
-  }),
-}, {
-  description: "A generic error schema that can be used for all routes",
-});
-export type ErrorSchema = Type.Static<typeof errorSchema>;
+    description: "A human readable error message"
+  })
+})
 
 export const nullable = <T extends Type.TSchema>(schema: T) => Type.Union([schema, Type.Null()]);

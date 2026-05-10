@@ -1,20 +1,18 @@
+import { fastifyMultipart } from "@fastify/multipart";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import { TypeBoxValidatorCompiler } from "@fastify/type-provider-typebox";
 import { fromNodeHeaders } from "better-auth/node";
 import fastify from "fastify";
-import { auth } from "./lib/auth";
-import { userRoutes } from "./routes/profileRoutes";
-import { groupRoutes } from "./routes/groupRoutes";
 import fs from "fs";
-import { env } from "./lib/env";
 import path from "path";
+import { auth } from "./lib/auth";
+import { env } from "./lib/env";
+import { groupRoutes } from "./routes/groupRoutes";
+import { userRoutes } from "./routes/profileRoutes";
 
-const logsDir = path.dirname(env.LOG_FILE_PATH);
+// ##### APP SETUP #####
 
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
-}
 
 export const app = fastify({
   logger: {
@@ -24,11 +22,19 @@ export const app = fastify({
 });
 app.setValidatorCompiler(TypeBoxValidatorCompiler);
 
+await app.register(fastifyMultipart);
+
+bootstrapDirs();
+
+// ##### SWAGGER SETUP #####
+
 await app.register(fastifySwagger);
 
 await app.register(fastifySwaggerUi, {
   routePrefix: "v1/docs",
 });
+
+// ##### BETTER-AUTH PROXY SETUP #####
 
 app.route({
   method: ["GET", "POST"],
@@ -65,5 +71,19 @@ app.route({
   },
 });
 
+// ##### ROUTES SETUP #####
+
 app.register(userRoutes, { prefix: "/v1/restricted/users/" });
 app.register(groupRoutes, { prefix: "/v1/restricted/groups/" });
+
+// ####### FUNCTIONS #######
+
+async function bootstrapDirs() { 
+  const logsDir = path.dirname(env.LOG_FILE_PATH);
+  if (!fs.existsSync(logsDir)) {
+    app.log.info(`Logs directory not found, creating at ${logsDir}`);
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+
+  app.log.info("Required directories are set up");
+}

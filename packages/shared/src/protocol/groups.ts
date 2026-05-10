@@ -37,3 +37,12 @@ export const createGroupBody = Type.Object({
   })
 })
 export type createGroupBody = Type.Static<typeof createGroupBody>;
+
+// PATCH /groups/:id/edit/photo
+export const editGroupPhotoParams = Type.Object({
+  id: Type.String({
+    description: "Group UUID",
+    format: "uuid",
+  }),
+})
+export type editGroupPhotoParams = Type.Static<typeof editGroupPhotoParams>;

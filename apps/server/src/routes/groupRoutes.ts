@@ -1,7 +1,18 @@
-import { createGroupBody, ErrorTypes, getGroupByIdParams, groupDTO } from "@baza/shared-types";
+import {
+  createGroupBody,
+  editGroupPhotoParams,
+  ErrorTypes,
+  genericError,
+  getGroupByIdParams,
+  groupDTO,
+} from "@baza/shared-types";
 import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
-import { createGroupHandler, getGroupByIdHandler } from "../handlers/groupHandlers";
+import {
+  createGroupHandler,
+  editGroupPhotoHandler,
+  getGroupByIdHandler,
+} from "../handlers/groupHandlers";
 
 export const groupRoutes: FastifyPluginAsync = async (fastify) => {
   const app = fastify.withTypeProvider<TypeBoxTypeProvider>();
@@ -65,13 +76,31 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
               }),
             },
             {
-              description: "if there was an error creating the group or converting the created group to the expected format",
-            }
+              description:
+                "if there was an error creating the group or converting the created group to the expected format",
+            },
           ),
         },
         body: createGroupBody,
       },
     },
     createGroupHandler,
+  );
+
+  app.patch(
+    "/:id/edit/photo",
+    {
+      schema: {
+        description: "This route allows editing a group's photo",
+        tags: ["groups"],
+        params: editGroupPhotoParams,
+        response: {
+          201: groupDTO,
+          404: genericError(ErrorTypes.UnknownIdError),
+          500: genericError(ErrorTypes.ResourceCreationError),
+        },
+      },
+    },
+    editGroupPhotoHandler,
   );
 };
