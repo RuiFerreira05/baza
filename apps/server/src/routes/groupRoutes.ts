@@ -6,7 +6,7 @@ import {
   getGroupByIdParams,
   groupDTO,
 } from "@baza/shared-types";
-import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
 import {
   createGroupHandler,
@@ -26,28 +26,13 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         tags: ["groups"],
         response: {
           200: groupDTO,
-          404: Type.Object(
-            {
-              type: Type.Literal(ErrorTypes.UnknownIdError),
-              message: Type.String({
-                description: "A human readable error message",
-              }),
-            },
-            {
-              description: "if no group with the provided id was found",
-            },
+          404: genericError(
+            ErrorTypes.UnknownIdError,
+            "if no group with the provided id was found",
           ),
-          500: Type.Object(
-            {
-              type: Type.Literal(ErrorTypes.ConversionError),
-              message: Type.String({
-                description: "A human readable error message",
-              }),
-            },
-            {
-              description:
-                "if the group was found but there was an error converting it to the expected format",
-            },
+          500: genericError(
+            ErrorTypes.ConversionError,
+            "if there was an error converting the group data to the expected format before sending the response",
           ),
         },
         params: getGroupByIdParams,
@@ -65,20 +50,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         tags: ["groups"],
         response: {
           200: groupDTO,
-          500: Type.Object(
-            {
-              type: Type.Union([
-                Type.Literal(ErrorTypes.ConversionError),
-                Type.Literal(ErrorTypes.ResourceCreationError),
-              ]),
-              message: Type.String({
-                description: "A human readable error message",
-              }),
-            },
-            {
-              description:
-                "if there was an error creating the group or converting the created group to the expected format",
-            },
+          500: genericError(
+            ErrorTypes.ConversionError,
+            "if the group was created but there was an error converting it to the expected format before sending the response",
           ),
         },
         body: createGroupBody,
@@ -96,8 +70,14 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         params: editGroupPhotoParams,
         response: {
           201: groupDTO,
-          404: genericError(ErrorTypes.UnknownIdError),
-          500: genericError(ErrorTypes.ResourceCreationError),
+          404: genericError(
+            ErrorTypes.UnknownIdError,
+            "if no group with the provided id was found",
+          ),
+          500: genericError(
+            ErrorTypes.ResourceCreationError,
+            "if there was an error saving the group photo or updating the group with the new photo",
+          ),
         },
       },
     },

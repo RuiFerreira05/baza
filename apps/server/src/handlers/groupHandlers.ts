@@ -1,6 +1,6 @@
 import { createGroupBody, editGroupPhotoParams, ErrorTypes, type getGroupByIdParams } from "@baza/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { createGroup, getGroupById, saveGroupPhoto } from "../services/groupServices";
+import { createGroup, getGroupById, editGroupPhoto } from "../services/groupServices";
 import { app } from "../setup";
 
 // /groups/:id
@@ -35,6 +35,7 @@ export const getGroupByIdHandler = async (
   }
 };
 
+// /groups/create
 export const createGroupHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
@@ -63,6 +64,7 @@ export const createGroupHandler = async (
   }
 }
 
+// groups/:id/edit/photo
 export const editGroupPhotoHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
@@ -78,7 +80,7 @@ export const editGroupPhotoHandler = async (
     });
   }
 
-  const group = await saveGroupPhoto(id, photo);
+  const group = await editGroupPhoto(id, photo);
 
   if (!group.ok) {
     switch (group.error) {

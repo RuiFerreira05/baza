@@ -56,7 +56,7 @@ export const createGroup = async (
   }
 };
 
-export const saveGroupPhoto = async (
+export const editGroupPhoto = async (
   groupId: string,
   photo: MultipartFile,
 ): Promise<Result<GroupDTO, ErrorTypes>> => {
