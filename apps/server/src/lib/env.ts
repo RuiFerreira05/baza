@@ -7,6 +7,7 @@ const serverEnvSchema = Type.Object({
   SERVER_HOST: Type.String(),
   BETTER_AUTH_SECRET: Type.String(),
   PUBLIC_SERVER_URL: Type.String(),
+  LOG_FILE_PATH: Type.String(),
 });
 
 export type ServerEnv = Type.Static<typeof serverEnvSchema>;

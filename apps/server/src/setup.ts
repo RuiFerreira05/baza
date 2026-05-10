@@ -7,15 +7,19 @@ import { auth } from "./lib/auth";
 import { userRoutes } from "./routes/profileRoutes";
 import { groupRoutes } from "./routes/groupRoutes";
 import fs from "fs";
+import { env } from "./lib/env";
+import path from "path";
 
-if (!fs.existsSync("./logs")) {
-  fs.mkdirSync("./logs");
+const logsDir = path.dirname(env.LOG_FILE_PATH);
+
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
 }
 
 export const app = fastify({
   logger: {
     level: "info",
-    file: "./logs/server.log",
+    file: env.LOG_FILE_PATH,
   },
 });
 app.setValidatorCompiler(TypeBoxValidatorCompiler);
