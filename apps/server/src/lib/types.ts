@@ -15,9 +15,12 @@ export type GetImageResult =
   // | { type: "stream"; data: Readable; contentType: string } // alternate way for fs uploads, not currently implemented
   // | { type: "buffer"; data: Buffer; contentType: string } // used for db uploads, not currently implemented
   // | { type: "redirect"; url: string } // used for cloud uploads, not currently implemented
-  | { type: "static"; filename: string }; // used for fs files
+  { type: "static"; filename: string }; // used for fs files
 
 export interface FileUploadInterface {
-  saveGroupPhoto: (photo: MultipartFile) => Promise<Result<UUID, ErrorTypes>>;
+  saveGroupPhoto: (
+    photo: MultipartFile,
+    oldPhoto: string | null,
+  ) => Promise<Result<UUID, ErrorTypes>>;
   getGroupPhoto: (photoId: UUID) => Promise<Result<GetImageResult, ErrorTypes>>;
 }

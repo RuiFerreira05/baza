@@ -15,6 +15,7 @@ export class FSUploadService implements FileUploadInterface {
 
   async saveGroupPhoto(
     photo: MultipartFile,
+    oldPhoto: string | null,
   ): Promise<Result<UUID, ErrorTypes>> {
 
     const uploadDir = FSUploadService.groupPhotoDir;
@@ -40,6 +41,10 @@ export class FSUploadService implements FileUploadInterface {
 
     try {
       await pipeline(photo.file, fs.createWriteStream(filePath));
+      if (oldPhoto) {
+        app.log.info(`Removing old photo with id ${oldPhoto}`);
+        fs.rmSync(path.join(uploadDir, `${oldPhoto}${extension}`), { force: true });
+      }
       return Ok(fileId);
     } catch (error) {
       app.log.error(`Failed to save group photo: ${(error as Error).message}`);

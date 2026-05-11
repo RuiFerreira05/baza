@@ -78,6 +78,9 @@ export const editGroupPhoto = async (
     where: {
       id: groupId,
     },
+    columns: {
+      photo: true,
+    },
   });
 
   if (!groupExists) {
@@ -85,7 +88,7 @@ export const editGroupPhoto = async (
     return Err(ErrorTypes.UnknownIdError);
   }
 
-  const result = await fileUploadService.saveGroupPhoto(photo);
+  const result = await fileUploadService.saveGroupPhoto(photo, groupExists.photo);
   if (!result.ok) {
     return Err(ErrorTypes.ResourceCreationError);
   }
