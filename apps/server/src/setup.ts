@@ -1,19 +1,42 @@
-import { TypeBoxValidatorCompiler } from "@fastify/type-provider-typebox";
-import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
-import fastify from "fastify";
-import { auth } from "./lib/auth";
-import { userRoutes } from "./routes/profiles";
+import { fastifyMultipart } from "@fastify/multipart";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
+import { TypeBoxValidatorCompiler } from "@fastify/type-provider-typebox";
+import { fromNodeHeaders } from "better-auth/node";
+import fastify from "fastify";
+import fs from "fs";
+import path from "path";
+import { auth } from "./lib/auth";
+import { env } from "./lib/env";
+import { groupRoutes } from "./routes/groupRoutes";
+import { userRoutes } from "./routes/profileRoutes";
+import { FSUploadService } from "./lib/FSUploadService";
+import fastifyStatic from "@fastify/static";
 
-export const app = fastify({ logger: true });
+// ##### APP SETUP #####
+
+
+export const app = fastify({
+  logger: {
+    level: "info",
+    file: env.LOG_FILE_PATH,
+  },
+});
 app.setValidatorCompiler(TypeBoxValidatorCompiler);
+
+await app.register(fastifyMultipart);
+
+bootstrapDirs();
+
+// ##### SWAGGER SETUP #####
 
 await app.register(fastifySwagger);
 
 await app.register(fastifySwaggerUi, {
-  routePrefix: "/docs",
+  routePrefix: "v1/docs",
 });
+
+// ##### BETTER-AUTH PROXY SETUP #####
 
 app.route({
   method: ["GET", "POST"],
@@ -50,4 +73,39 @@ app.route({
   },
 });
 
-app.register(userRoutes, { prefix: "/restricted/users/" });
+// ##### ROUTES SETUP #####
+
+app.register(userRoutes, { prefix: "/v1/restricted/users/" });
+app.register(groupRoutes, { prefix: "/v1/restricted/groups/" });
+
+if (env.FILE_UPLOAD_SERVICE === "fs") {
+  app.register(fastifyStatic, {
+    root: path.resolve(env.UPLOAD_DIR)
+    // no prefix cause we handle sending files manually
+  })
+}
+
+// ####### FUNCTIONS #######
+
+async function bootstrapDirs() { 
+  const logsDir = path.dirname(env.LOG_FILE_PATH);
+  if (!fs.existsSync(logsDir)) {
+    app.log.info(`Logs directory not found, creating at ${logsDir}`);
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+
+  if (env.FILE_UPLOAD_SERVICE === "fs") {
+    const groupUploadDir = FSUploadService.groupPhotoDir;
+    if (!fs.existsSync(groupUploadDir)) {
+      app.log.info(`Group upload directory not found, creating at ${groupUploadDir}`);
+      fs.mkdirSync(groupUploadDir, { recursive: true });
+    }
+    const userUploadDir = path.join(env.UPLOAD_DIR, "user-photos"); // TODO: MATI muda isto quando implementares o upload de fotos dos users
+    if (!fs.existsSync(userUploadDir)) {
+      app.log.info(`User upload directory not found, creating at ${userUploadDir}`);
+      fs.mkdirSync(userUploadDir, { recursive: true });
+    }
+  }
+
+  app.log.info("Required directories are set up");
+}

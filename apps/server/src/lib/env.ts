@@ -1,14 +1,59 @@
 import Type from "typebox";
+import { Settings } from "typebox/system";
 import Value from "typebox/value";
 
+Settings.Set({
+  correctiveParse: true,
+});
+
 const serverEnvSchema = Type.Object({
-  DATABASE_URL: Type.String(),
-  SERVER_PORT: Type.String(),
-  SERVER_HOST: Type.String(),
-  BETTER_AUTH_SECRET: Type.String(),
-  PUBLIC_SERVER_URL: Type.String(),
+  SERVER_PORT: Type.String({
+    description: "The port number the server will listen on",
+    pattern: "^[0-9]+$",
+    default: "8080",
+  }),
+  SERVER_HOST: Type.String({
+    description: "The host the server will bind to",
+    default: "0.0.0.0",
+  }),
+  PUBLIC_SERVER_URL: Type.String({
+    description: "The public URL of the server, used for generating links in emails",
+    format: "uri",
+  }),
+  DATABASE_URL: Type.String({
+    description:
+      "The connection string for the database, in the format postgres://user:password@host:port/database",
+    format: "uri"
+  }),
+  BETTER_AUTH_SECRET: Type.String({
+    description: "A random string used to sign authentication tokens",
+  }),
+  LOG_FILE_PATH: Type.String({
+    description: "The file path where server logs will be written",
+    default: "./logs/server.log",
+  }),
+  FILE_UPLOAD_SERVICE: Type.Union([Type.Literal("fs")], {
+    description: "The file upload service to use for handling file uploads",
+    default: "fs",
+  }),
+  UPLOAD_DIR: Type.String({
+    description: "The directory where uploaded files will be stored (used only if FILE_UPLOAD_SERVICE is 'fs')",
+    default: "./uploads/",
+  }),
 });
 
 export type ServerEnv = Type.Static<typeof serverEnvSchema>;
 
-export const env: ServerEnv = Value.Parse(serverEnvSchema, process.env);
+var env: ServerEnv;
+
+try {
+  env = Value.Parse(serverEnvSchema, process.env);
+} catch (err) {
+  console.error(
+    "Environment variable validation error:\n",
+    Value.Errors(serverEnvSchema, err),
+  );
+  process.exit(1);
+}
+
+export { env };
