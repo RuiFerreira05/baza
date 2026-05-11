@@ -70,7 +70,7 @@ CREATE TABLE "profiles" (
 --> statement-breakpoint
 CREATE TABLE "group_members" (
 	"username" text,
-	"group_id" text,
+	"group_id" uuid,
 	"admin" boolean NOT NULL,
 	"banned" boolean DEFAULT false NOT NULL,
 	"banned_at" timestamp,
@@ -83,7 +83,7 @@ CREATE TABLE "group_members" (
 );
 --> statement-breakpoint
 CREATE TABLE "groups" (
-	"id" text PRIMARY KEY,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"group_name" varchar(64) NOT NULL,
 	"description" text,
 	"photo" text,
@@ -93,14 +93,14 @@ CREATE TABLE "groups" (
 );
 --> statement-breakpoint
 CREATE TABLE "event_confirmations" (
-	"group_id" text,
+	"group_id" uuid,
 	"username" text,
 	"confirmed_at" text NOT NULL,
 	CONSTRAINT "event_confirmations_pkey" PRIMARY KEY("group_id","username")
 );
 --> statement-breakpoint
 CREATE TABLE "events" (
-	"id" text PRIMARY KEY,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"title" varchar(64) NOT NULL,
 	"description" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -108,8 +108,8 @@ CREATE TABLE "events" (
 );
 --> statement-breakpoint
 CREATE TABLE "group_events" (
-	"id" text PRIMARY KEY,
-	"group_id" text,
+	"id" uuid PRIMARY KEY,
+	"group_id" uuid,
 	"start_date" date NOT NULL,
 	"end_date" date NOT NULL,
 	"state" "state" NOT NULL,
@@ -120,13 +120,13 @@ CREATE TABLE "group_events" (
 );
 --> statement-breakpoint
 CREATE TABLE "group_events_final" (
-	"id" text PRIMARY KEY,
-	"group_id" text,
-	"plan_id" text
+	"id" uuid PRIMARY KEY,
+	"group_id" uuid,
+	"plan_id" uuid
 );
 --> statement-breakpoint
 CREATE TABLE "personal_events" (
-	"id" text,
+	"id" uuid,
 	"username" text,
 	"date" date NOT NULL,
 	"location" text,
@@ -139,8 +139,8 @@ CREATE TABLE "personal_events" (
 );
 --> statement-breakpoint
 CREATE TABLE "plans" (
-	"id" text PRIMARY KEY,
-	"group_event_id" text,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"group_event_id" uuid,
 	"username" text,
 	"title" varchar(64) NOT NULL,
 	"date" date NOT NULL,
@@ -157,13 +157,13 @@ CREATE TABLE "plans" (
 );
 --> statement-breakpoint
 CREATE TABLE "votes" (
-	"plan_id" text,
+	"plan_id" uuid,
 	"username" text,
 	CONSTRAINT "votes_pkey" PRIMARY KEY("plan_id","username")
 );
 --> statement-breakpoint
 CREATE TABLE "preferences" (
-	"group_event_id" text,
+	"group_event_id" uuid,
 	"username" text,
 	"preference" json NOT NULL,
 	"private" boolean NOT NULL,
