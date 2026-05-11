@@ -25,7 +25,7 @@ export const getGroupById = async (
     if (Value.Check(groupDTO, conv)) {
       return Ok(conv);
     } else {
-      console.error(Value.Errors(groupDTO, conv));
+      app.log.error(Value.Errors(groupDTO, conv));
       return Err(ErrorTypes.ConversionError);
     }
   } else {
@@ -55,7 +55,7 @@ export const createGroup = async (
     if (Value.Check(groupDTO, conv)) {
       return Ok(conv);
     } else {
-      console.error(Value.Errors(groupDTO, conv));
+      app.log.error(Value.Errors(groupDTO, conv));
       return Err(ErrorTypes.ConversionError);
     }
   } else {
@@ -88,7 +88,10 @@ export const editGroupPhoto = async (
     return Err(ErrorTypes.UnknownIdError);
   }
 
-  const result = await fileUploadService.saveGroupPhoto(photo, groupExists.photo);
+  const result = await fileUploadService.saveGroupPhoto(
+    photo,
+    groupExists.photo,
+  );
   if (!result.ok) {
     return Err(ErrorTypes.ResourceCreationError);
   }
@@ -107,10 +110,47 @@ export const editGroupPhoto = async (
     if (Value.Check(groupDTO, conv)) {
       return Ok(conv);
     } else {
-      console.error(Value.Errors(groupDTO, conv));
+      app.log.error(Value.Errors(groupDTO, conv));
       return Err(ErrorTypes.ConversionError);
     }
   } else {
     return Err(ErrorTypes.ResourceCreationError);
+  }
+};
+
+export const editGroup = async (
+  groupId: string,
+  groupName: string | undefined,
+  description: string | undefined,
+): Promise<
+  Result<
+    GroupDTO,
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.ConversionError
+    | ErrorTypes.ExistingResourceError
+  >
+  > => {
+  
+  const [group] = await db
+    .update(groups)
+    .set({
+      groupname: groupName,
+      description: description,
+      updatedAt: new Date(),
+    })
+    .where(eq(groups.id, groupId))
+    .returning();
+
+  if (!group) {
+    app.log.warn(`Group with id ${groupId} not found`);
+    return Err(ErrorTypes.UnknownIdError);
+  }
+
+  const conv = Value.Convert(groupDTO, group);
+  if (Value.Check(groupDTO, conv)) {
+    return Ok(conv);
+  } else {
+    app.log.error(Value.Errors(groupDTO, conv));
+    return Err(ErrorTypes.ConversionError);
   }
 };

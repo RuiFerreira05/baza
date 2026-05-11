@@ -5,6 +5,7 @@ export enum ErrorTypes {
   ConversionError = "ConversionError",
   ResourceCreationError = "ResourceCreationError",
   MalformedRequestError = "MalformedRequestError",
+  ExistingResourceError = "ExistingResourceError",
 }
 
 export const genericError = (type: ErrorTypes, description: string) =>

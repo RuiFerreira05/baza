@@ -1,5 +1,6 @@
 import {
   CreateGroupBody,
+  EditGroupBody,
   ErrorTypes,
   genericError,
   groupDTO,
@@ -9,6 +10,7 @@ import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
 import {
   createGroupHandler,
+  editGroupHandler,
   editGroupPhotoHandler,
   getGroupByIdHandler,
   getGroupPhotoHandler,
@@ -112,4 +114,30 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     },
     getGroupPhotoHandler,
   );
+
+  app.patch(
+    "/:id/edit",
+    {
+      schema: {
+        description: "This route allows editing a group's information (except photo)",
+        tags: ["groups"],
+        params: SimpleIdParam(
+          "The UUID of the group whose information is being edited",
+        ),
+        body: EditGroupBody,
+        response: {
+          200: groupDTO,
+          404: genericError(
+            ErrorTypes.UnknownIdError,
+            "if no group with the provided id was found",
+          ),
+          500: genericError(
+            ErrorTypes.ConversionError,
+            "if there was an error converting the updated group data to the expected format before sending the response",
+          ),
+        }
+      }
+    },
+    editGroupHandler
+  )
 };

@@ -1,6 +1,6 @@
-import { CreateGroupBody, ErrorTypes, SimpleIdParam } from "@baza/shared-types";
+import { CreateGroupBody, EditGroupBody, ErrorTypes, SimpleIdParam } from "@baza/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { createGroup, getGroupById, editGroupPhoto } from "../services/groupServices";
+import { createGroup, getGroupById, editGroupPhoto, editGroup } from "../services/groupServices";
 import { app } from "../setup";
 import { fileUploadService } from "../server";
 import type { UUID } from "node:crypto";
@@ -139,5 +139,40 @@ export const getGroupPhotoHandler = async (
         return res.sendFile(photoResult.filename, FSUploadService.groupPhotoDir);
       // other cases for different GetImageResult types
     }
+  }
+}
+
+export const editGroupHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => { 
+  const { id } = req.params as SimpleIdParam;
+  const { groupName, description } = req.body as EditGroupBody;
+
+  const result = await editGroup(id, groupName, description);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownIdError:
+        app.log.warn(`Group not found`);
+        return res.status(404).send({
+          type: ErrorTypes.UnknownIdError,
+          message: `A group with the provided id was not found`,
+        });
+      case ErrorTypes.ConversionError:
+        app.log.error(`Failed to convert updated group data`);
+        return res.status(500).send({
+          type: ErrorTypes.ConversionError,
+          message: `An error occurred while converting the updated group data`,
+        });
+      case ErrorTypes.ExistingResourceError:
+        app.log.warn(`Group with name ${groupName} already exists`);
+        return res.status(400).send({
+          type: ErrorTypes.ExistingResourceError,
+          message: `A group with the provided name already exists`,
+        });
+    }
+  } else {
+    return res.send(result.value);
   }
 }
