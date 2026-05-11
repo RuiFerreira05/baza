@@ -94,6 +94,7 @@ export const editGroupPhoto = async (
     .update(groups)
     .set({
       photo: result.value,
+      updatedAt: new Date(),
     })
     .where(eq(groups.id, groupId))
     .returning();
