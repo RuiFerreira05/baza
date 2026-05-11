@@ -10,7 +10,7 @@ export const getUserByIdHandler = async (req: FastifyRequest, res: FastifyReply)
     return res.code(200).send(data[0]);
   }
   else{
-    return res.code(404).send("User with said id was not found.")
+    return res.code(404).send("User with said username was not found.")
   }
 }
 

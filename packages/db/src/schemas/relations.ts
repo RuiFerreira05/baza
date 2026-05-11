@@ -1,4 +1,4 @@
-import { defineRelations } from "drizzle-orm";
+import { defineRelations, defineRelationsPart } from "drizzle-orm";
 import { users, sessions, accounts } from "./auth";
 import { profiles, friends } from "./profile";
 import { groups, groupMembers } from "./group";
@@ -32,7 +32,7 @@ export const authRelations = defineRelations(
   }),
 );
 
-export const profileRelations = defineRelations(
+export const profileRelations = defineRelationsPart(
   {profiles, users, friends, groupEvents, personalEvents, groupMembers, plans, preferences, votes},
   (r) => ({
     profiles: {
@@ -86,7 +86,7 @@ export const profileRelations = defineRelations(
   })
 );
 
-export const groupRelations = defineRelations(
+export const groupRelations = defineRelationsPart(
   {groups, groupMembers, profiles, groupEvents},
   (r) => ({
     groups: {
@@ -109,7 +109,7 @@ export const groupRelations = defineRelations(
   })
 );
 
-export const eventRelations = defineRelations(
+export const eventRelations = defineRelationsPart(
   {personalEvents, groupEvents, groupEventsFinal, profiles, groups, plans, preferences},
   (r) => ({
     personalEvents: {
@@ -149,7 +149,7 @@ export const eventRelations = defineRelations(
   })
 );
 
-export const planRelations = defineRelations(
+export const planRelations = defineRelationsPart(
   {plans, profiles, groupEvents, groupEventsFinal, votes},
   (r) => ({
     plans: {
@@ -173,7 +173,7 @@ export const planRelations = defineRelations(
   })
 );
 
-export const preferenceRelations = defineRelations(
+export const preferenceRelations = defineRelationsPart(
   {preferences, profiles, groupEvents},
   (r) => ({
     preferences: {

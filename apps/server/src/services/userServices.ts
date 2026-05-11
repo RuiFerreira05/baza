@@ -7,9 +7,9 @@ import type { createUserProfileRequest } from "@baza/shared-types";
 //   return db.select().from(users).where(users.id.equals(userId)).first();
 // }
 
-export const getUserById = async (userId: string) => {
+export const getUserById = async (username: string) => {
   const { settings, ...rest } = getColumns(profiles)
-  const result = await db.select({...rest}).from(profiles).where(eq(profiles.userId, userId));
+  const result = await db.select({...rest}).from(profiles).where(eq(profiles.username, username));
 
   return result;
 }
