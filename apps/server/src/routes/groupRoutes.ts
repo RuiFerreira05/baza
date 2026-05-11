@@ -1,17 +1,17 @@
 import {
-  createGroupBody,
-  editGroupPhotoParams,
+  CreateGroupBody,
   ErrorTypes,
   genericError,
-  getGroupByIdParams,
   groupDTO,
+  SimpleIdParam,
 } from "@baza/shared-types";
-import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
 import {
   createGroupHandler,
   editGroupPhotoHandler,
   getGroupByIdHandler,
+  getGroupPhotoHandler,
 } from "../handlers/groupHandlers";
 
 export const groupRoutes: FastifyPluginAsync = async (fastify) => {
@@ -35,7 +35,7 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
             "if there was an error converting the group data to the expected format before sending the response",
           ),
         },
-        params: getGroupByIdParams,
+        params: SimpleIdParam("The UUID of the group being fetched"),
       },
     },
     getGroupByIdHandler,
@@ -55,7 +55,7 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
             "if the group was created but there was an error converting it to the expected format before sending the response",
           ),
         },
-        body: createGroupBody,
+        body: CreateGroupBody,
       },
     },
     createGroupHandler,
@@ -67,7 +67,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
       schema: {
         description: "This route allows editing a group's photo",
         tags: ["groups"],
-        params: editGroupPhotoParams,
+        params: SimpleIdParam(
+          "The UUID of the group whose photo is being edited",
+        ),
         response: {
           201: groupDTO,
           404: genericError(
@@ -82,5 +84,32 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     editGroupPhotoHandler,
+  );
+
+  app.get(
+    "/:id/photo",
+    {
+      schema: {
+        description: "This route fetches a group's photo",
+        tags: ["groups"],
+        params: SimpleIdParam(
+          "The UUID of the group whose photo is being fetched",
+        ),
+        response: {
+          200: Type.String({
+            description: "The group photo as a stream",
+          }),
+          404: genericError(
+            ErrorTypes.UnknownIdError,
+            "if no group with the provided id was found or if the group does not have a photo",
+          ),
+          500: genericError(
+            ErrorTypes.ResourceCreationError,
+            "if there was an error fetching the group photo",
+          ),
+        }
+      },
+    },
+    getGroupPhotoHandler,
   );
 };

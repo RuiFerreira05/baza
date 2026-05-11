@@ -22,3 +22,11 @@ export const genericError = (type: ErrorTypes, description: string) =>
 
 export const nullable = <T extends Type.TSchema>(schema: T) =>
   Type.Union([schema, Type.Null()]);
+
+export const SimpleIdParam = (description: string) => Type.Object({
+  id: Type.String({
+    description: description,
+    format: "uuid",
+  }),
+});
+export type SimpleIdParam = Type.Static<ReturnType<typeof SimpleIdParam>>;

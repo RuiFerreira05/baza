@@ -10,6 +10,8 @@ import { auth } from "./lib/auth";
 import { env } from "./lib/env";
 import { groupRoutes } from "./routes/groupRoutes";
 import { userRoutes } from "./routes/profileRoutes";
+import { FSUploadService } from "./lib/FSUploadService";
+import fastifyStatic from "@fastify/static";
 
 // ##### APP SETUP #####
 
@@ -76,6 +78,13 @@ app.route({
 app.register(userRoutes, { prefix: "/v1/restricted/users/" });
 app.register(groupRoutes, { prefix: "/v1/restricted/groups/" });
 
+if (env.FILE_UPLOAD_SERVICE === "fs") {
+  app.register(fastifyStatic, {
+    root: path.resolve(env.UPLOAD_DIR)
+    // no prefix cause we handle sending files manually
+  })
+}
+
 // ####### FUNCTIONS #######
 
 async function bootstrapDirs() { 
@@ -83,6 +92,19 @@ async function bootstrapDirs() {
   if (!fs.existsSync(logsDir)) {
     app.log.info(`Logs directory not found, creating at ${logsDir}`);
     fs.mkdirSync(logsDir, { recursive: true });
+  }
+
+  if (env.FILE_UPLOAD_SERVICE === "fs") {
+    const groupUploadDir = FSUploadService.groupPhotoDir;
+    if (!fs.existsSync(groupUploadDir)) {
+      app.log.info(`Group upload directory not found, creating at ${groupUploadDir}`);
+      fs.mkdirSync(groupUploadDir, { recursive: true });
+    }
+    const userUploadDir = path.join(env.UPLOAD_DIR, "user-photos"); // TODO: MATI muda isto quando implementares o upload de fotos dos users
+    if (!fs.existsSync(userUploadDir)) {
+      app.log.info(`User upload directory not found, creating at ${userUploadDir}`);
+      fs.mkdirSync(userUploadDir, { recursive: true });
+    }
   }
 
   app.log.info("Required directories are set up");

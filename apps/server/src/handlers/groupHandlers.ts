@@ -1,7 +1,11 @@
-import { createGroupBody, editGroupPhotoParams, ErrorTypes, type getGroupByIdParams } from "@baza/shared-types";
+import { CreateGroupBody, ErrorTypes, SimpleIdParam } from "@baza/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { createGroup, getGroupById, editGroupPhoto } from "../services/groupServices";
 import { app } from "../setup";
+import { fileUploadService } from "../server";
+import type { UUID } from "node:crypto";
+import { db } from "../lib/db";
+import { FSUploadService } from "../lib/FSUploadService";
 
 // /groups/:id
 export const getGroupByIdHandler = async (
@@ -9,7 +13,7 @@ export const getGroupByIdHandler = async (
   res: FastifyReply,
 ) => {
   app.log.info("Received get group by id request");
-  const { id } = req.params as getGroupByIdParams;
+  const { id } = req.params as SimpleIdParam;
   app.log.info(`Fetching group with id: ${id}`);
 
   const group = await getGroupById(id);
@@ -41,7 +45,7 @@ export const createGroupHandler = async (
   res: FastifyReply,
 ) => {
   app.log.info("Received Create Group request")
-  const { groupName } = req.body as createGroupBody;
+  const { groupName } = req.body as CreateGroupBody;
   const result = await createGroup(groupName);
 
   if (!result.ok) {
@@ -70,7 +74,7 @@ export const editGroupPhotoHandler = async (
   res: FastifyReply,
 ) => {
   app.log.info("Received Edit Group Photo request");
-  const { id } = req.params as editGroupPhotoParams;
+  const { id } = req.params as SimpleIdParam;
   const photo = await req.file();
 
   if (!photo) {
@@ -105,5 +109,35 @@ export const editGroupPhotoHandler = async (
     }
   } else {
     return res.status(201).send(group.value);
+  }
+}
+
+// This route does not use a service as it's essentially just a wrapper over Fastify's static file serving functionality
+export const getGroupPhotoHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => { 
+  app.log.info("Received Get Group Photo request");
+  const { id } = req.params as SimpleIdParam;
+
+  const result = await fileUploadService.getGroupPhoto(id);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownIdError:
+        app.log.warn(`Group photo not found`);
+        return res.status(404).send({
+          type: ErrorTypes.UnknownIdError,
+          message: `A group photo with the provided id was not found`,
+        });
+    }
+  } else {
+    const photoResult = result.value;
+    switch (photoResult.type) {
+      case "static":
+        app.log.info(`GetGroupPhotoHandler: Sending static file ${photoResult.filename} for group ${id}`);
+        return res.sendFile(photoResult.filename, FSUploadService.groupPhotoDir);
+      // other cases for different GetImageResult types
+    }
   }
 }

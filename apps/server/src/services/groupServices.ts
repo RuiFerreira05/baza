@@ -11,7 +11,9 @@ import { app } from "../setup";
 
 export const getGroupById = async (
   id: string,
-): Promise<Result<GroupDTO, ErrorTypes>> => {
+): Promise<
+  Result<GroupDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>
+> => {
   const group = await db.query.groups.findFirst({
     where: {
       id: id,
@@ -33,7 +35,12 @@ export const getGroupById = async (
 
 export const createGroup = async (
   groupName: string,
-): Promise<Result<GroupDTO, ErrorTypes>> => {
+): Promise<
+  Result<
+    GroupDTO,
+    ErrorTypes.ConversionError | ErrorTypes.ResourceCreationError
+  >
+> => {
   // have to do this destructuring cause drizzle returns an array with returning()
   const [group] = await db
     .insert(groups)
@@ -59,7 +66,14 @@ export const createGroup = async (
 export const editGroupPhoto = async (
   groupId: string,
   photo: MultipartFile,
-): Promise<Result<GroupDTO, ErrorTypes>> => {
+): Promise<
+  Result<
+    GroupDTO,
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.ResourceCreationError
+    | ErrorTypes.ConversionError
+  >
+> => {
   const groupExists = await db.query.groups.findFirst({
     where: {
       id: groupId,
