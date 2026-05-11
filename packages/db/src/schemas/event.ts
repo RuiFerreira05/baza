@@ -9,7 +9,7 @@ export const events = pgTable("events", {
   title: varchar("title", { length: 64 }).notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const repeatEnum = pgEnum("every", ['day', 'week', 'month', 'year', 'never']);

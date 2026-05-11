@@ -16,7 +16,7 @@ export const plans = pgTable("plans", {
   minBudget: integer("min_budget"),
   maxBudget: integer("max_budget"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 },
   (t) => [
     check("time_check", sql`${t.startTime} < ${t.endTime}`),

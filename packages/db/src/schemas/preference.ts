@@ -8,7 +8,7 @@ export const preferences = pgTable("preferences", {
   preference: json("preference").notNull(),
   private: boolean("private").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 },
   (t) => [
     primaryKey({ columns: [t.username, t.groupEventId]}),

@@ -8,7 +8,7 @@ export const groups = pgTable("groups", {
   description: text("description"),
   photo: text("photo"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 },
   (t) => [
     check("group_name_check", sql`${t.groupname} ~ '^[A-Za-z0-9_\\-\\.]{3,}$'`),

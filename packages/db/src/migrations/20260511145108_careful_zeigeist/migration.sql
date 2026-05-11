@@ -53,7 +53,7 @@ CREATE TABLE "friends" (
 	"friend_status" "status" NOT NULL,
 	"request_accepted_at" timestamp,
 	"request_sent_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "friends_pkey" PRIMARY KEY("sent_by","received_by"),
 	CONSTRAINT "banned_check" CHECK ((("friend_status" = 'accepted' OR "friend_status" = 'blocked') AND "request_accepted_at" IS NOT NULL) OR "friend_status" = 'pending' OR "friend_status" = 'rejected')
 );
@@ -65,7 +65,7 @@ CREATE TABLE "profiles" (
 	"settings" json NOT NULL,
 	"user_id" text NOT NULL UNIQUE,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "group_members" (
@@ -88,7 +88,7 @@ CREATE TABLE "groups" (
 	"description" text,
 	"photo" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "group_name_check" CHECK ("group_name" ~ '^[A-Za-z0-9_\-\.]{3,}$')
 );
 --> statement-breakpoint
@@ -104,7 +104,7 @@ CREATE TABLE "events" (
 	"title" varchar(64) NOT NULL,
 	"description" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "group_events" (
@@ -151,7 +151,7 @@ CREATE TABLE "plans" (
 	"min_budget" integer,
 	"max_budget" integer,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "time_check" CHECK ("start_time" < "end_time"),
 	CONSTRAINT "budget_check" CHECK ("min_budget" < "max_budget")
 );
@@ -168,7 +168,7 @@ CREATE TABLE "preferences" (
 	"preference" json NOT NULL,
 	"private" boolean NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "preferences_pkey" PRIMARY KEY("username","group_event_id")
 );
 --> statement-breakpoint

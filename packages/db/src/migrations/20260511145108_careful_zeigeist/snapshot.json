@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "468de8d2-aaa1-4b7e-9076-a7043227d2f5",
+  "id": "540797d2-eb62-47aa-9f35-398e85933d5d",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -644,9 +644,9 @@
     {
       "type": "timestamp",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
-      "default": null,
+      "default": "now()",
       "generated": null,
       "identity": null,
       "name": "updated_at",
@@ -735,9 +735,9 @@
     {
       "type": "timestamp",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
-      "default": null,
+      "default": "now()",
       "generated": null,
       "identity": null,
       "name": "updated_at",
@@ -917,9 +917,9 @@
     {
       "type": "timestamp",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
-      "default": null,
+      "default": "now()",
       "generated": null,
       "identity": null,
       "name": "updated_at",
@@ -1021,9 +1021,9 @@
     {
       "type": "timestamp",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
-      "default": null,
+      "default": "now()",
       "generated": null,
       "identity": null,
       "name": "updated_at",
@@ -1424,9 +1424,9 @@
     {
       "type": "timestamp",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
-      "default": null,
+      "default": "now()",
       "generated": null,
       "identity": null,
       "name": "updated_at",
@@ -1528,9 +1528,9 @@
     {
       "type": "timestamp",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
-      "default": null,
+      "default": "now()",
       "generated": null,
       "identity": null,
       "name": "updated_at",
