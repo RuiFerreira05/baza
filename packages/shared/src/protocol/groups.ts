@@ -37,21 +37,8 @@ export const groupMemberDTO = Type.Object({
   banned: Type.Boolean({
     description: "Whether the group member is banned from the group",
   }),
-  bannedAt: nullable(
-    Type.String({
-      description: "The date and time when the group member was banned, if they are banned",
-    }),
-  ),
   acceptedInvite: Type.Boolean({
     description: "Whether the group member has accepted their invite to the group",
-  }),
-  acceptedAt: nullable(
-    Type.String({
-      description: "The date and time when the group member accepted their invite to the group, if they have accepted it",
-    }),
-  ),
-  invitedAt: Type.String({
-    description: "The date and time when the group member was invited to the group",
   }),
 });
 export type GroupMemberDTO = Type.Static<typeof groupMemberDTO>;

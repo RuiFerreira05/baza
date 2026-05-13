@@ -168,7 +168,7 @@ export const inviteUserToGroup = async (
     | ErrorTypes.ConversionError
   >
 > => {
-  const groupMember = await db
+  const [ groupMember ] = await db
     .insert(groupMembers)
     .values({
       username: username,

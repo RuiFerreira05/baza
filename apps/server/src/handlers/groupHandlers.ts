@@ -243,6 +243,12 @@ export const inviteUsersToGroupHandler = async (
           ErrorTypes.UnknownIdError,
           "A group or user with the provided id was not found",
         ));
+      case ErrorTypes.ConversionError:
+        app.log.error(`Failed to convert group invitation data`);
+        return res.status(500).send(createStatusError(
+          ErrorTypes.ConversionError,
+          "An error occurred while converting the group invitation data",
+        ));
       case ErrorTypes.ResourceCreationError:
         app.log.error(`Failed to create group invitation`);
         return res.status(500).send(createStatusError(
