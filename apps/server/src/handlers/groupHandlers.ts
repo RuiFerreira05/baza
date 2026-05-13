@@ -109,6 +109,7 @@ export const editGroupPhotoHandler = async (
   }
 }
 
+// groups/:id/photo
 // This route does not use a service as it's essentially just a wrapper over Fastify's static file serving functionality
 export const getGroupPhotoHandler = async (
   req: FastifyRequest,
@@ -139,6 +140,7 @@ export const getGroupPhotoHandler = async (
   }
 }
 
+// groups/:id/edit
 export const editGroupHandler = async (
   req: FastifyRequest,
   res: FastifyReply,

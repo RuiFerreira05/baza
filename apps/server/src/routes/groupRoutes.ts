@@ -63,6 +63,7 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     createGroupHandler,
   );
 
+  // PATCH /groups/:id/edit/photo
   app.patch(
     "/:id/edit/photo",
     {
@@ -88,6 +89,7 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     editGroupPhotoHandler,
   );
 
+  // GET /groups/:id/photo
   app.get(
     "/:id/photo",
     {
@@ -115,6 +117,7 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     getGroupPhotoHandler,
   );
 
+  // PATCH /groups/:id/edit
   app.patch(
     "/:id/edit",
     {

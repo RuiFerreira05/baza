@@ -81,8 +81,8 @@ app.route({
 
 // ##### ROUTES SETUP #####
 
-app.register(userRoutes, { prefix: "/v1/restricted/users/" });
-app.register(groupRoutes, { prefix: "/v1/restricted/groups/" });
+app.register(userRoutes, { prefix: "/v1/restricted/users" });
+app.register(groupRoutes, { prefix: "/v1/restricted/groups" });
 
 if (env.FILE_UPLOAD_SERVICE === "fs") {
   app.register(fastifyStatic, {
