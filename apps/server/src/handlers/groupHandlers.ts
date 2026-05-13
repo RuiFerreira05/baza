@@ -1,11 +1,8 @@
 import { CreateGroupBody, EditGroupBody, ErrorTypes, SimpleIdParam } from "@baza/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { createGroup, getGroupById, editGroupPhoto, editGroup } from "../services/groupServices";
-import { app } from "../setup";
-import { fileUploadService } from "../server";
-import type { UUID } from "node:crypto";
-import { db } from "../lib/db";
 import { FSUploadService } from "../lib/FSUploadService";
+import { createGroup, editGroup, editGroupPhoto, getGroupById } from "../services/groupServices";
+import { app, fileUploadService } from "../setup";
 
 // /groups/:id
 export const getGroupByIdHandler = async (
@@ -116,7 +113,7 @@ export const editGroupPhotoHandler = async (
 export const getGroupPhotoHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
-) => { 
+) => {
   app.log.info("Received Get Group Photo request");
   const { id } = req.params as SimpleIdParam;
 
@@ -145,7 +142,7 @@ export const getGroupPhotoHandler = async (
 export const editGroupHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
-) => { 
+) => {
   const { id } = req.params as SimpleIdParam;
   const { groupName, description } = req.body as EditGroupBody;
 

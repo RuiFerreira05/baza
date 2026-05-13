@@ -1,13 +1,12 @@
 import { groups } from "@baza/db/schemas";
 import { ErrorTypes, groupDTO, type GroupDTO } from "@baza/shared-types";
-import { randomUUID, type UUID } from "crypto";
+import type { MultipartFile } from "@fastify/multipart";
+import { randomUUID } from "crypto";
+import { eq } from "drizzle-orm";
 import { Value } from "typebox/value";
 import { db } from "../lib/db";
 import { Err, Ok, type Result } from "../lib/types";
-import type { MultipartFile } from "@fastify/multipart";
-import { eq } from "drizzle-orm";
-import { fileUploadService } from "../server";
-import { app } from "../setup";
+import { app, fileUploadService } from "../setup";
 
 export const getGroupById = async (
   id: string,
@@ -129,8 +128,8 @@ export const editGroup = async (
     | ErrorTypes.ConversionError
     | ErrorTypes.ExistingResourceError
   >
-  > => {
-  
+> => {
+
   const [group] = await db
     .update(groups)
     .set({

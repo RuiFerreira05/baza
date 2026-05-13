@@ -1,7 +1,6 @@
 import type { ErrorTypes } from "@baza/shared-types";
 import type { MultipartFile } from "@fastify/multipart";
 import type { UUID } from "crypto";
-import type { Readable } from "stream";
 
 export type Maybe<T> = T | null;
 
@@ -23,4 +22,5 @@ export interface FileUploadInterface {
     oldPhoto: string | null,
   ) => Promise<Result<UUID, ErrorTypes>>;
   getGroupPhoto: (photoId: UUID) => Promise<Result<GetImageResult, ErrorTypes>>;
+  setup: () => Result<void, ErrorTypes>;
 }
