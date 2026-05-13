@@ -8,7 +8,30 @@ export enum ErrorTypes {
   ExistingResourceError = "ExistingResourceError",
 }
 
-export const genericError = (type: ErrorTypes, description: string) =>
+export const StatusOK = <T extends Type.TSchema>(schema: T, description: string) =>
+  Type.Object({
+    status: Type.Literal("OK"),
+    data: schema,
+  }, {
+    description,
+  });
+export type StatusOK<T extends Type.TSchema> = Type.Static<ReturnType<typeof StatusOK<T>>>;
+
+export const StatusError = (type: ErrorTypes, description: string) =>
+  Type.Object({
+    status: Type.Literal("ERROR"),
+    error: genericError(type, description),
+  });
+
+export type StatusError<T extends ErrorTypes = ErrorTypes> = {
+  status: "ERROR";
+  error: {
+    type: T;
+    message: string;
+  };
+};
+
+const genericError = (type: ErrorTypes, description: string) =>
   Type.Object(
     {
       type: Type.Literal(type),
@@ -20,6 +43,16 @@ export const genericError = (type: ErrorTypes, description: string) =>
       description,
     },
   );
+
+export const createStatusOK = <T>(data: T) => ({
+  status: "OK" as const,
+  data,
+});
+
+export const createStatusError = (type: ErrorTypes, message: string) => ({
+  status: "ERROR" as const,
+  error: { type, message },
+});
 
 export const nullable = <T extends Type.TSchema>(schema: T) =>
   Type.Union([schema, Type.Null()]);

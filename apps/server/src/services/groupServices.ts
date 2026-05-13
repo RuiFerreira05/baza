@@ -1,7 +1,12 @@
-import { groups } from "@baza/db/schemas";
-import { ErrorTypes, groupDTO, type GroupDTO } from "@baza/shared-types";
+import { groupMembers, groups } from "@baza/db/schemas";
+import {
+  ErrorTypes,
+  groupDTO,
+  groupMemberDTO,
+  type GroupDTO,
+  type GroupMemberDTO,
+} from "@baza/shared-types";
 import type { MultipartFile } from "@fastify/multipart";
-import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { Value } from "typebox/value";
 import { db } from "../lib/db";
@@ -44,7 +49,6 @@ export const createGroup = async (
   const [group] = await db
     .insert(groups)
     .values({
-      id: randomUUID(),
       groupname: groupName,
     })
     .returning();
@@ -129,7 +133,6 @@ export const editGroup = async (
     | ErrorTypes.ExistingResourceError
   >
 > => {
-
   const [group] = await db
     .update(groups)
     .set({
@@ -150,6 +153,43 @@ export const editGroup = async (
     return Ok(conv);
   } else {
     app.log.error(Value.Errors(groupDTO, conv));
+    return Err(ErrorTypes.ConversionError);
+  }
+};
+
+export const inviteUserToGroup = async (
+  groupId: string,
+  username: string,
+): Promise<
+  Result<
+    GroupMemberDTO,
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.ResourceCreationError
+    | ErrorTypes.ConversionError
+  >
+> => {
+  const groupMember = await db
+    .insert(groupMembers)
+    .values({
+      username: username,
+      groupId: groupId,
+      admin: false,
+      banned: false,
+      acceptedInvite: false,
+      invitedAt: new Date(),
+    })
+    .returning();
+
+  if (!groupMember) {
+    app.log.warn(`Group or user not found`);
+    return Err(ErrorTypes.UnknownIdError);
+  }
+
+  const conv = Value.Convert(groupMemberDTO, groupMember);
+  if (Value.Check(groupMemberDTO, conv)) {
+    return Ok(conv);
+  } else {
+    app.log.error(Value.Errors(groupMemberDTO, conv));
     return Err(ErrorTypes.ConversionError);
   }
 };

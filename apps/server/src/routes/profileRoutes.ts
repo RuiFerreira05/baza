@@ -51,39 +51,39 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     createUserProfileHandler
   );
 
-  app.get(
-    "/:id/events",
-    {
-      schema: {
-        description: "This route fetches all events, in the given time period, from a user calendar.",
-        tags: ["users"],
-        querystring: {
-          startDate: { 
-            type: "string",
-            description: "Start date of the time period. Following ISO format: yyyy-mm-dd"
-          },
-          endDate: {
-            type: "string",
-            description: "End date of the time period. Following ISO format: yyyy-mm-dd"
-          }
-        },
-        response: {
-          200: getPersonalEventsResponseSchema,
-          404:{
-            description: "Resources do not exist."
-          }
-        },
-        params: {
-          type: "object",
-          properties: {
-            id: {
-              type: "string",
-              description: "username of user who is the owner of these events",
-            },
-          },
-        },
-      },
-    },
+  // app.get(
+  //   "/:id/events",
+  //   {
+  //     schema: {
+  //       description: "This route fetches all events, in the given time period, from a user calendar.",
+  //       tags: ["users"],
+  //       querystring: {
+  //         startDate: { 
+  //           type: "string",
+  //           description: "Start date of the time period. Following ISO format: yyyy-mm-dd"
+  //         },
+  //         endDate: {
+  //           type: "string",
+  //           description: "End date of the time period. Following ISO format: yyyy-mm-dd"
+  //         }
+  //       },
+  //       response: {
+  //         200: getPersonalEventsResponseSchema,
+  //         404:{
+  //           description: "Resources do not exist."
+  //         }
+  //       },
+  //       params: {
+  //         type: "object",
+  //         properties: {
+  //           id: {
+  //             type: "string",
+  //             description: "username of user who is the owner of these events",
+  //           },
+  //         },
+  //       },
+  //     },
+  //   },
 
-  );
+  // );
 }

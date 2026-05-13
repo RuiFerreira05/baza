@@ -2,9 +2,12 @@ import {
   CreateGroupBody,
   EditGroupBody,
   ErrorTypes,
-  genericError,
   groupDTO,
+  groupMemberDTO,
+  InviteUserToGroupBody,
   SimpleIdParam,
+  StatusError,
+  StatusOK,
 } from "@baza/shared-types";
 import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
@@ -14,6 +17,7 @@ import {
   editGroupPhotoHandler,
   getGroupByIdHandler,
   getGroupPhotoHandler,
+  inviteUsersToGroupHandler,
 } from "../handlers/groupHandlers";
 
 export const groupRoutes: FastifyPluginAsync = async (fastify) => {
@@ -27,12 +31,12 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         description: "This route fetches information from a group",
         tags: ["groups"],
         response: {
-          200: groupDTO,
-          404: genericError(
+          200: StatusOK(groupDTO, "if the group information was successfully fetched and converted to the expected format before sending the response"),
+          404: StatusError(
             ErrorTypes.UnknownIdError,
             "if no group with the provided id was found",
           ),
-          500: genericError(
+          500: StatusError(
             ErrorTypes.ConversionError,
             "if there was an error converting the group data to the expected format before sending the response",
           ),
@@ -51,8 +55,8 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         description: "This route creates a new group",
         tags: ["groups"],
         response: {
-          200: groupDTO,
-          500: genericError(
+          200: StatusOK(groupDTO, "if the group was successfully created and converted to the expected format before sending the response"),
+          500: StatusError(
             ErrorTypes.ConversionError,
             "if the group was created but there was an error converting it to the expected format before sending the response",
           ),
@@ -74,12 +78,12 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
           "The UUID of the group whose photo is being edited",
         ),
         response: {
-          201: groupDTO,
-          404: genericError(
+          201: StatusOK(groupDTO, "if the group photo was successfully updated and the updated group data was successfully converted to the expected format before sending the response"),
+          404: StatusError(
             ErrorTypes.UnknownIdError,
             "if no group with the provided id was found",
           ),
-          500: genericError(
+          500: StatusError(
             ErrorTypes.ResourceCreationError,
             "if there was an error saving the group photo or updating the group with the new photo",
           ),
@@ -103,15 +107,15 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
           200: Type.String({
             description: "The group photo as a stream",
           }),
-          404: genericError(
+          404: StatusError(
             ErrorTypes.UnknownIdError,
             "if no group with the provided id was found or if the group does not have a photo",
           ),
-          500: genericError(
+          500: StatusError(
             ErrorTypes.ResourceCreationError,
             "if there was an error fetching the group photo",
           ),
-        }
+        },
       },
     },
     getGroupPhotoHandler,
@@ -122,25 +126,57 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     "/:id/edit",
     {
       schema: {
-        description: "This route allows editing a group's information (except photo)",
+        description:
+          "This route allows editing a group's information (except photo)",
         tags: ["groups"],
         params: SimpleIdParam(
           "The UUID of the group whose information is being edited",
         ),
         body: EditGroupBody,
         response: {
-          200: groupDTO,
-          404: genericError(
+          200: StatusOK(groupDTO, "if the group information was successfully updated and converted to the expected format before sending the response"),
+          404: StatusError(
             ErrorTypes.UnknownIdError,
             "if no group with the provided id was found",
           ),
-          500: genericError(
+          500: StatusError(
             ErrorTypes.ConversionError,
             "if there was an error converting the updated group data to the expected format before sending the response",
           ),
-        }
-      }
+        },
+      },
     },
-    editGroupHandler
-  )
+    editGroupHandler,
+  );
+
+  // ###### GROUP MEMBERS #######
+
+  app.post(
+    "/:id/group-members/invite-user",
+    {
+      schema: {
+        description: "This route allows inviting users to a group",
+        tags: ["groups"],
+        params: SimpleIdParam(
+          "The UUID of the group to which users are being invited",
+        ),
+        body: InviteUserToGroupBody,
+        response: {
+          201: StatusOK(
+            groupMemberDTO,
+            "Indicates that the users were successfully invited to the group",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "if no group or user with the provided id was found",
+          ),
+          500: StatusError(
+            ErrorTypes.ResourceCreationError,
+            "if there was an error creating the group invitation",
+          ),
+        },
+      },
+    },
+    inviteUsersToGroupHandler,
+  );
 };
