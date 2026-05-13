@@ -33,7 +33,7 @@ export const userProfilePublicSchema = Type.Object({
   description: Type.Union([ Type.String({description: "Profile description of user", example: "Hi, i'm random_user123!"}), Type.Null() ]),
   userId: Type.String({description: "user ID (randomly given)", example: "1y9889192bfb987"}),
   createdAt: SafeDate(),
-  updatedAt: Type.Union([SafeDate(), Type.Null()]),
+  updatedAt: SafeDate(),
 }, {
   description: "Public user profile data, without sensitive information",
   title: "UserProfileDTO",

@@ -53,7 +53,7 @@ CREATE TABLE "friends" (
 	"friend_status" "status" NOT NULL,
 	"request_accepted_at" timestamp,
 	"request_sent_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "friends_pkey" PRIMARY KEY("sent_by","received_by"),
 	CONSTRAINT "banned_check" CHECK ((("friend_status" = 'accepted' OR "friend_status" = 'blocked') AND "request_accepted_at" IS NOT NULL) OR "friend_status" = 'pending' OR "friend_status" = 'rejected')
 );
@@ -65,12 +65,12 @@ CREATE TABLE "profiles" (
 	"settings" json NOT NULL,
 	"user_id" text NOT NULL UNIQUE,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "group_members" (
 	"username" text,
-	"group_id" text,
+	"group_id" uuid,
 	"admin" boolean NOT NULL,
 	"banned" boolean DEFAULT false NOT NULL,
 	"banned_at" timestamp,
@@ -83,33 +83,33 @@ CREATE TABLE "group_members" (
 );
 --> statement-breakpoint
 CREATE TABLE "groups" (
-	"id" text PRIMARY KEY,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"group_name" varchar(64) NOT NULL,
 	"description" text,
 	"photo" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "group_name_check" CHECK ("group_name" ~ '^[A-Za-z0-9_\-\.]{3,}$')
 );
 --> statement-breakpoint
 CREATE TABLE "event_confirmations" (
-	"group_id" text,
+	"group_id" uuid,
 	"username" text,
 	"confirmed_at" text NOT NULL,
 	CONSTRAINT "event_confirmations_pkey" PRIMARY KEY("group_id","username")
 );
 --> statement-breakpoint
 CREATE TABLE "events" (
-	"id" text PRIMARY KEY,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"title" varchar(64) NOT NULL,
 	"description" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "group_events" (
-	"id" text PRIMARY KEY,
-	"group_id" text,
+	"id" uuid PRIMARY KEY,
+	"group_id" uuid,
 	"start_date" date NOT NULL,
 	"end_date" date NOT NULL,
 	"state" "state" NOT NULL,
@@ -120,13 +120,13 @@ CREATE TABLE "group_events" (
 );
 --> statement-breakpoint
 CREATE TABLE "group_events_final" (
-	"id" text PRIMARY KEY,
-	"group_id" text,
-	"plan_id" text
+	"id" uuid PRIMARY KEY,
+	"group_id" uuid,
+	"plan_id" uuid
 );
 --> statement-breakpoint
 CREATE TABLE "personal_events" (
-	"id" text,
+	"id" uuid,
 	"username" text,
 	"date" date NOT NULL,
 	"location" text,
@@ -139,8 +139,8 @@ CREATE TABLE "personal_events" (
 );
 --> statement-breakpoint
 CREATE TABLE "plans" (
-	"id" text PRIMARY KEY,
-	"group_event_id" text,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"group_event_id" uuid,
 	"username" text,
 	"title" varchar(64) NOT NULL,
 	"date" date NOT NULL,
@@ -151,24 +151,24 @@ CREATE TABLE "plans" (
 	"min_budget" integer,
 	"max_budget" integer,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "time_check" CHECK ("start_time" < "end_time"),
 	CONSTRAINT "budget_check" CHECK ("min_budget" < "max_budget")
 );
 --> statement-breakpoint
 CREATE TABLE "votes" (
-	"plan_id" text,
+	"plan_id" uuid,
 	"username" text,
 	CONSTRAINT "votes_pkey" PRIMARY KEY("plan_id","username")
 );
 --> statement-breakpoint
 CREATE TABLE "preferences" (
-	"group_event_id" text,
+	"group_event_id" uuid,
 	"username" text,
 	"preference" json NOT NULL,
 	"private" boolean NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "preferences_pkey" PRIMARY KEY("username","group_event_id")
 );
 --> statement-breakpoint

@@ -9,7 +9,7 @@ export const profiles = pgTable("profiles", {
   settings: json("settings").notNull(),
   userId: text("user_id").unique().notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const friendStatusEnum = pgEnum("status", ['accepted', 'pending', 'rejected', 'blocked']);
@@ -20,7 +20,7 @@ export const friends = pgTable("friends", {
   friendStatus: friendStatusEnum("friend_status").notNull(),
   requestAcceptedAt: timestamp("request_accepted_at"),
   requestSentAt: timestamp("request_sent_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 },
   (t) => [
     primaryKey({ columns: [t.sentBy, t.receivedBy]}),

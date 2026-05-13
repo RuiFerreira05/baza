@@ -1,11 +1,11 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, date, time, integer, primaryKey, check } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, date, time, integer, primaryKey, check, uuid } from "drizzle-orm/pg-core";
 import { profiles } from "./profile";
 import { groupEvents } from "./event";
 
 export const plans = pgTable("plans", {
-  id: text("id").primaryKey(),
-  groupEventId: text("group_event_id").references(() => groupEvents.id),
+  id: uuid('id').defaultRandom().primaryKey(),
+  groupEventId: uuid("group_event_id").references(() => groupEvents.id),
   username: text("username").references(() => profiles.username),
   title: varchar("title", { length: 64 }).notNull(),
   date: date("date").notNull(),
@@ -16,7 +16,7 @@ export const plans = pgTable("plans", {
   minBudget: integer("min_budget"),
   maxBudget: integer("max_budget"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 },
   (t) => [
     check("time_check", sql`${t.startTime} < ${t.endTime}`),
@@ -25,7 +25,7 @@ export const plans = pgTable("plans", {
 );
 
 export const votes = pgTable("votes", {
-  planId: text("plan_id").references(() => plans.id),
+  planId: uuid("plan_id").references(() => plans.id),
   username: text("username").references(() => profiles.username),
 },
   (t) => [
