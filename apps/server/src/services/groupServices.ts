@@ -12,6 +12,7 @@ import { Value } from "typebox/value";
 import { db } from "../lib/db";
 import { Err, Ok, type Result } from "../lib/types";
 import { app, fileUploadService } from "../setup";
+import Type from "typebox";
 
 export const getGroupById = async (
   id: string,
@@ -192,4 +193,30 @@ export const inviteUserToGroup = async (
     app.log.error(Value.Errors(groupMemberDTO, conv));
     return Err(ErrorTypes.ConversionError);
   }
+};
+
+export const getGroupMembers = async (
+  groupId: string,
+): Promise<Result<GroupMemberDTO[], ErrorTypes.UnknownIdError | ErrorTypes.ConversionError>> => {
+
+  const members = await db.query.groupMembers.findMany({
+    where: {
+      groupId: groupId,
+    }
+  });
+
+  if (members) {
+    const check = Type.Array(groupMemberDTO);
+    const conv = Value.Convert(check, members);
+    if (Value.Check(check, conv)) {
+      return Ok(conv);
+    } else {
+      app.log.error(Value.Errors(check, conv));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } else {
+    app.log.warn(`Group with id ${groupId} not found`);
+    return Err(ErrorTypes.UnknownIdError);
+  }
+
 };

@@ -16,6 +16,7 @@ import {
   editGroupHandler,
   editGroupPhotoHandler,
   getGroupByIdHandler,
+  getGroupMembersHandler,
   getGroupPhotoHandler,
   inviteUsersToGroupHandler,
 } from "../handlers/groupHandlers";
@@ -179,4 +180,32 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     },
     inviteUsersToGroupHandler,
   );
+
+  app.get(
+    "/:id/group-members",
+    {
+      schema: {
+        description: "This route fetches all members of a group (including members who have been banned or have not accepted their invite yet)",
+        tags: ["groups"],
+        params: SimpleIdParam(
+          "The UUID of the group whose members are being fetched",
+        ),
+        response: {
+          200: StatusOK(
+            Type.Array(groupMemberDTO),
+            "if the group members were successfully fetched and converted to the expected format before sending the response",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "if no group with the provided id was found",
+          ),
+          500: StatusError(
+            ErrorTypes.ConversionError,
+            "if there was an error converting the group members data to the expected format before sending the response",
+          ),
+        },
+      }
+    },
+    getGroupMembersHandler,
+  )
 };

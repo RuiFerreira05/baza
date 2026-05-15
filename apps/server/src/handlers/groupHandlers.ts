@@ -14,6 +14,7 @@ import {
   editGroup,
   editGroupPhoto,
   getGroupById,
+  getGroupMembers,
   inviteUserToGroup,
 } from "../services/groupServices";
 import { app, fileUploadService } from "../setup";
@@ -258,6 +259,35 @@ export const inviteUsersToGroupHandler = async (
     }
   } else {
     return res.status(201).send(createStatusOK(
+      result.value,
+    ));
+  }
+};
+
+export const getGroupMembersHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  const { id: groupId } = req.params as SimpleIdParam;
+
+  const result = await getGroupMembers(groupId);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownIdError:
+        return res.status(404).send(createStatusError(
+          ErrorTypes.UnknownIdError,
+          "A group with the provided id was not found",
+        ));
+      case ErrorTypes.ConversionError:
+        app.log.error(`Failed to convert group members data`);
+        return res.status(500).send(createStatusError(
+          ErrorTypes.ConversionError,
+          "An error occurred while converting the group members data",
+        ));
+    }
+  } else {
+    return res.status(200).send(createStatusOK(
       result.value,
     ));
   }
