@@ -8,20 +8,33 @@ export enum ErrorTypes {
   ExistingResourceError = "ExistingResourceError",
 }
 
-export const StatusOK = <T extends Type.TSchema>(schema: T, description: string) =>
-  Type.Object({
-    status: Type.Literal("OK"),
-    data: schema,
-  }, {
-    description,
-  });
-export type StatusOK<T extends Type.TSchema> = Type.Static<ReturnType<typeof StatusOK<T>>>;
+export const StatusOK = <T extends Type.TSchema>(
+  schema: T,
+  description: string,
+) =>
+  Type.Object(
+    {
+      status: Type.Literal("OK"),
+      data: schema,
+    },
+    {
+      description,
+    },
+  );
+export type StatusOK<T extends Type.TSchema> = Type.Static<
+  ReturnType<typeof StatusOK<T>>
+>;
 
 export const StatusError = (type: ErrorTypes, description: string) =>
-  Type.Object({
-    status: Type.Literal("ERROR"),
-    error: genericError(type, description),
-  });
+  Type.Object(
+    {
+      status: Type.Literal("ERROR"),
+      error: genericError(type),
+    },
+    {
+      description,
+    },
+  );
 
 export type StatusError<T extends ErrorTypes = ErrorTypes> = {
   status: "ERROR";
@@ -31,18 +44,13 @@ export type StatusError<T extends ErrorTypes = ErrorTypes> = {
   };
 };
 
-const genericError = (type: ErrorTypes, description: string) =>
-  Type.Object(
-    {
-      type: Type.Literal(type),
-      message: Type.String({
-        description: "A human readable error message",
-      }),
-    },
-    {
-      description,
-    },
-  );
+const genericError = (type: ErrorTypes) =>
+  Type.Object({
+    type: Type.Literal(type),
+    message: Type.String({
+      description: "A human readable error message",
+    }),
+  });
 
 export const createStatusOK = <T>(data: T) => ({
   status: "OK" as const,
@@ -57,10 +65,11 @@ export const createStatusError = (type: ErrorTypes, message: string) => ({
 export const nullable = <T extends Type.TSchema>(schema: T) =>
   Type.Union([schema, Type.Null()]);
 
-export const SimpleIdParam = (description: string) => Type.Object({
-  id: Type.String({
-    description: description,
-    format: "uuid",
-  }),
-});
+export const SimpleIdParam = (description: string) =>
+  Type.Object({
+    id: Type.String({
+      description: description,
+      format: "uuid",
+    }),
+  });
 export type SimpleIdParam = Type.Static<ReturnType<typeof SimpleIdParam>>;
