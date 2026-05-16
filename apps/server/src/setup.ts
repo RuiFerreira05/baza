@@ -1,4 +1,5 @@
 import { fastifyMultipart } from "@fastify/multipart";
+import fastifyStatic from "@fastify/static";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import { TypeBoxValidatorCompiler } from "@fastify/type-provider-typebox";
@@ -8,13 +9,11 @@ import fs from "fs";
 import path from "path";
 import { auth } from "./lib/auth";
 import { env } from "./lib/env";
+import { FSUploadService } from "./lib/FSUploadService";
 import { groupRoutes } from "./routes/groupRoutes";
 import { userRoutes } from "./routes/profileRoutes";
-import { FSUploadService } from "./lib/FSUploadService";
-import fastifyStatic from "@fastify/static";
 
 // ##### APP SETUP #####
-
 
 export const app = fastify({
   logger: {
@@ -27,6 +26,13 @@ app.setValidatorCompiler(TypeBoxValidatorCompiler);
 await app.register(fastifyMultipart);
 
 bootstrapDirs();
+
+const fileUploadServiceMap = {
+  fs: new FSUploadService(),
+};
+
+export const fileUploadService = fileUploadServiceMap[env.FILE_UPLOAD_SERVICE];
+fileUploadService.setup(); // TODO: handle setup failure
 
 // ##### SWAGGER SETUP #####
 
@@ -75,8 +81,8 @@ app.route({
 
 // ##### ROUTES SETUP #####
 
-app.register(userRoutes, { prefix: "/v1/restricted/users/" });
-app.register(groupRoutes, { prefix: "/v1/restricted/groups/" });
+app.register(userRoutes, { prefix: "/v1/restricted/users" });
+app.register(groupRoutes, { prefix: "/v1/restricted/groups" });
 
 if (env.FILE_UPLOAD_SERVICE === "fs") {
   app.register(fastifyStatic, {
@@ -87,24 +93,11 @@ if (env.FILE_UPLOAD_SERVICE === "fs") {
 
 // ####### FUNCTIONS #######
 
-async function bootstrapDirs() { 
+async function bootstrapDirs() {
   const logsDir = path.dirname(env.LOG_FILE_PATH);
   if (!fs.existsSync(logsDir)) {
     app.log.info(`Logs directory not found, creating at ${logsDir}`);
     fs.mkdirSync(logsDir, { recursive: true });
-  }
-
-  if (env.FILE_UPLOAD_SERVICE === "fs") {
-    const groupUploadDir = FSUploadService.groupPhotoDir;
-    if (!fs.existsSync(groupUploadDir)) {
-      app.log.info(`Group upload directory not found, creating at ${groupUploadDir}`);
-      fs.mkdirSync(groupUploadDir, { recursive: true });
-    }
-    const userUploadDir = path.join(env.UPLOAD_DIR, "user-photos"); // TODO: MATI muda isto quando implementares o upload de fotos dos users
-    if (!fs.existsSync(userUploadDir)) {
-      app.log.info(`User upload directory not found, creating at ${userUploadDir}`);
-      fs.mkdirSync(userUploadDir, { recursive: true });
-    }
   }
 
   app.log.info("Required directories are set up");
