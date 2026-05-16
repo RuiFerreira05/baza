@@ -2,6 +2,7 @@ import { Type } from "typebox";
 
 export enum ErrorTypes {
   UnknownIdError = "UnknownIdError",
+  UnknownUsernameError = "UnknownUsernameError",
   ConversionError = "ConversionError",
   ResourceCreationError = "ResourceCreationError",
   MalformedRequestError = "MalformedRequestError",

@@ -1,12 +1,11 @@
 import Type from "typebox";
-import { SafeDate } from "./users";
 
 // ####### DTO #######
 
-export const personalEventPublicSchema = Type.Object({
+export const personalEventDTO = Type.Object({
   id: Type.String({description: "event ID (randomly given)", example: "1y9889192bfb987"}),
   username: Type.String({description: "username of user who this event belongs to", example: "random_user123"}),
-  date: SafeDate(),
+  date: Type.String({description: "The date of the event ",format: "date-time"}),
   location: Type.Union([ Type.String({description: "location where the event is going to take place", example: "My house"}), Type.Null() ]),
   startTime: Type.String({format: "time", description: "start time of the event"}),
   endTime: Type.String({format: "time", description: "end time of the event"}),
@@ -17,13 +16,26 @@ export const personalEventPublicSchema = Type.Object({
   title: "PersonalEventDTO",
 });
 
-export type PersonalEventDTO = Type.Static<typeof personalEventPublicSchema>; 
+export type PersonalEventDTO = Type.Static<typeof personalEventDTO>; 
 
 // ####### Route Specific Schemas #######
 
 // GET /users/:id/events?startDate&endDate
-export const getPersonalEventsResponseSchema = Type.Array(personalEventPublicSchema, {
+export const GetPersonalEventsResponse = Type.Array(personalEventDTO, {
   description: "Response schema for GET /users/:id/events?startDate&endDate, an array of event objects.",
-  title: "GetPersonalEventResponse",
+  title: "GetPersonalEventsResponse",
 });
-export type GetPersonalEventsResponse = Type.Static<typeof getPersonalEventsResponseSchema>;
+export type GetPersonalEventsResponse = Type.Static<typeof GetPersonalEventsResponse>;
+
+//Parameters
+export const GetPersonalEventsParams = Type.Object({
+  startDate: Type.String({
+    description: "Starting from this date, the user events will be returned.",
+    format: "date",
+  }),
+  endDate: Type.String({
+    description: "Until this date, the user events will be returned.",
+    format: "date",
+  }),
+})
+export type GetPersonalEventsParams = Type.Static<typeof GetPersonalEventsParams>
