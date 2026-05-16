@@ -67,6 +67,60 @@ export const createGroup = async (
   }
 };
 
+export const deleteGroup = async (
+  groupId: string,
+): Promise<
+  Result<GroupDTO, ErrorTypes.UnknownIdError | ErrorTypes.DeleteError>
+> => {
+  app.log.info(`Received delete group request for group with id ${groupId}`);
+  try {
+    const group = await db.transaction(async (tx) => {
+      try {
+        await tx.delete(groupMembers).where(eq(groupMembers.groupId, groupId));
+      } catch (error) {
+        app.log.error(
+          `Failed to delete group members for group with id ${groupId}: ${(error as Error).message}`,
+        );
+        tx.rollback();
+      }
+      try {
+        const [group] = await tx
+          .delete(groups)
+          .where(eq(groups.id, groupId))
+          .returning();
+
+        if (!group) {
+          app.log.warn(`Group with id ${groupId} not found`);
+          tx.rollback();
+        }
+
+        const conv = Value.Convert(groupDTO, group);
+        if (Value.Check(groupDTO, conv)) {
+          return conv;
+        } else {
+          app.log.error(Value.Errors(groupDTO, conv));
+          tx.rollback();
+        }
+      } catch (error) {
+        app.log.error(
+          `Failed to delete group with id ${groupId}: ${(error as Error).message}`,
+        );
+        tx.rollback();
+      }
+    });
+    if (group) {
+      return Ok(group);
+    } else {
+      return Err(ErrorTypes.DeleteError);
+    }
+  } catch (error) {
+    app.log.error(
+      `Failed to delete group with id ${groupId}: ${(error as Error).message}`,
+    );
+    return Err(ErrorTypes.DeleteError);
+  }
+};
+
 export const editGroupPhoto = async (
   groupId: string,
   photo: MultipartFile,
@@ -248,7 +302,7 @@ export const removeUserFromGroup = async (
 
   const conv = Value.Convert(groupMemberDTO, groupMember);
   if (Value.Check(groupMemberDTO, conv)) {
-    updateGroupTimestamp(groupId)
+    updateGroupTimestamp(groupId);
     return Ok(conv);
   } else {
     app.log.error(Value.Errors(groupMemberDTO, conv));
@@ -268,7 +322,9 @@ const updateGroupTimestamp = async (
       .where(eq(groups.id, groupId));
     return FailableOk();
   } catch (error) {
-    app.log.error(`Failed to update group timestamp: ${(error as Error).message}`);
+    app.log.error(
+      `Failed to update group timestamp: ${(error as Error).message}`,
+    );
     return Err(ErrorTypes.UpdateError);
   }
 };

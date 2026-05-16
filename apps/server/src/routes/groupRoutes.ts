@@ -13,6 +13,7 @@ import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
 import {
   createGroupHandler,
+  deleteGroupHandler,
   editGroupHandler,
   editGroupPhotoHandler,
   getGroupByIdHandler,
@@ -74,6 +75,32 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     },
     createGroupHandler,
   );
+
+  app.delete(
+    "/:id/delete",
+    {
+      schema: {
+        description: "This route deletes a group",
+        tags: ["groups"],
+        params: SimpleIdParam("The UUID of the group being deleted"),
+        response: {
+          200: StatusOK(
+            groupDTO,
+            "if the group was successfully deleted",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "if no group with the provided id was found",
+          ),
+          500: StatusError(
+            ErrorTypes.DeleteError,
+            "if there was an error deleting the group",
+          ),
+        },
+      },
+    },
+    deleteGroupHandler,
+  )
 
   // PATCH /groups/:id/edit/photo
   app.patch(

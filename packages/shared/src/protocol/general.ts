@@ -7,6 +7,7 @@ export enum ErrorTypes {
   MalformedRequestError = "MalformedRequestError",
   ExistingResourceError = "ExistingResourceError",
   UpdateError = "UpdateError",
+  DeleteError = "DeleteError",
 }
 
 export const StatusOK = <T extends Type.TSchema>(
