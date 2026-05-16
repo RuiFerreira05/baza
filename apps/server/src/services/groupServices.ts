@@ -188,6 +188,9 @@ export const inviteUserToGroup = async (
 
   const conv = Value.Convert(groupMemberDTO, groupMember);
   if (Value.Check(groupMemberDTO, conv)) {
+    db.update(groups).set({
+      updatedAt: new Date(),
+    })
     return Ok(conv);
   } else {
     app.log.error(Value.Errors(groupMemberDTO, conv));
