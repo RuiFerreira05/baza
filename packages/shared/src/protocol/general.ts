@@ -4,13 +4,40 @@ import { Type } from "typebox";
  * Enum representing the different types of errors that can occur in the system.
  */
 export enum ErrorTypes {
+  /**
+   * Indicates that a requested resource with a specific identifier was not found in
+   * the system.
+   */
   UnknownIdError = "UnknownIdError",
+  /**
+   * Indicates that a requested user with a specific username was not found in the system.
+   */
   UnknownUsernameError = "UnknownUsernameError",
+  /**
+   * Indicates an error occurred while converting data from one format to another,
+   * typically when validating data against a schema.
+   */
   ConversionError = "ConversionError",
+  /**
+   * Indicates that an error occurred while trying to create a new resource in the database.
+   */
   ResourceCreationError = "ResourceCreationError",
+  /**
+   * Indicates that the request sent by the client was malformed or missing required information.
+   */
   MalformedRequestError = "MalformedRequestError",
+  /**
+   * Indicates that an operation failed because a resource with the same identifier or
+   * unique property already exists.
+   */
   ExistingResourceError = "ExistingResourceError",
+  /**
+   * Indicates that an error occurred while trying to update an existing resource.
+   */
   UpdateError = "UpdateError",
+  /**
+   * Indicates that an error occurred while trying to delete a resource.
+   */
   DeleteError = "DeleteError",
 }
 
