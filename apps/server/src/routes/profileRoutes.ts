@@ -1,4 +1,4 @@
-import { profileDTO,  CreateProfileBody, genericError, ErrorTypes, SimpleIdParam, UsernameParam } from "@baza/shared-types";
+import { profileDTO,  CreateProfileBody, ErrorTypes, StatusOK, StatusError, UsernameParam } from "@baza/shared-types";
 import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
 import { getUserByUsernameHandler, createUserProfileHandler } from "../handlers/profileHandlers";
@@ -14,11 +14,17 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         description: "This route fetches profile information from a user of the app",
         tags: ["users"],
         response: {
-          200: profileDTO,
-          404: genericError(ErrorTypes.UnknownIdError, "No profile of the user with said username was found"),
-          500: genericError(
+          200: StatusOK(
+            profileDTO,
+            "if the profile information was successfully fetched and converted to the expected format before sending the response",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownUsernameError,
+            "if no profile from user with the provided username was found",
+          ),
+          500: StatusError(
             ErrorTypes.ConversionError,
-            "There was an error converting the profile data to the expected format before sending the response",
+            "if there was an error converting the profile data to the expected format before sending the response",
           ),
         },
         params: UsernameParam,
@@ -35,11 +41,13 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         tags: ["users"],
         body: CreateProfileBody,
         response: {
-          201: profileDTO,
-          400: genericError(ErrorTypes.MalformedRequestError, "The given profile data is not valid"),
-          500: genericError(
+          200: StatusOK(
+            profileDTO,
+            "if the profile was successfully created and converted to the expected format before sending the response",
+          ),
+          500: StatusError(
             ErrorTypes.ConversionError,
-            "The profile was created but there was an error converting it to the expected format before sending the response",
+            "if the profile was created but there was an error converting it to the expected format before sending the response",
           ),
         },
       },
