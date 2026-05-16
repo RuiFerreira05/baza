@@ -61,7 +61,7 @@ export const getGroupByIdHandler = async (
   }
 };
 
-// /groups/create
+// GET /groups/create
 export const createGroupHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
@@ -98,6 +98,7 @@ export const createGroupHandler = async (
   }
 };
 
+// DELETE groups/:id/delete
 export const deleteGroupHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
@@ -133,7 +134,7 @@ export const deleteGroupHandler = async (
   }
 };
 
-// groups/:id/edit/photo
+// PATCH groups/:id/edit/photo
 export const editGroupPhotoHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
@@ -235,7 +236,7 @@ export const getGroupPhotoHandler = async (
   }
 };
 
-// groups/:id/edit
+// PATCH groups/:id/edit
 export const editGroupHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
@@ -285,6 +286,7 @@ export const editGroupHandler = async (
 
 // ####### GROUP MEMBERS ########
 
+// POST /groups/:id/group-members/invite-user
 export const inviteUsersToGroupHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
@@ -331,6 +333,7 @@ export const inviteUsersToGroupHandler = async (
   }
 };
 
+// GET /groups/:id/group-members/
 export const getGroupMembersHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
@@ -366,6 +369,7 @@ export const getGroupMembersHandler = async (
   }
 };
 
+// POST /groups/:id/group-members/remove-user
 export const removeUserFromGroupHandler = async (
   req: FastifyRequest,
   res: FastifyReply,

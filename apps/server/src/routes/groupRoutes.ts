@@ -76,6 +76,7 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     createGroupHandler,
   );
 
+  // DELETE /groups/:id/delete
   app.delete(
     "/:id/delete",
     {
@@ -192,6 +193,7 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
 
   // ###### GROUP MEMBERS #######
 
+  // POST /groups/:id/group-members/invite-user
   app.post(
     "/:id/group-members/invite-user",
     {
@@ -223,6 +225,7 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     inviteUsersToGroupHandler,
   );
 
+  // POST /groups/:id/group-members/remove-user
   app.post(
     "/:id/group-members/remove-user",
     {
@@ -254,6 +257,7 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     removeUserFromGroupHandler,
   )
 
+  // GET /groups/:id/group-members
   app.get(
     "/:id/group-members",
     {
