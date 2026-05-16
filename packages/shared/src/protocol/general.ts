@@ -1,5 +1,8 @@
 import { Type } from "typebox";
 
+/**
+ * Enum representing the different types of errors that can occur in the system.
+ */
 export enum ErrorTypes {
   UnknownIdError = "UnknownIdError",
   UnknownUsernameError = "UnknownUsernameError",
@@ -11,6 +14,13 @@ export enum ErrorTypes {
   DeleteError = "DeleteError",
 }
 
+/**
+ * Creates a schema for a successful "OK" response.
+ *
+ * @param schema The schema for the data being returned
+ * @param description A description of the response
+ * @returns A TypeBox object schema for the OK response
+ */
 export const StatusOK = <T extends Type.TSchema>(
   schema: T,
   description: string,
@@ -24,10 +34,21 @@ export const StatusOK = <T extends Type.TSchema>(
       description,
     },
   );
+
+/**
+ * Type representing an "OK" response with a specific data schema.
+ */
 export type StatusOK<T extends Type.TSchema> = Type.Static<
   ReturnType<typeof StatusOK<T>>
 >;
 
+/**
+ * Creates a schema for an "ERROR" response.
+ *
+ * @param type The type of error
+ * @param description A description of the error response
+ * @returns A TypeBox object schema for the error response
+ */
 export const StatusError = (type: ErrorTypes, description: string) =>
   Type.Object(
     {
@@ -39,6 +60,9 @@ export const StatusError = (type: ErrorTypes, description: string) =>
     },
   );
 
+/**
+ * Type representing an "ERROR" response with a specific error type.
+ */
 export type StatusError<T extends ErrorTypes = ErrorTypes> = {
   status: "ERROR";
   error: {
@@ -47,6 +71,12 @@ export type StatusError<T extends ErrorTypes = ErrorTypes> = {
   };
 };
 
+/**
+ * Internal helper to create a generic error schema.
+ *
+ * @param type The error type literal
+ * @returns A TypeBox object schema
+ */
 const genericError = (type: ErrorTypes) =>
   Type.Object({
     type: Type.Literal(type),
@@ -55,19 +85,44 @@ const genericError = (type: ErrorTypes) =>
     }),
   });
 
+/**
+ * Creates a runtime "OK" response object.
+ *
+ * @param data The data to include in the response
+ * @returns An object with status "OK" and the data
+ */
 export const createStatusOK = <T>(data: T) => ({
   status: "OK" as const,
   data,
 });
 
+/**
+ * Creates a runtime "ERROR" response object.
+ *
+ * @param type The type of error
+ * @param message A human-readable error message
+ * @returns An object with status "ERROR" and the error details
+ */
 export const createStatusError = (type: ErrorTypes, message: string) => ({
   status: "ERROR" as const,
   error: { type, message },
 });
 
+/**
+ * Makes a schema nullable by creating a union with Type.Null().
+ *
+ * @param schema The schema to make nullable
+ * @returns A TypeBox union schema
+ */
 export const nullable = <T extends Type.TSchema>(schema: T) =>
   Type.Union([schema, Type.Null()]);
 
+/**
+ * Creates a schema for a request parameter containing a UUID 'id'.
+ *
+ * @param description A description of the parameter
+ * @returns A TypeBox object schema
+ */
 export const SimpleIdParam = (description: string) =>
   Type.Object(
     {
@@ -79,8 +134,18 @@ export const SimpleIdParam = (description: string) =>
       description,
     },
   );
+
+/**
+ * Type representing a parameter schema containing a UUID 'id'.
+ */
 export type SimpleIdParam = Type.Static<ReturnType<typeof SimpleIdParam>>;
 
+/**
+ * Creates a schema for a request parameter containing a 'username'.
+ *
+ * @param description A description of the parameter
+ * @returns A TypeBox object schema
+ */
 export const SimpleUsernameParam = (description: string) =>
   Type.Object(
     {
@@ -90,6 +155,10 @@ export const SimpleUsernameParam = (description: string) =>
       description,
     },
   );
+
+/**
+ * Type representing a parameter schema containing a 'username'.
+ */
 export type SimpleUsernameParam = Type.Static<
   ReturnType<typeof SimpleUsernameParam>
 >;
