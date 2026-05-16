@@ -77,11 +77,3 @@ export const EditGroupBody = Type.Object({
   ),
 });
 export type EditGroupBody = Type.Static<typeof EditGroupBody>;
-
-// POST /groups/:id/group-members/inviteUsers
-export const InviteUserToGroupBody = Type.Object({
-  username: Type.String({
-    description: "The username of the user being invited to the group",
-  }),
-});
-export type InviteUserToGroupBody = Type.Static<typeof InviteUserToGroupBody>;

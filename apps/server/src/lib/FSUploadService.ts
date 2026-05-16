@@ -7,7 +7,7 @@ import { pipeline } from "node:stream/promises";
 import { app } from "../setup";
 import { db } from "./db";
 import { env } from "./env";
-import { Err, Ok, type FileUploadInterface, type GetImageResult, type Result } from "./types";
+import { Err, Ok, SetupError, type Failable, type FileUploadInterface, type GetImageResult, type Result } from "./types";
 
 export class FSUploadService implements FileUploadInterface {
 
@@ -89,7 +89,7 @@ export class FSUploadService implements FileUploadInterface {
     });
   }
 
-  setup(): Result<undefined, ErrorTypes> {
+  setup(): Failable<SetupError> {
     if (!fs.existsSync(FSUploadService.groupPhotoDir)) {
       app.log.info(`Group photos upload directory not found, creating at ${FSUploadService.groupPhotoDir}`);
       fs.mkdirSync(FSUploadService.groupPhotoDir, { recursive: true })

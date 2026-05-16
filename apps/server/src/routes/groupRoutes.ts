@@ -4,8 +4,8 @@ import {
   ErrorTypes,
   groupDTO,
   groupMemberDTO,
-  InviteUserToGroupBody,
   SimpleIdParam,
+  SimpleUsernameParam,
   StatusError,
   StatusOK,
 } from "@baza/shared-types";
@@ -19,6 +19,7 @@ import {
   getGroupMembersHandler,
   getGroupPhotoHandler,
   inviteUsersToGroupHandler,
+  removeUserFromGroupHandler,
 } from "../handlers/groupHandlers";
 
 export const groupRoutes: FastifyPluginAsync = async (fastify) => {
@@ -32,7 +33,10 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         description: "This route fetches information from a group",
         tags: ["groups"],
         response: {
-          200: StatusOK(groupDTO, "if the group information was successfully fetched and converted to the expected format before sending the response"),
+          200: StatusOK(
+            groupDTO,
+            "if the group information was successfully fetched and converted to the expected format before sending the response",
+          ),
           404: StatusError(
             ErrorTypes.UnknownIdError,
             "if no group with the provided id was found",
@@ -56,7 +60,10 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         description: "This route creates a new group",
         tags: ["groups"],
         response: {
-          200: StatusOK(groupDTO, "if the group was successfully created and converted to the expected format before sending the response"),
+          200: StatusOK(
+            groupDTO,
+            "if the group was successfully created and converted to the expected format before sending the response",
+          ),
           500: StatusError(
             ErrorTypes.ConversionError,
             "if the group was created but there was an error converting it to the expected format before sending the response",
@@ -79,7 +86,10 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
           "The UUID of the group whose photo is being edited",
         ),
         response: {
-          201: StatusOK(groupDTO, "if the group photo was successfully updated and the updated group data was successfully converted to the expected format before sending the response"),
+          201: StatusOK(
+            groupDTO,
+            "if the group photo was successfully updated and the updated group data was successfully converted to the expected format before sending the response",
+          ),
           404: StatusError(
             ErrorTypes.UnknownIdError,
             "if no group with the provided id was found",
@@ -135,7 +145,10 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         ),
         body: EditGroupBody,
         response: {
-          200: StatusOK(groupDTO, "if the group information was successfully updated and converted to the expected format before sending the response"),
+          200: StatusOK(
+            groupDTO,
+            "if the group information was successfully updated and converted to the expected format before sending the response",
+          ),
           404: StatusError(
             ErrorTypes.UnknownIdError,
             "if no group with the provided id was found",
@@ -161,7 +174,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         params: SimpleIdParam(
           "The UUID of the group to which users are being invited",
         ),
-        body: InviteUserToGroupBody,
+        body: SimpleUsernameParam(
+          "The username of the user being invited to the group",
+        ),
         response: {
           201: StatusOK(
             groupMemberDTO,
@@ -181,11 +196,43 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     inviteUsersToGroupHandler,
   );
 
+  app.post(
+    "/:id/group-members/remove-user",
+    {
+      schema: {
+        description: "This route allows removing users from a group",
+        tags: ["groups"],
+        params: SimpleIdParam(
+          "The UUID of the group from which users are being removed",
+        ),
+        body: SimpleUsernameParam(
+          "The username of the user being removed from the group",
+        ),
+        response: {
+          200: StatusOK(
+            groupMemberDTO,
+            "Indicates that the user was successfully removed from the group and the updated group member data was successfully converted to the expected format before sending the response",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "if no group or user with the provided id was found",
+          ),
+          500: StatusError(
+            ErrorTypes.ConversionError,
+            "if there was an error removing the user from the group",
+          ),
+        },
+      },
+    },
+    removeUserFromGroupHandler,
+  )
+
   app.get(
     "/:id/group-members",
     {
       schema: {
-        description: "This route fetches all members of a group (including members who have been banned or have not accepted their invite yet)",
+        description:
+          "This route fetches all members of a group (including members who have been banned or have not accepted their invite yet)",
         tags: ["groups"],
         params: SimpleIdParam(
           "The UUID of the group whose members are being fetched",
@@ -204,8 +251,8 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
             "if there was an error converting the group members data to the expected format before sending the response",
           ),
         },
-      }
+      },
     },
     getGroupMembersHandler,
-  )
+  );
 };

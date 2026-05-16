@@ -32,7 +32,7 @@ const fileUploadServiceMap = {
 };
 
 export const fileUploadService = fileUploadServiceMap[env.FILE_UPLOAD_SERVICE];
-fileUploadService.setup();
+fileUploadService.setup(); // TODO: handle setup failure
 
 // ##### SWAGGER SETUP #####
 

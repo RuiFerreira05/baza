@@ -7,10 +7,10 @@ import {
   type GroupMemberDTO,
 } from "@baza/shared-types";
 import type { MultipartFile } from "@fastify/multipart";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Value } from "typebox/value";
 import { db } from "../lib/db";
-import { Err, Ok, type Result } from "../lib/types";
+import { Err, FailableOk, Ok, type Failable, type Result } from "../lib/types";
 import { app, fileUploadService } from "../setup";
 import Type from "typebox";
 
@@ -169,7 +169,7 @@ export const inviteUserToGroup = async (
     | ErrorTypes.ConversionError
   >
 > => {
-  const [ groupMember ] = await db
+  const [groupMember] = await db
     .insert(groupMembers)
     .values({
       username: username,
@@ -188,9 +188,7 @@ export const inviteUserToGroup = async (
 
   const conv = Value.Convert(groupMemberDTO, groupMember);
   if (Value.Check(groupMemberDTO, conv)) {
-    db.update(groups).set({
-      updatedAt: new Date(),
-    })
+    updateGroupTimestamp(groupId);
     return Ok(conv);
   } else {
     app.log.error(Value.Errors(groupMemberDTO, conv));
@@ -200,12 +198,16 @@ export const inviteUserToGroup = async (
 
 export const getGroupMembers = async (
   groupId: string,
-): Promise<Result<GroupMemberDTO[], ErrorTypes.UnknownIdError | ErrorTypes.ConversionError>> => {
-
+): Promise<
+  Result<
+    GroupMemberDTO[],
+    ErrorTypes.UnknownIdError | ErrorTypes.ConversionError
+  >
+> => {
   const members = await db.query.groupMembers.findMany({
     where: {
       groupId: groupId,
-    }
+    },
   });
 
   if (members) {
@@ -221,5 +223,52 @@ export const getGroupMembers = async (
     app.log.warn(`Group with id ${groupId} not found`);
     return Err(ErrorTypes.UnknownIdError);
   }
+};
 
+export const removeUserFromGroup = async (
+  groupId: string,
+  username: string,
+): Promise<
+  Result<GroupMemberDTO, ErrorTypes.UnknownIdError | ErrorTypes.ConversionError>
+> => {
+  const [groupMember] = await db
+    .delete(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.groupId, groupId),
+        eq(groupMembers.username, username),
+      ),
+    )
+    .returning();
+
+  if (!groupMember) {
+    app.log.warn(`Group or user not found`);
+    return Err(ErrorTypes.UnknownIdError);
+  }
+
+  const conv = Value.Convert(groupMemberDTO, groupMember);
+  if (Value.Check(groupMemberDTO, conv)) {
+    updateGroupTimestamp(groupId)
+    return Ok(conv);
+  } else {
+    app.log.error(Value.Errors(groupMemberDTO, conv));
+    return Err(ErrorTypes.ConversionError);
+  }
+};
+
+const updateGroupTimestamp = async (
+  groupId: string,
+): Promise<Failable<ErrorTypes.UpdateError>> => {
+  try {
+    await db
+      .update(groups)
+      .set({
+        updatedAt: new Date(),
+      })
+      .where(eq(groups.id, groupId));
+    return FailableOk();
+  } catch (error) {
+    app.log.error(`Failed to update group timestamp: ${(error as Error).message}`);
+    return Err(ErrorTypes.UpdateError);
+  }
 };
