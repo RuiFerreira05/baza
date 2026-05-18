@@ -43,7 +43,6 @@ export const getUserByUsername = async (username: string):
 export const createUserProfile = async (userProfile: CreateProfileBody): 
 Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreationError | ErrorTypes.UnknownIdError>> => {
 
-  console.log(`GUYS`)
   //Verify if the user whose profile is being created, exists.
   const user = await db.select().from(users).where(eq(users.id, userProfile.userId));
 
@@ -64,7 +63,6 @@ Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreat
 
       const converted = Value.Convert(profileDTO, sanitizedProfile);
       if(Value.Check(profileDTO, converted)){
-        console.log("ESTA TUDO BEM!")
         return Ok(converted);
       }
       else{

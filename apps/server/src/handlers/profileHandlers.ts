@@ -41,7 +41,6 @@ export const createUserProfileHandler = async (req: FastifyRequest, res: Fastify
   if(!result.ok){
     switch(result.error){
       case ErrorTypes.ConversionError:
-        console.log('OPA')
         app.log.error(`Failed to convert created profile`);
         return res.status(500).send(createStatusError(
           ErrorTypes.ConversionError,
