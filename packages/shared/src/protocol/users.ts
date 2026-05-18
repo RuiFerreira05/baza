@@ -63,9 +63,9 @@ export const CreateProfileBody = Type.Object({
 export type CreateProfileBody = Type.Static<typeof CreateProfileBody>;
 
 // Parameters
-export const UsernameParam = Type.Object({
-  username: Type.String({
-    description: "Username of a user of the aplication",
-  })
-});
-export type UsernameParam = Type.Static<typeof UsernameParam>
+// export const UsernameParam = Type.Object({
+//   username: Type.String({
+//     description: "Username of a user of the aplication",
+//   })
+// });
+// export type UsernameParam = Type.Static<typeof UsernameParam>

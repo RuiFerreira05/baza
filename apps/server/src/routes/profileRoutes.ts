@@ -1,4 +1,4 @@
-import { profileDTO,  CreateProfileBody, ErrorTypes, StatusOK, StatusError, UsernameParam } from "@baza/shared-types";
+import { profileDTO,  CreateProfileBody, ErrorTypes, StatusOK, StatusError, SimpleUsernameParam } from "@baza/shared-types";
 import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
 import { getUserByUsernameHandler, createUserProfileHandler } from "../handlers/profileHandlers";
@@ -27,7 +27,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
             "if there was an error converting the profile data to the expected format before sending the response",
           ),
         },
-        params: UsernameParam,
+        params: SimpleUsernameParam("Username of a user of the aplication whose profile is being created"),
       },
     },
     getUserByUsernameHandler

@@ -19,7 +19,14 @@ export const getUserByUsername = async (username: string):
   });
 
   if(profile){
-    const converted = Value.Convert(profileDTO, profile)
+
+    const sanitizedProfile = {
+        ...profile,
+        createdAt: profile.createdAt.toISOString(),
+        updatedAt: profile.updatedAt.toISOString(),
+    }
+
+    const converted = Value.Convert(profileDTO, sanitizedProfile)
     if(Value.Check(profileDTO, converted)){
       return Ok(converted);
     }
@@ -36,6 +43,7 @@ export const getUserByUsername = async (username: string):
 export const createUserProfile = async (userProfile: CreateProfileBody): 
 Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreationError | ErrorTypes.UnknownIdError>> => {
 
+  console.log(`GUYS`)
   //Verify if the user whose profile is being created, exists.
   const user = await db.select().from(users).where(eq(users.id, userProfile.userId));
 
@@ -47,8 +55,16 @@ Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreat
     }).returning();
 
     if(newProfile){
-      const converted = Value.Convert(profileDTO, newProfile);
+
+      const sanitizedProfile = {
+        ...newProfile[0],
+        createdAt: newProfile[0]?.createdAt.toISOString(),
+        updatedAt: newProfile[0]?.updatedAt.toISOString(),
+      }
+
+      const converted = Value.Convert(profileDTO, sanitizedProfile);
       if(Value.Check(profileDTO, converted)){
+        console.log("ESTA TUDO BEM!")
         return Ok(converted);
       }
       else{
