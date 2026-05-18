@@ -7,7 +7,7 @@ export const profiles = pgTable("profiles", {
   photo: text("photo"),
   description: text("description"),
   settings: json("settings").notNull(),
-  userId: text("user_id").unique().notNull().references(() => users.id),
+  userId: text("user_id").unique().notNull().references(() => users.id, {onDelete: 'cascade'}),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

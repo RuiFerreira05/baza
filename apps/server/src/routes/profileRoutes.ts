@@ -7,6 +7,7 @@ import { getUserByUsernameHandler, createUserProfileHandler } from "../handlers/
 export const userRoutes: FastifyPluginAsync = async (fastify) => {
   const app = fastify.withTypeProvider<TypeBoxTypeProvider>();
 
+  // GET /users/:username
   app.get(
     "/:username",
     {
@@ -33,6 +34,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     getUserByUsernameHandler
   );
 
+  // DELETE /users/create
   app.post(
     "/create",
     {
@@ -54,6 +56,34 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     },
     createUserProfileHandler
   );
+
+  // DELETE /users/:username/delete
+  // app.delete(
+  //     "/:username/delete",
+  //     {
+  //       schema: {
+  //         description: "This route deletes a user's profile",
+  //         tags: ["users"],
+  //         params: SimpleUsernameParam("The username of the user whose profile is being deleted"),
+  //         response: {
+  //           200: StatusOK(
+  //             profileDTO,
+  //             "if the profile was successfully deleted",
+  //           ),
+  //           404: StatusError(
+  //             ErrorTypes.UnknownIdError,
+  //             "if no user with the provided username was found",
+  //           ),
+  //           500: StatusError(
+  //             ErrorTypes.DeleteError,
+  //             "if there was an error deleting the profile",
+  //           ),
+  //         },
+  //       },
+  //     },
+  //     ,
+  //   );
+    
 
 //   app.get(
 //     "/:id/events",

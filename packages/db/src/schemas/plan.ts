@@ -5,7 +5,7 @@ import { groupEvents } from "./event";
 
 export const plans = pgTable("plans", {
   id: uuid('id').defaultRandom().primaryKey(),
-  groupEventId: uuid("group_event_id").references(() => groupEvents.id),
+  groupEventId: uuid("group_event_id").references(() => groupEvents.id, {onDelete: 'cascade'}),
   username: text("username").references(() => profiles.username),
   title: varchar("title", { length: 64 }).notNull(),
   date: date("date").notNull(),

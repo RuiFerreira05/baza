@@ -34,7 +34,7 @@ export const stateEnum = pgEnum("state", ['finished', 'unfinished']);
 
 export const groupEvents = pgTable("group_events", {
   id: uuid("id").references(() => events.id).primaryKey(),
-  groupId: uuid("group_id").references(() => groups.id),
+  groupId: uuid("group_id").references(() => groups.id, {onDelete: 'cascade'}),
   startDate: date("start_date").notNull(),
   endDate: date("end_date").notNull(),
   state: stateEnum("state").notNull(),
@@ -49,13 +49,13 @@ export const groupEvents = pgTable("group_events", {
 
 export const groupEventsFinal = pgTable("group_events_final", {
   id: uuid("id").references(() => events.id).primaryKey(),
-  groupId: uuid("group_id").references(() => groups.id),
-  planId: uuid("plan_id").references(() => plans.id)
+  groupId: uuid("group_id").references(() => groups.id, {onDelete: 'cascade'}),
+  planId: uuid("plan_id").references(() => plans.id, {onDelete: 'cascade'})
 });
 
 export const eventConfirmations = pgTable("event_confirmations", {
-  groupId: uuid("group_id").references(() => groups.id),
-  username: text("username").references(() => profiles.username),
+  groupId: uuid("group_id").references(() => groups.id, {onDelete: 'cascade'}),
+  username: text("username").references(() => profiles.username, {onDelete: 'cascade'}),
   confirmedAt: text("confirmed_at").notNull(),
 },
   (t) => [

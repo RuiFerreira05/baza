@@ -16,8 +16,8 @@ export const groups = pgTable("groups", {
 );
 
 export const groupMembers = pgTable("group_members", {
-  username: text("username").notNull().references(() => profiles.username),
-  groupId: uuid("group_id").notNull().references(() => groups.id),
+  username: text("username").notNull().references(() => profiles.username, {onDelete: 'cascade'}),
+  groupId: uuid("group_id").notNull().references(() => groups.id, {onDelete: 'cascade'}),
   admin: boolean("admin").notNull(),
   banned: boolean("banned").default(false).notNull(),
   bannedAt: timestamp("banned_at"),

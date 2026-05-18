@@ -96,3 +96,10 @@ Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreat
     return Err(ErrorTypes.UnknownIdError);
   }
 }
+
+// export const deleteUserProfile = async (username: string):
+// Promise<Result<ProfileDTO, ErrorTypes.DeleteError | ErrorTypes.UnknownUsernameError>> => {
+ 
+//   app.log.info(`Received delete profile request for user with username ${username}`);
+
+// }

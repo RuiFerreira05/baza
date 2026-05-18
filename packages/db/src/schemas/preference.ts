@@ -3,7 +3,7 @@ import { profiles } from "./profile";
 import { groupEvents } from "./event";
 
 export const preferences = pgTable("preferences", {
-  groupEventId: uuid("group_event_id").references(() => groupEvents.id),
+  groupEventId: uuid("group_event_id").references(() => groupEvents.id, {onDelete: 'cascade'}),
   username: text("username").references(() => profiles.username),
   preference: json("preference").notNull(),
   private: boolean("private").notNull(),
