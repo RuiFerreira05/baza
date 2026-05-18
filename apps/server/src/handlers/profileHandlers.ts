@@ -3,6 +3,7 @@ import { getUserByUsername, createUserProfile } from "../services/profileService
 import { createStatusError, createStatusOK, ErrorTypes, type CreateProfileBody, type ProfileDTO, type SimpleIdParam, type SimpleUsernameParam } from "@baza/shared-types";
 import { app } from "../setup";
 
+// GET /users/:id
 export const getUserByUsernameHandler = async (req: FastifyRequest, res: FastifyReply) => {
   app.log.info("Recieved get user profile by username request");
   const { username } = req.params as SimpleUsernameParam;
@@ -33,6 +34,7 @@ export const getUserByUsernameHandler = async (req: FastifyRequest, res: Fastify
   }
 }
 
+// POST /users/create
 export const createUserProfileHandler = async (req: FastifyRequest, res: FastifyReply) => {
   app.log.info("Received create user profile request")
   const body = req.body as CreateProfileBody;
