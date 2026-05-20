@@ -1,7 +1,7 @@
-import { profileDTO,  CreateProfileBody, ErrorTypes, StatusOK, StatusError, SimpleUsernameParam } from "@baza/shared-types";
+import { profileDTO,  CreateProfileBody, EditProfileBody, ErrorTypes, StatusOK, StatusError, SimpleUsernameParam } from "@baza/shared-types";
 import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
-import { getUserByUsernameHandler, createUserProfileHandler, deleteUserProfileHandler } from "../handlers/profileHandlers";
+import { getUserByUsernameHandler, createUserProfileHandler, deleteUserProfileHandler, editUserProfileHandler } from "../handlers/profileHandlers";
 
 
 export const userRoutes: FastifyPluginAsync = async (fastify) => {
@@ -82,6 +82,34 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     deleteUserProfileHandler
+  );
+
+  // PATCH /users/:username/edit
+  app.patch(
+    "/:username/edit",
+    {
+      schema: {
+        description: "This route edits a user's profile information (except photo and settings)",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username of the user whose profile is being edited"),
+        body: EditProfileBody,
+        response: {
+          200: StatusOK(
+            profileDTO,
+            "if the profile information was successfully updated and converted to the expected format before sending the response",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "if no user with the provided username was found",
+          ),
+          500: StatusError(
+            ErrorTypes.DeleteError,
+            "if there was an error converting the updated profile data to the expected format before sending the response",
+          ),
+        },
+      },
+    },
+    editUserProfileHandler
   );
     
 

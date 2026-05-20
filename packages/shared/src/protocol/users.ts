@@ -61,3 +61,18 @@ export const CreateProfileBody = Type.Object({
   userId: Type.String({ description: "ID of the user creating this profile.", format: "uuid" }),
 });
 export type CreateProfileBody = Type.Static<typeof CreateProfileBody>;
+
+// PATCH /users/:username/delete
+export const EditProfileBody = Type.Object({
+  newUsername: Type.Optional(
+    Type.String({
+      description: "The new username of the user who's the owner of this profile. If not provided, the username will not be changed",
+    }),
+  ),
+  newDescription: Type.Optional(
+    Type.String({
+      description: "The new description of the user's profile. If not provided, the profile description will not be changed",
+    }),
+  ),
+});
+export type EditProfileBody = Type.Static<typeof EditProfileBody>;

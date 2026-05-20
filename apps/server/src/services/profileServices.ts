@@ -5,6 +5,7 @@ import { ErrorTypes, profileDTO, type CreateProfileBody, type ProfileDTO } from 
 import { Value } from "typebox/value";
 import { Err, Ok, type Result } from "../lib/types";
 import { app } from "../setup";
+import { username } from "better-auth/plugins";
 
 /**
  * This method fetches the profile data of a specific user from the database by their username, 
@@ -109,7 +110,6 @@ Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreat
 export const deleteUserProfile = async (username: string):
 Promise<Result<ProfileDTO, ErrorTypes.DeleteError | ErrorTypes.UnknownUsernameError>> => {
  
-  app.log.info(`Received delete profile request for user with username ${username}`);
   try{
       const deletedProfile = await db.transaction(async (tx) => {
       const [profile] = await tx.delete(profiles).where(eq(profiles.username, username)).returning();
@@ -144,5 +144,59 @@ Promise<Result<ProfileDTO, ErrorTypes.DeleteError | ErrorTypes.UnknownUsernameEr
   } catch (error){
     app.log.error(`Failed to delete profile from user with username ${username}: ${(error as Error).message}`);
     return Err(ErrorTypes.DeleteError);
+  }
+}
+
+/**
+ * This method updates the username and/or description of an existing user profile. If successful, it
+ * returns the updated profile as a profileDTO. If no user with the provided username is found, it
+ * returns an UnknownUsernameError. If there is an error converting the profile data to the
+ * expected format, it returns a ConversionError.
+ * 
+ * @param username username of the user whose profile is being edited
+ * @param newUserName new username of the user whose profile is being edited
+ * @param description new description of the profile that is being edited
+ * @returns a promised result with the updated profileDTO, or an error
+ */
+export const editUserProfile = async ( username: string, newUserName: string | undefined, description: string | undefined):
+Promise<Result<ProfileDTO, ErrorTypes.UnknownUsernameError | ErrorTypes.ConversionError | ErrorTypes.ExistingResourceError>> => {
+  
+  const usernameCheck = await db.query.profiles.findFirst({
+    where: {
+      username: newUserName,
+    },
+  })
+
+  if(!usernameCheck){
+    const [profile] = await db.update(profiles).set({
+      username: newUserName,
+      description: description,
+      updatedAt: new Date(),
+    }).where(eq(profiles.username, username)).returning();
+
+    if(profile){
+      const sanitizedProfile = {
+          ...profile,
+          createdAt: profile?.createdAt.toISOString(),
+          updatedAt: profile?.updatedAt.toISOString(),
+        }
+
+        const converted = Value.Convert(profileDTO, sanitizedProfile);
+        if(Value.Check(profileDTO, converted)){
+          return Ok(converted);
+        }
+        else{
+          app.log.error(Value.Errors(profileDTO, converted));
+          return Err(ErrorTypes.ConversionError);
+        }
+    }
+    else{
+      app.log.warn(`User with id ${username} not found`);
+      return Err(ErrorTypes.UnknownUsernameError);
+    }
+  }
+  else{
+    app.log.warn(`User with name ${newUserName} already exists`);
+    return Err(ErrorTypes.ExistingResourceError);
   }
 }

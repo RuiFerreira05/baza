@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { getUserByUsername, createUserProfile, deleteUserProfile } from "../services/profileServices";
-import { createStatusError, createStatusOK, ErrorTypes, type CreateProfileBody, type ProfileDTO, type SimpleIdParam, type SimpleUsernameParam } from "@baza/shared-types";
+import { getUserByUsername, createUserProfile, deleteUserProfile, editUserProfile } from "../services/profileServices";
+import { createStatusError, createStatusOK, ErrorTypes, type CreateProfileBody, type ProfileDTO, type SimpleIdParam, type SimpleUsernameParam, type EditProfileBody } from "@baza/shared-types";
 import { app } from "../setup";
 
 // GET /users/:username
@@ -90,6 +90,40 @@ export const deleteUserProfileHandler = async (req: FastifyRequest, res: Fastify
     }
   }
   else{
+    return res.send(createStatusOK(result.value));
+  }
+}
+
+// PATCH /users/:username/edit
+export const editUserProfileHandler = async (req: FastifyRequest, res: FastifyReply) => {
+  app.log.info("Received  user's profile request");
+  const { username } = req.params as SimpleUsernameParam;
+  const { newUsername, newDescription } = req.body as EditProfileBody;
+  const result = await editUserProfile(username, newUsername, newDescription);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownUsernameError:
+        app.log.warn(`User not found`);
+        return res.status(404).send(createStatusError(
+          ErrorTypes.UnknownUsernameError,
+          "A user with the provided username was not found",
+        ));
+      case ErrorTypes.ConversionError:
+        app.log.error(`Failed to convert updated profile data`);
+        return res.status(500).send(createStatusError(
+          ErrorTypes.ConversionError,
+          "An error occurred while converting the updated profile data",
+        ));
+      case ErrorTypes.ExistingResourceError:
+        app.log.warn(`User with name ${username} already exists`);
+        return res.status(400).send(createStatusError(
+          ErrorTypes.ExistingResourceError,
+          `A user with the name ${username} already exists`,
+        ));
+    }
+  } 
+  else {
     return res.send(createStatusOK(result.value));
   }
 }
