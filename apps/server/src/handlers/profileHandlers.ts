@@ -1,11 +1,11 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { getUserByUsername, createUserProfile } from "../services/profileServices";
+import { getUserByUsername, createUserProfile, deleteUserProfile } from "../services/profileServices";
 import { createStatusError, createStatusOK, ErrorTypes, type CreateProfileBody, type ProfileDTO, type SimpleIdParam, type SimpleUsernameParam } from "@baza/shared-types";
 import { app } from "../setup";
 
-// GET /users/:id
+// GET /users/:username
 export const getUserByUsernameHandler = async (req: FastifyRequest, res: FastifyReply) => {
-  app.log.info("Recieved get user profile by username request");
+  app.log.info("Recieved get user's profile by username request");
   const { username } = req.params as SimpleUsernameParam;
 
   app.log.info(`Fetching profile from user with username: ${username}`)
@@ -36,7 +36,7 @@ export const getUserByUsernameHandler = async (req: FastifyRequest, res: Fastify
 
 // POST /users/create
 export const createUserProfileHandler = async (req: FastifyRequest, res: FastifyReply) => {
-  app.log.info("Received create user profile request")
+  app.log.info("Received create user's profile request")
   const body = req.body as CreateProfileBody;
   const result = await createUserProfile(body)
 
@@ -59,6 +59,33 @@ export const createUserProfileHandler = async (req: FastifyRequest, res: Fastify
         return res.status(404).send(createStatusError(
           ErrorTypes.UnknownIdError,
           `A user with the provided id was not found`,
+        ));
+    }
+  }
+  else{
+    return res.send(createStatusOK(result.value));
+  }
+}
+
+// POST /users/:username/delete
+export const deleteUserProfileHandler = async (req: FastifyRequest, res: FastifyReply) => {
+  app.log.info("Received delete user's profile request");
+  const { username } = req.params as SimpleUsernameParam;
+  const result = await deleteUserProfile(username);
+
+  if(!result.ok){
+    switch(result.error){
+      case ErrorTypes.UnknownUsernameError:
+        app.log.error(`User not found`);
+        return res.status(404).send(createStatusError(
+          ErrorTypes.UnknownUsernameError,
+          "A user with the provided username was not found",
+        ));
+      case ErrorTypes.DeleteError:
+        app.log.error(`Failed to delete users's profile with username ${username} `);
+        return res.status(500).send(createStatusError(
+          ErrorTypes.DeleteError,
+          "An error occurred while deleting the profile",
         ));
     }
   }

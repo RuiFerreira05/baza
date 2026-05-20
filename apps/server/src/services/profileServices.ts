@@ -65,7 +65,7 @@ Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreat
   const user = await db.select().from(users).where(eq(users.id, userProfile.userId));
 
   if(user.length == 1){
-    const newProfile = await db.insert(profiles).values({
+    const [newProfile] = await db.insert(profiles).values({
       username: userProfile.username,
       userId: userProfile.userId,
       settings: {},
@@ -74,9 +74,9 @@ Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreat
     if(newProfile){
 
       const sanitizedProfile = {
-        ...newProfile[0],
-        createdAt: newProfile[0]?.createdAt.toISOString(),
-        updatedAt: newProfile[0]?.updatedAt.toISOString(),
+        ...newProfile,
+        createdAt: newProfile?.createdAt.toISOString(),
+        updatedAt: newProfile?.updatedAt.toISOString(),
       }
 
       const converted = Value.Convert(profileDTO, sanitizedProfile);
@@ -97,9 +97,52 @@ Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreat
   }
 }
 
-// export const deleteUserProfile = async (username: string):
-// Promise<Result<ProfileDTO, ErrorTypes.DeleteError | ErrorTypes.UnknownUsernameError>> => {
+/**
+ * This method deletes a user's profile from the database by the provided username.
+ * If the profile is successfully deleted, it returns the deleted profile as a profileDTO.
+ * If the profile is not found, it returns an UnknownUsernameError. If there is an error during
+ * the deletion process or conversion, it returns a DeleteError.
+ * 
+ * @param username the username of the user whose profile is being deleted
+ * @returns a promised result with the deleted profileDTO, or an error
+ */
+export const deleteUserProfile = async (username: string):
+Promise<Result<ProfileDTO, ErrorTypes.DeleteError | ErrorTypes.UnknownUsernameError>> => {
  
-//   app.log.info(`Received delete profile request for user with username ${username}`);
+  app.log.info(`Received delete profile request for user with username ${username}`);
+  try{
+      const deletedProfile = await db.transaction(async (tx) => {
+      const [profile] = await tx.delete(profiles).where(eq(profiles.username, username)).returning();
+        
+      if(!profile){
+        app.log.warn(`Profile from user with username ${username} not found`);
+        tx.rollback();
+      }
 
-// }
+      const sanitizedProfile = {
+        ...profile,
+        createdAt: profile?.createdAt.toISOString(),
+        updatedAt: profile?.updatedAt.toISOString(),
+      }
+
+      const converted = Value.Convert(profileDTO, sanitizedProfile);
+      if(Value.Check(profileDTO, converted)){
+        return converted;
+      }
+      else{
+        app.log.error(Value.Errors(profileDTO, converted));
+        tx.rollback();
+      }
+    });
+
+    if(deletedProfile){
+      return Ok(deletedProfile)
+    }
+    else{
+      return Err(ErrorTypes.UnknownUsernameError);
+    }
+  } catch (error){
+    app.log.error(`Failed to delete profile from user with username ${username}: ${(error as Error).message}`);
+    return Err(ErrorTypes.DeleteError);
+  }
+}

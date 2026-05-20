@@ -1,7 +1,7 @@
 import { profileDTO,  CreateProfileBody, ErrorTypes, StatusOK, StatusError, SimpleUsernameParam } from "@baza/shared-types";
 import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
-import { getUserByUsernameHandler, createUserProfileHandler } from "../handlers/profileHandlers";
+import { getUserByUsernameHandler, createUserProfileHandler, deleteUserProfileHandler } from "../handlers/profileHandlers";
 
 
 export const userRoutes: FastifyPluginAsync = async (fastify) => {
@@ -58,31 +58,31 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
   );
 
   // DELETE /users/:username/delete
-  // app.delete(
-  //     "/:username/delete",
-  //     {
-  //       schema: {
-  //         description: "This route deletes a user's profile",
-  //         tags: ["users"],
-  //         params: SimpleUsernameParam("The username of the user whose profile is being deleted"),
-  //         response: {
-  //           200: StatusOK(
-  //             profileDTO,
-  //             "if the profile was successfully deleted",
-  //           ),
-  //           404: StatusError(
-  //             ErrorTypes.UnknownIdError,
-  //             "if no user with the provided username was found",
-  //           ),
-  //           500: StatusError(
-  //             ErrorTypes.DeleteError,
-  //             "if there was an error deleting the profile",
-  //           ),
-  //         },
-  //       },
-  //     },
-  //     ,
-  //   );
+  app.delete(
+    "/:username/delete",
+    {
+      schema: {
+        description: "This route deletes a user's profile",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username of the user whose profile is being deleted"),
+        response: {
+          200: StatusOK(
+            profileDTO,
+            "if the profile was successfully deleted",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "if no user with the provided username was found",
+          ),
+          500: StatusError(
+            ErrorTypes.DeleteError,
+            "if there was an error deleting the profile",
+          ),
+        },
+      },
+    },
+    deleteUserProfileHandler
+  );
     
 
 //   app.get(
