@@ -39,6 +39,10 @@ export enum ErrorTypes {
    * Indicates that an error occurred while trying to delete a resource.
    */
   DeleteError = "DeleteError",
+  /**
+   * Indicates that the user is not authenticated or authorized to perform the action.
+   */
+  UnauthorizedError = "UnauthorizedError",
 }
 
 /**

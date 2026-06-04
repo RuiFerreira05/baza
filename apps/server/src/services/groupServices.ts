@@ -100,42 +100,32 @@ export const deleteGroup = async (
 > => {
   app.log.info(`Received delete group request for group with id ${groupId}`);
   try {
-    const group = await db.transaction(async (tx) => {
-      try {
-        await tx.delete(groupMembers).where(eq(groupMembers.groupId, groupId));
-      } catch (error) {
-        app.log.error(
-          `Failed to delete group members for group with id ${groupId}: ${(error as Error).message}`,
-        );
-        tx.rollback();
-      }
-      try {
-        const [group] = await tx
-          .delete(groups)
-          .where(eq(groups.id, groupId))
-          .returning();
-
-        if (!group) {
-          app.log.warn(`Group with id ${groupId} not found`);
-          tx.rollback();
-        }
-
-        const conv = Value.Convert(groupDTO, group);
-        if (Value.Check(groupDTO, conv)) {
-          return conv;
-        } else {
-          app.log.error(Value.Errors(groupDTO, conv));
-          tx.rollback();
-        }
-      } catch (error) {
-        app.log.error(
-          `Failed to delete group with id ${groupId}: ${(error as Error).message}`,
-        );
-        tx.rollback();
-      }
+    const groupExists = await db.query.groups.findFirst({
+      where: eq(groups.id, groupId),
     });
-    if (group) {
-      return Ok(group);
+
+    if (!groupExists) {
+      app.log.warn(`Group with id ${groupId} not found`);
+      return Err(ErrorTypes.UnknownIdError);
+    }
+
+    const deleted = await db.transaction(async (tx) => {
+      await tx.delete(groupMembers).where(eq(groupMembers.groupId, groupId));
+      const [group] = await tx
+        .delete(groups)
+        .where(eq(groups.id, groupId))
+        .returning();
+      return group;
+    });
+
+    if (deleted) {
+      const conv = Value.Convert(groupDTO, deleted);
+      if (Value.Check(groupDTO, conv)) {
+        return Ok(conv);
+      } else {
+        app.log.error(Value.Errors(groupDTO, conv));
+        return Err(ErrorTypes.DeleteError);
+      }
     } else {
       return Err(ErrorTypes.DeleteError);
     }
@@ -409,6 +399,68 @@ const updateGroupTimestamp = async (
     app.log.error(
       `Failed to update group timestamp: ${(error as Error).message}`,
     );
+    return Err(ErrorTypes.UpdateError);
+  }
+};
+
+export const promoteUserToAdmin = async (
+  groupId: string,
+  username: string,
+): Promise<
+  Result<GroupMemberDTO, ErrorTypes.UnknownIdError | ErrorTypes.ConversionError | ErrorTypes.UpdateError>
+> => {
+  try {
+    const [groupMember] = await db
+      .update(groupMembers)
+      .set({ admin: true })
+      .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.username, username)))
+      .returning();
+
+    if (!groupMember) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+
+    const conv = Value.Convert(groupMemberDTO, groupMember);
+    if (Value.Check(groupMemberDTO, conv)) {
+      updateGroupTimestamp(groupId);
+      return Ok(conv);
+    } else {
+      app.log.error(Value.Errors(groupMemberDTO, conv));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(`Failed to promote user to admin: ${(error as Error).message}`);
+    return Err(ErrorTypes.UpdateError);
+  }
+};
+
+export const dismissUserAsAdmin = async (
+  groupId: string,
+  username: string,
+): Promise<
+  Result<GroupMemberDTO, ErrorTypes.UnknownIdError | ErrorTypes.ConversionError | ErrorTypes.UpdateError>
+> => {
+  try {
+    const [groupMember] = await db
+      .update(groupMembers)
+      .set({ admin: false })
+      .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.username, username)))
+      .returning();
+
+    if (!groupMember) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+
+    const conv = Value.Convert(groupMemberDTO, groupMember);
+    if (Value.Check(groupMemberDTO, conv)) {
+      updateGroupTimestamp(groupId);
+      return Ok(conv);
+    } else {
+      app.log.error(Value.Errors(groupMemberDTO, conv));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(`Failed to dismiss user as admin: ${(error as Error).message}`);
     return Err(ErrorTypes.UpdateError);
   }
 };

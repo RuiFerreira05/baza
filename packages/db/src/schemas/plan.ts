@@ -6,7 +6,7 @@ import { groupEvents } from "./event";
 export const plans = pgTable("plans", {
   id: uuid('id').defaultRandom().primaryKey(),
   groupEventId: uuid("group_event_id").references(() => groupEvents.id, {onDelete: 'cascade'}),
-  username: text("username").references(() => profiles.username),
+  username: text("username").references(() => profiles.username, { onDelete: 'cascade' }),
   title: varchar("title", { length: 64 }).notNull(),
   date: date("date").notNull(),
   startTime: time("start_time").notNull(),
@@ -25,8 +25,8 @@ export const plans = pgTable("plans", {
 );
 
 export const votes = pgTable("votes", {
-  planId: uuid("plan_id").references(() => plans.id),
-  username: text("username").references(() => profiles.username),
+  planId: uuid("plan_id").references(() => plans.id, { onDelete: 'cascade' }),
+  username: text("username").references(() => profiles.username, { onDelete: 'cascade' }),
 },
   (t) => [
     primaryKey({ columns: [t.planId, t.username]}),

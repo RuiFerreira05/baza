@@ -13,6 +13,7 @@ export default defineConfig({
   format: ["esm"],
   // cleans the output directory before each build.
   clean: true,
+  target: "es2022",
   // The target environment for the output code. We are targeting node because this code will be run
   // on a server, not in a browser.
   platform: "node",

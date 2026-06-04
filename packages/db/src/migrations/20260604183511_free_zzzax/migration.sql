@@ -1,0 +1,3 @@
+ALTER TABLE "group_events_final" DROP CONSTRAINT "group_events_final_id_events_id_fkey", ADD CONSTRAINT "group_events_final_id_events_id_fkey" FOREIGN KEY ("id") REFERENCES "events"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "group_events" DROP CONSTRAINT "voting_time_check", ADD CONSTRAINT "voting_time_check" CHECK ((("voting_end_time" > CURRENT_TIMESTAMP) AND "state" = 'unfinished') OR 
+         (("voting_end_time" < CURRENT_TIMESTAMP) AND ("state" = 'finished' OR "state" = 'needs_tiebreaker')));

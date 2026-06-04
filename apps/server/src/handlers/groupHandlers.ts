@@ -18,6 +18,8 @@ import {
   getGroupMembers,
   inviteUserToGroup,
   removeUserFromGroup,
+  promoteUserToAdmin,
+  dismissUserAsAdmin,
 } from "../services/groupServices";
 import { app, fileUploadService } from "../setup";
 
@@ -398,6 +400,96 @@ export const removeUserFromGroupHandler = async (
             createStatusError(
               ErrorTypes.ConversionError,
               "An error occurred while converting the group member removal result data",
+            ),
+          );
+    }
+  } else {
+    return res.status(200).send(createStatusOK(result.value));
+  }
+};
+
+// PATCH /groups/:id/group-members/:username/promote-to-admin
+export const promoteUserToAdminHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  const { id: groupId } = req.params as SimpleIdParam;
+  const { username } = req.params as { username: string };
+
+  const result = await promoteUserToAdmin(groupId, username);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownIdError:
+        return res
+          .status(404)
+          .send(
+            createStatusError(
+              ErrorTypes.UnknownIdError,
+              "A group or user with the provided id/username was not found",
+            ),
+          );
+      case ErrorTypes.ConversionError:
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.ConversionError,
+              "An error occurred while converting the promoted admin data",
+            ),
+          );
+      case ErrorTypes.UpdateError:
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.UpdateError,
+              "An error occurred while promoting the user to admin",
+            ),
+          );
+    }
+  } else {
+    return res.status(200).send(createStatusOK(result.value));
+  }
+};
+
+// PATCH /groups/:id/group-members/:username/dismiss-admin
+export const dismissUserAsAdminHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  const { id: groupId } = req.params as SimpleIdParam;
+  const { username } = req.params as { username: string };
+
+  const result = await dismissUserAsAdmin(groupId, username);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownIdError:
+        return res
+          .status(404)
+          .send(
+            createStatusError(
+              ErrorTypes.UnknownIdError,
+              "A group or user with the provided id/username was not found",
+            ),
+          );
+      case ErrorTypes.ConversionError:
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.ConversionError,
+              "An error occurred while converting the dismissed admin data",
+            ),
+          );
+      case ErrorTypes.UpdateError:
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.UpdateError,
+              "An error occurred while dismissing the user as admin",
             ),
           );
     }

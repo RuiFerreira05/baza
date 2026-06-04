@@ -30,7 +30,7 @@ export const personalEvents = pgTable("personal_events", {
   ]
 );
 
-export const stateEnum = pgEnum("state", ['finished', 'unfinished']);
+export const stateEnum = pgEnum("state", ['finished', 'unfinished', 'needs_tiebreaker']);
 
 export const groupEvents = pgTable("group_events", {
   id: uuid("id").references(() => events.id).primaryKey(),
@@ -38,17 +38,12 @@ export const groupEvents = pgTable("group_events", {
   startDate: date("start_date").notNull(),
   endDate: date("end_date").notNull(),
   state: stateEnum("state").notNull(),
-  votingEndTime: timestamp("voting_end_time"),
-  createdBy: text("createdBy").notNull().references(() => profiles.username),
-},
-  (t) => [
-    check("voting_time_check", sql`((${t.votingEndTime} > CURRENT_TIMESTAMP) AND ${t.state} = 'unfinished') OR 
-         ((${t.votingEndTime} < CURRENT_TIMESTAMP) AND ${t.state} = 'finished')`)
-  ]
-);
+  votingEndTime: timestamp("voting_end_time", { withTimezone: true }),
+  createdBy: text("createdBy").notNull().references(() => profiles.username, { onDelete: 'cascade' }),
+});
 
 export const groupEventsFinal = pgTable("group_events_final", {
-  id: uuid("id").references(() => events.id).primaryKey(),
+  id: uuid("id").references(() => events.id, {onDelete: 'cascade'}).primaryKey(),
   groupId: uuid("group_id").references(() => groups.id, {onDelete: 'cascade'}),
   planId: uuid("plan_id").references(() => plans.id, {onDelete: 'cascade'})
 });

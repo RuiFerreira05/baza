@@ -8,6 +8,16 @@ import {
   SimpleUsernameParam,
   StatusError,
   StatusOK,
+  groupEventDTO,
+  planDTO,
+  preferenceDTO,
+  groupPreferenceReportDTO,
+  CreateEventBody,
+  EditEventBody,
+  CreatePlanBody,
+  EditPlanBody,
+  CreatePreferenceBody,
+  ResolveTieBody,
 } from "@baza/shared-types";
 import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
@@ -21,12 +31,35 @@ import {
   getGroupPhotoHandler,
   inviteUsersToGroupHandler,
   removeUserFromGroupHandler,
+  promoteUserToAdminHandler,
+  dismissUserAsAdminHandler,
 } from "../handlers/groupHandlers";
+import {
+  createGroupEventHandler,
+  getGroupEventsHandler,
+  getGroupEventByIdHandler,
+  editGroupEventHandler,
+  resolveTieHandler,
+} from "../handlers/eventHandlers";
+import {
+  createEventPlanHandler,
+  getEventPlansHandler,
+  getEventPlanByIdHandler,
+  editEventPlanHandler,
+  voteEventPlanHandler,
+  removeVoteEventPlanHandler,
+} from "../handlers/planHandlers";
+import {
+  createOrEditEventPreferenceHandler,
+  getEventPreferenceByUsernameHandler,
+  getEventPreferencesHandler,
+  getGroupPreferenceAggregationHandler,
+} from "../handlers/preferenceHandlers";
 
 export const groupRoutes: FastifyPluginAsync = async (fastify) => {
   const app = fastify.withTypeProvider<TypeBoxTypeProvider>();
 
-  // GET /groupds/:id
+  // GET /groups/:id
   app.get(
     "/:id",
     {
@@ -285,5 +318,378 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     getGroupMembersHandler,
+  );
+
+  // ###### ADMIN PROMOTION/DISMISSAL ENDPOINTS ######
+
+  // PATCH /groups/:id/group-members/:username/promote-to-admin
+  app.patch(
+    "/:id/group-members/:username/promote-to-admin",
+    {
+      schema: {
+        description: "Promote a group member to admin status",
+        tags: ["groups"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          username: Type.String(),
+        }),
+        response: {
+          200: StatusOK(groupMemberDTO, "If the member was successfully promoted to admin"),
+          404: StatusError(ErrorTypes.UnknownIdError, "If the group or user was not found"),
+          500: StatusError(ErrorTypes.UpdateError, "If the database update failed"),
+        },
+      },
+    },
+    promoteUserToAdminHandler,
+  );
+
+  // PATCH /groups/:id/group-members/:username/dismiss-admin
+  app.patch(
+    "/:id/group-members/:username/dismiss-admin",
+    {
+      schema: {
+        description: "Dismiss admin status from a group member",
+        tags: ["groups"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          username: Type.String(),
+        }),
+        response: {
+          200: StatusOK(groupMemberDTO, "If the member was successfully dismissed as admin"),
+          404: StatusError(ErrorTypes.UnknownIdError, "If the group or user was not found"),
+          500: StatusError(ErrorTypes.UpdateError, "If the database update failed"),
+        },
+      },
+    },
+    dismissUserAsAdminHandler,
+  );
+
+  // ###### GROUP EVENTS ENDPOINTS ######
+
+  // POST /groups/:id/events/create
+  app.post(
+    "/:id/events/create",
+    {
+      schema: {
+        description: "Create a new group event with a dynamic voting deadline",
+        tags: ["events"],
+        params: SimpleIdParam("Group UUID"),
+        body: CreateEventBody,
+        response: {
+          201: StatusOK(groupEventDTO, "Event created successfully"),
+          400: StatusError(ErrorTypes.MalformedRequestError, "Voting end time constraint validation failed"),
+          500: StatusError(ErrorTypes.ResourceCreationError, "Database execution failed"),
+        },
+      },
+    },
+    createGroupEventHandler,
+  );
+
+  // GET /groups/:id/events
+  app.get(
+    "/:id/events",
+    {
+      schema: {
+        description: "Fetch all group events, optionally filtered by overlapping date ranges",
+        tags: ["events"],
+        params: SimpleIdParam("Group UUID"),
+        querystring: Type.Object({
+          startDate: Type.Optional(Type.String({ format: "date" })),
+          endDate: Type.Optional(Type.String({ format: "date" })),
+        }),
+        response: {
+          200: StatusOK(Type.Array(groupEventDTO), "List of group events retrieved successfully"),
+          500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
+        },
+      },
+    },
+    getGroupEventsHandler,
+  );
+
+  // GET /groups/:id/events/:idevent
+  app.get(
+    "/:id/events/:idevent",
+    {
+      schema: {
+        description: "Get specific group event details by ID",
+        tags: ["events"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid", description: "Group UUID" }),
+          idevent: Type.String({ format: "uuid", description: "Event UUID" }),
+        }),
+        response: {
+          200: StatusOK(groupEventDTO, "Event details retrieved successfully"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Event not found"),
+          500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
+        },
+      },
+    },
+    getGroupEventByIdHandler,
+  );
+
+  // PATCH /groups/:id/events/:idevent/edit
+  app.patch(
+    "/:id/events/:idevent/edit",
+    {
+      schema: {
+        description: "Modify an existing group event's title, description or voting deadline",
+        tags: ["events"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid", description: "Group UUID" }),
+          idevent: Type.String({ format: "uuid", description: "Event UUID" }),
+        }),
+        body: EditEventBody,
+        response: {
+          200: StatusOK(groupEventDTO, "Event updated successfully"),
+          400: StatusError(ErrorTypes.MalformedRequestError, "Voting end time constraint validation failed"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Event not found"),
+          500: StatusError(ErrorTypes.UpdateError, "Database execution failed"),
+        },
+      },
+    },
+    editGroupEventHandler,
+  );
+
+  // POST /groups/:id/events/:idevent/resolve-tie
+  app.post(
+    "/:id/events/:idevent/resolve-tie",
+    {
+      schema: {
+        description: "Submit the event creator's tie-breaking decision to choose the winning plan",
+        tags: ["events"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid", description: "Group UUID" }),
+          idevent: Type.String({ format: "uuid", description: "Event UUID" }),
+        }),
+        body: ResolveTieBody,
+        response: {
+          200: StatusOK(Type.Object({ message: Type.String() }), "Tie successfully resolved"),
+          403: StatusError(ErrorTypes.UpdateError, "Action forbidden: Caller is not the creator, or target plan is not tied"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Event or plan not found, or not in tie-breaker state"),
+        },
+      },
+    },
+    resolveTieHandler,
+  );
+
+  // ###### EVENT PLANNING PREFERENCES ENDPOINTS ######
+
+  // POST /groups/:id/events/:idevent/preferences/create
+  app.post(
+    "/:id/events/:idevent/preferences/create",
+    {
+      schema: {
+        description: "Create or update user planning preferences for a group event",
+        tags: ["preferences"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          idevent: Type.String({ format: "uuid" }),
+        }),
+        body: CreatePreferenceBody,
+        response: {
+          200: StatusOK(preferenceDTO, "Preferences saved successfully"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Event not found, or caller not a group member"),
+          500: StatusError(ErrorTypes.ResourceCreationError, "Database execution failed"),
+        },
+      },
+    },
+    createOrEditEventPreferenceHandler,
+  );
+
+  // GET /groups/:id/events/:idevent/preferences/group
+  app.get(
+    "/:id/events/:idevent/preferences/group",
+    {
+      schema: {
+        description: "Retrieve anonymously aggregated group preference overlaps summary",
+        tags: ["preferences"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          idevent: Type.String({ format: "uuid" }),
+        }),
+        response: {
+          200: StatusOK(groupPreferenceReportDTO, "Group preference overlap report generated successfully"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Event not found"),
+          500: StatusError(ErrorTypes.ConversionError, "Aggregation/Conversion error"),
+        },
+      },
+    },
+    getGroupPreferenceAggregationHandler,
+  );
+
+  // GET /groups/:id/events/:idevent/preferences/all
+  app.get(
+    "/:id/events/:idevent/preferences/all",
+    {
+      schema: {
+        description: "Retrieve all members' preferences (hiding private preferences of other members)",
+        tags: ["preferences"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          idevent: Type.String({ format: "uuid" }),
+        }),
+        response: {
+          200: StatusOK(Type.Array(preferenceDTO), "All visible preferences retrieved successfully"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Event not found"),
+          500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
+        },
+      },
+    },
+    getEventPreferencesHandler,
+  );
+
+  // GET /groups/:id/events/:idevent/preferences/:username
+  app.get(
+    "/:id/events/:idevent/preferences/:username",
+    {
+      schema: {
+        description: "Retrieve specific group member availability preference (hides private options of other users)",
+        tags: ["preferences"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          idevent: Type.String({ format: "uuid" }),
+          username: Type.String(),
+        }),
+        response: {
+          200: StatusOK(preferenceDTO, "Preference data retrieved successfully"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Preference not found or hidden by privacy controls"),
+          500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
+        },
+      },
+    },
+    getEventPreferenceByUsernameHandler,
+  );
+
+  // ###### EVENT PLANS & VOTING ENDPOINTS ######
+
+  // GET /groups/:id/events/:idevent/plans
+  app.get(
+    "/:id/events/:idevent/plans",
+    {
+      schema: {
+        description: "Get all proposed plans for a group event along with vote counts",
+        tags: ["plans"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          idevent: Type.String({ format: "uuid" }),
+        }),
+        response: {
+          200: StatusOK(Type.Array(planDTO), "List of plans retrieved successfully"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Event not found"),
+          500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
+        },
+      },
+    },
+    getEventPlansHandler,
+  );
+
+  // POST /groups/:id/events/:idevent/plans/create
+  app.post(
+    "/:id/events/:idevent/plans/create",
+    {
+      schema: {
+        description: "Propose a new plan coordinate/option for a group event",
+        tags: ["plans"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          idevent: Type.String({ format: "uuid" }),
+        }),
+        body: CreatePlanBody,
+        response: {
+          201: StatusOK(planDTO, "Plan proposed successfully"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Event not found, or user is not a group member"),
+          500: StatusError(ErrorTypes.ResourceCreationError, "Database execution failed"),
+        },
+      },
+    },
+    createEventPlanHandler,
+  );
+
+  // GET /groups/:id/events/:idevent/plans/:idplan
+  app.get(
+    "/:id/events/:idevent/plans/:idplan",
+    {
+      schema: {
+        description: "Retrieve specific plan details",
+        tags: ["plans"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          idevent: Type.String({ format: "uuid" }),
+          idplan: Type.String({ format: "uuid" }),
+        }),
+        response: {
+          200: StatusOK(planDTO, "Plan details retrieved successfully"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Plan proposal not found"),
+          500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
+        },
+      },
+    },
+    getEventPlanByIdHandler,
+  );
+
+  // PATCH /groups/:id/events/:idevent/plans/:idplan/edit
+  app.patch(
+    "/:id/events/:idevent/plans/:idplan/edit",
+    {
+      schema: {
+        description: "Edit proposed plan coordinates (restricted to the original plan proposer)",
+        tags: ["plans"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          idevent: Type.String({ format: "uuid" }),
+          idplan: Type.String({ format: "uuid" }),
+        }),
+        body: EditPlanBody,
+        response: {
+          200: StatusOK(planDTO, "Plan updated successfully"),
+          403: StatusError(ErrorTypes.UpdateError, "Action forbidden: Proposer mismatch"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Plan not found"),
+          500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
+        },
+      },
+    },
+    editEventPlanHandler,
+  );
+
+  // POST /groups/:id/events/:idevent/plans/:idplan/vote
+  app.post(
+    "/:id/events/:idevent/plans/:idplan/vote",
+    {
+      schema: {
+        description: "Cast an approval vote for a proposed event plan",
+        tags: ["plans"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          idevent: Type.String({ format: "uuid" }),
+          idplan: Type.String({ format: "uuid" }),
+        }),
+        response: {
+          200: StatusOK(Type.Object({ message: Type.String() }), "Vote successfully casted"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Event or plan not found"),
+        },
+      },
+    },
+    voteEventPlanHandler,
+  );
+
+  // POST /groups/:id/events/:idevent/plans/:idplan/remove-vote
+  app.post(
+    "/:id/events/:idevent/plans/:idplan/remove-vote",
+    {
+      schema: {
+        description: "Remove a previously casted approval vote",
+        tags: ["plans"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          idevent: Type.String({ format: "uuid" }),
+          idplan: Type.String({ format: "uuid" }),
+        }),
+        response: {
+          200: StatusOK(Type.Object({ message: Type.String() }), "Vote successfully removed"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Event or plan not found"),
+        },
+      },
+    },
+    removeVoteEventPlanHandler,
   );
 };

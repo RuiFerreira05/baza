@@ -1,0 +1,8 @@
+ALTER TABLE "group_events" DROP CONSTRAINT "voting_time_check";--> statement-breakpoint
+ALTER TABLE "friends" DROP CONSTRAINT "friends_sent_by_profiles_username_fkey", ADD CONSTRAINT "friends_sent_by_profiles_username_fkey" FOREIGN KEY ("sent_by") REFERENCES "profiles"("username") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "friends" DROP CONSTRAINT "friends_received_by_profiles_username_fkey", ADD CONSTRAINT "friends_received_by_profiles_username_fkey" FOREIGN KEY ("received_by") REFERENCES "profiles"("username") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "group_events" DROP CONSTRAINT "group_events_createdBy_profiles_username_fkey", ADD CONSTRAINT "group_events_createdBy_profiles_username_fkey" FOREIGN KEY ("createdBy") REFERENCES "profiles"("username") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "plans" DROP CONSTRAINT "plans_username_profiles_username_fkey", ADD CONSTRAINT "plans_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "votes" DROP CONSTRAINT "votes_plan_id_plans_id_fkey", ADD CONSTRAINT "votes_plan_id_plans_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "plans"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "votes" DROP CONSTRAINT "votes_username_profiles_username_fkey", ADD CONSTRAINT "votes_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "preferences" DROP CONSTRAINT "preferences_username_profiles_username_fkey", ADD CONSTRAINT "preferences_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username") ON DELETE CASCADE;

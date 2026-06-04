@@ -5,6 +5,11 @@ import { env } from "./env";
 import { expo } from "@better-auth/expo";
 import * as schema from "@baza/db/schemas";
 import { openAPI } from "better-auth/plugins";
+import { fromNodeHeaders } from "better-auth/node";
+import { eq } from "drizzle-orm";
+import { profiles } from "@baza/db/schemas";
+import { createStatusError, ErrorTypes } from "@baza/shared-types";
+import type { FastifyReply, FastifyRequest } from "fastify";
 
 export const auth = betterAuth({
   trustedOrigins: ["baza://", `http://10.0.2.2:${env.SERVER_PORT}`], // 10.0.2.2 is the special IP for localhost in Android emulators
@@ -23,3 +28,52 @@ export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.PUBLIC_SERVER_URL,
 });
+
+export const getAuthenticatedUsername = async (
+  req: FastifyRequest,
+  res: FastifyReply
+): Promise<string | null> => {
+  try {
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
+
+    if (!session || !session.user) {
+      res.status(401).send(
+        createStatusError(
+          ErrorTypes.UnauthorizedError,
+          "Unauthorized request. Session not found."
+        )
+      );
+      return null;
+    }
+
+    const [profile] = await db
+      .select({ username: profiles.username })
+      .from(profiles)
+      .where(eq(profiles.userId, session.user.id))
+      .limit(1);
+
+    if (!profile) {
+      res.status(404).send(
+        createStatusError(
+          ErrorTypes.UnknownUsernameError,
+          "User profile not found. Please create a profile first."
+        )
+      );
+      return null;
+    }
+
+    return profile.username;
+  } catch (error) {
+    req.log.error(error as any, "Authentication check failed");
+    res.status(500).send(
+      createStatusError(
+        ErrorTypes.UnauthorizedError,
+        "An internal authentication error occurred."
+      )
+    );
+    return null;
+  }
+};
+
