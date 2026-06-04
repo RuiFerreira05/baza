@@ -101,7 +101,9 @@ export const deleteGroup = async (
   app.log.info(`Received delete group request for group with id ${groupId}`);
   try {
     const groupExists = await db.query.groups.findFirst({
-      where: eq(groups.id, groupId),
+      where: {
+        id: groupId,
+      },
     });
 
     if (!groupExists) {
@@ -407,13 +409,23 @@ export const promoteUserToAdmin = async (
   groupId: string,
   username: string,
 ): Promise<
-  Result<GroupMemberDTO, ErrorTypes.UnknownIdError | ErrorTypes.ConversionError | ErrorTypes.UpdateError>
+  Result<
+    GroupMemberDTO,
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.ConversionError
+    | ErrorTypes.UpdateError
+  >
 > => {
   try {
     const [groupMember] = await db
       .update(groupMembers)
       .set({ admin: true })
-      .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.username, username)))
+      .where(
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.username, username),
+        ),
+      )
       .returning();
 
     if (!groupMember) {
@@ -429,7 +441,9 @@ export const promoteUserToAdmin = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(`Failed to promote user to admin: ${(error as Error).message}`);
+    app.log.error(
+      `Failed to promote user to admin: ${(error as Error).message}`,
+    );
     return Err(ErrorTypes.UpdateError);
   }
 };
@@ -438,13 +452,23 @@ export const dismissUserAsAdmin = async (
   groupId: string,
   username: string,
 ): Promise<
-  Result<GroupMemberDTO, ErrorTypes.UnknownIdError | ErrorTypes.ConversionError | ErrorTypes.UpdateError>
+  Result<
+    GroupMemberDTO,
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.ConversionError
+    | ErrorTypes.UpdateError
+  >
 > => {
   try {
     const [groupMember] = await db
       .update(groupMembers)
       .set({ admin: false })
-      .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.username, username)))
+      .where(
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.username, username),
+        ),
+      )
       .returning();
 
     if (!groupMember) {
@@ -460,7 +484,9 @@ export const dismissUserAsAdmin = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(`Failed to dismiss user as admin: ${(error as Error).message}`);
+    app.log.error(
+      `Failed to dismiss user as admin: ${(error as Error).message}`,
+    );
     return Err(ErrorTypes.UpdateError);
   }
 };
