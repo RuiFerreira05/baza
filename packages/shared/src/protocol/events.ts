@@ -12,6 +12,8 @@ export const personalEventDTO = Type.Object({
   endTime: Type.String({format: "time", description: "end time of the event"}),
   repeat: Type.String({description: "frequency which an event should be repeated in the calendar. Can only be on of these: day, week, month, year, never"}),
   public: Type.Boolean({description: "expresses if an event should be public to the user's friends"}),
+  title: Type.String({description: "event title", example: "Doctor Appointment"}),
+  description: nullable(Type.String({description: "event description", example: "Annual checkup"})),
 }, {
   description: "Personal event data.",
   title: "PersonalEventDTO",
@@ -119,3 +121,13 @@ export const GetPersonalEventsParams = Type.Object({
   }),
 });
 export type GetPersonalEventsParams = Type.Static<typeof GetPersonalEventsParams>;
+
+// GET /groups/:id/calendar
+export const groupCalendarDTO = Type.Object({
+  groupEvents: Type.Array(groupEventDTO),
+  memberEvents: Type.Array(personalEventDTO),
+}, {
+  description: "Combined group calendar containing group events and group members' personal events.",
+  title: "GroupCalendarDTO",
+});
+export type GroupCalendarDTO = Type.Static<typeof groupCalendarDTO>;

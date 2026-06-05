@@ -1,7 +1,7 @@
-import { events, groupEvents } from "@baza/db/schemas";
+import { events, groupEvents, personalEvents, groupMembers, groups } from "@baza/db/schemas";
 import { db } from "../lib/db";
-import { eq, and, lte, gte } from "drizzle-orm";
-import { ErrorTypes, groupEventDTO, type GroupEventDTO, type CreateEventBody, type EditEventBody } from "@baza/shared-types";
+import { eq, and, lte, gte, inArray } from "drizzle-orm";
+import { ErrorTypes, groupEventDTO, personalEventDTO, groupCalendarDTO, type GroupCalendarDTO, type GroupEventDTO, type CreateEventBody, type EditEventBody } from "@baza/shared-types";
 import { Value } from "typebox/value";
 import { Type } from "typebox";
 import { Err, Ok, type Result } from "../lib/types";
@@ -297,5 +297,195 @@ export const editGroupEvent = async (
   } catch (error) {
     app.log.error(error as any, "Failed to edit group event");
     return Err(ErrorTypes.UpdateError);
+  }
+};
+
+/**
+ * Retrieves the combined calendar for a group, which includes group events and members' personal events.
+ * Private personal events are masked to hide sensitive details if requested by a different user.
+ * 
+ * @param groupId the UUID of the group
+ * @param requestingUsername the username of the user making the request
+ * @param startDate optional start date filter
+ * @param endDate optional end date filter
+ * @returns a promised result with the GroupCalendarDTO, or an error
+ */
+export const getGroupCalendar = async (
+  groupId: string,
+  requestingUsername: string,
+  startDate?: string,
+  endDate?: string
+): Promise<Result<GroupCalendarDTO, ErrorTypes.ConversionError | ErrorTypes.UnauthorizedError | ErrorTypes.UnknownIdError>> => {
+  try {
+    // 1. Verify group exists
+    const [groupExists] = await db
+      .select({ id: groups.id })
+      .from(groups)
+      .where(eq(groups.id, groupId))
+      .limit(1);
+
+    if (!groupExists) {
+      app.log.warn(`GetGroupCalendar: Group with id ${groupId} not found`);
+      return Err(ErrorTypes.UnknownIdError);
+    }
+
+    // 2. Check requester membership (must be accepted and not banned)
+    const [requesterMember] = await db
+      .select({ username: groupMembers.username })
+      .from(groupMembers)
+      .where(
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.username, requestingUsername),
+          eq(groupMembers.acceptedInvite, true),
+          eq(groupMembers.banned, false)
+        )
+      )
+      .limit(1);
+
+    if (!requesterMember) {
+      app.log.warn(`GetGroupCalendar: Access denied for user ${requestingUsername} in group ${groupId}`);
+      return Err(ErrorTypes.UnauthorizedError);
+    }
+
+    // 3. Fetch all active (accepted and not banned) group members
+    const members = await db
+      .select({ username: groupMembers.username })
+      .from(groupMembers)
+      .where(
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.acceptedInvite, true),
+          eq(groupMembers.banned, false)
+        )
+      );
+
+    const memberUsernames = members.map((m) => m.username);
+
+    // 4. Fetch group events within the date range
+    const groupEventsConditions = [eq(groupEvents.groupId, groupId)];
+    if (startDate) {
+      groupEventsConditions.push(gte(groupEvents.startDate, startDate));
+    }
+    if (endDate) {
+      groupEventsConditions.push(lte(groupEvents.endDate, endDate));
+    }
+
+    const dbGroupEvents = await db.select({
+      id: groupEvents.id,
+      groupId: groupEvents.groupId,
+      title: events.title,
+      description: events.description,
+      startDate: groupEvents.startDate,
+      endDate: groupEvents.endDate,
+      state: groupEvents.state,
+      votingEndTime: groupEvents.votingEndTime,
+      createdBy: groupEvents.createdBy,
+      createdAt: events.createdAt,
+      updatedAt: events.updatedAt,
+    })
+    .from(groupEvents)
+    .innerJoin(events, eq(groupEvents.id, events.id))
+    .where(and(...groupEventsConditions));
+
+    const formattedGroupEvents = dbGroupEvents.map((row) => ({
+      id: row.id,
+      groupId: row.groupId!,
+      title: row.title,
+      description: row.description,
+      startDate: row.startDate,
+      endDate: row.endDate,
+      state: row.state as any,
+      votingEndTime: row.votingEndTime?.toISOString() ?? null,
+      createdBy: row.createdBy,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    }));
+
+    // 5. Fetch personal events for group members
+    let formattedMemberEvents: any[] = [];
+    if (memberUsernames.length > 0) {
+      const personalEventsConditions = [inArray(personalEvents.username, memberUsernames)];
+      if (startDate) {
+        personalEventsConditions.push(gte(personalEvents.date, startDate));
+      }
+      if (endDate) {
+        personalEventsConditions.push(lte(personalEvents.date, endDate));
+      }
+
+      const dbPersonalEvents = await db.select({
+        id: personalEvents.id,
+        username: personalEvents.username,
+        date: personalEvents.date,
+        location: personalEvents.location,
+        startTime: personalEvents.startTime,
+        endTime: personalEvents.endTime,
+        repeat: personalEvents.repeat,
+        public: personalEvents.public,
+        title: events.title,
+        description: events.description,
+      })
+      .from(personalEvents)
+      .innerJoin(events, eq(personalEvents.id, events.id))
+      .where(and(...personalEventsConditions));
+
+      formattedMemberEvents = dbPersonalEvents.map((row) => {
+        const isOwner = row.username === requestingUsername;
+        const isPrivate = !row.public;
+
+        // format date as ISO date-time string (T00:00:00.000Z) to satisfy personalEventDTO validation
+        const isoDate = new Date(row.date).toISOString();
+
+        // format time by suffixing with 'Z' as required by AJV format time validator (Best Practice #9)
+        const formattedStartTime = `${row.startTime}Z`;
+        const formattedEndTime = `${row.endTime}Z`;
+
+        if (isPrivate && !isOwner) {
+          // Mask private events for other users
+          return {
+            id: row.id!,
+            username: row.username!,
+            date: isoDate,
+            location: null,
+            startTime: formattedStartTime,
+            endTime: formattedEndTime,
+            repeat: row.repeat,
+            public: false,
+            title: "Busy",
+            description: null,
+          };
+        } else {
+          // Keep intact for own events or public events
+          return {
+            id: row.id!,
+            username: row.username!,
+            date: isoDate,
+            location: row.location,
+            startTime: formattedStartTime,
+            endTime: formattedEndTime,
+            repeat: row.repeat,
+            public: row.public,
+            title: row.title,
+            description: row.description,
+          };
+        }
+      });
+    }
+
+    const payload = {
+      groupEvents: formattedGroupEvents,
+      memberEvents: formattedMemberEvents,
+    };
+
+    const checkSchema = Value.Convert(groupCalendarDTO, payload);
+    if (Value.Check(groupCalendarDTO, checkSchema)) {
+      return Ok(checkSchema as GroupCalendarDTO);
+    } else {
+      app.log.error(Value.Errors(groupCalendarDTO, checkSchema));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(error as any, "Failed to query group calendar");
+    return Err(ErrorTypes.ConversionError);
   }
 };

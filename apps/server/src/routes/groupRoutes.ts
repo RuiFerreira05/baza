@@ -18,6 +18,7 @@ import {
   EditPlanBody,
   CreatePreferenceBody,
   ResolveTieBody,
+  groupCalendarDTO,
 } from "@baza/shared-types";
 import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
@@ -40,6 +41,7 @@ import {
   getGroupEventByIdHandler,
   editGroupEventHandler,
   resolveTieHandler,
+  getGroupCalendarHandler,
 } from "../handlers/eventHandlers";
 import {
   createEventPlanHandler,
@@ -404,6 +406,29 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     getGroupEventsHandler,
+  );
+
+  // GET /groups/:id/calendar
+  app.get(
+    "/:id/calendar",
+    {
+      schema: {
+        description: "Fetch the combined group calendar containing group events and group members' personal events.",
+        tags: ["groups"],
+        params: SimpleIdParam("Group UUID"),
+        querystring: Type.Object({
+          startDate: Type.Optional(Type.String({ format: "date" })),
+          endDate: Type.Optional(Type.String({ format: "date" })),
+        }),
+        response: {
+          200: StatusOK(groupCalendarDTO, "Combined group calendar retrieved successfully"),
+          403: StatusError(ErrorTypes.UnauthorizedError, "If the caller is not a member of the group"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Group not found"),
+          500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
+        },
+      },
+    },
+    getGroupCalendarHandler,
   );
 
   // GET /groups/:id/events/:idevent

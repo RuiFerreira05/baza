@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { getAuthenticatedUsername } from "../lib/auth";
-import { createGroupEvent, getGroupEvents, getGroupEventById, editGroupEvent } from "../services/eventServices";
+import { createGroupEvent, getGroupEvents, getGroupEventById, editGroupEvent, getGroupCalendar } from "../services/eventServices";
 import { resolveTie } from "../services/finalizationService";
 import { createStatusError, createStatusOK, ErrorTypes, type SimpleIdParam, type CreateEventBody, type EditEventBody } from "@baza/shared-types";
 import { app } from "../setup";
@@ -177,5 +177,45 @@ export const resolveTieHandler = async (req: FastifyRequest, res: FastifyReply) 
     }
   } else {
     return res.status(200).send(createStatusOK({ message: "Tie successfully resolved." }));
+  }
+};
+
+// GET /groups/:id/calendar
+export const getGroupCalendarHandler = async (req: FastifyRequest, res: FastifyReply) => {
+  app.log.info("Received Get Group Calendar request");
+  const username = await getAuthenticatedUsername(req, res);
+  if (!username) return;
+
+  const { id: groupId } = req.params as SimpleIdParam;
+  const { startDate, endDate } = req.query as { startDate?: string; endDate?: string };
+
+  const result = await getGroupCalendar(groupId, username, startDate, endDate);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownIdError:
+        return res.status(404).send(
+          createStatusError(
+            ErrorTypes.UnknownIdError,
+            "Group not found."
+          )
+        );
+      case ErrorTypes.UnauthorizedError:
+        return res.status(403).send(
+          createStatusError(
+            ErrorTypes.UnauthorizedError,
+            "Access denied: You are not an active member of this group."
+          )
+        );
+      default:
+        return res.status(500).send(
+          createStatusError(
+            ErrorTypes.ConversionError,
+            "Failed to retrieve combined calendar."
+          )
+        );
+    }
+  } else {
+    return res.status(200).send(createStatusOK(result.value));
   }
 };
