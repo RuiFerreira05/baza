@@ -62,6 +62,8 @@ export const createEventPlan = async (
     if (newPlan) {
       const formatted = {
         ...newPlan,
+        startTime: newPlan.startTime.includes("Z") ? newPlan.startTime : `${newPlan.startTime}Z`,
+        endTime: newPlan.endTime.includes("Z") ? newPlan.endTime : `${newPlan.endTime}Z`,
         votesCount: 0,
         createdAt: newPlan.createdAt.toISOString(),
         updatedAt: newPlan.updatedAt.toISOString(),
@@ -123,6 +125,8 @@ export const getEventPlans = async (
 
     const formatted = proposals.map((plan) => ({
       ...plan,
+      startTime: plan.startTime.includes("Z") ? plan.startTime : `${plan.startTime}Z`,
+      endTime: plan.endTime.includes("Z") ? plan.endTime : `${plan.endTime}Z`,
       createdAt: plan.createdAt.toISOString(),
       updatedAt: plan.updatedAt.toISOString(),
     }));
@@ -186,6 +190,8 @@ export const getEventPlanById = async (
 
     const formatted = {
       ...plan,
+      startTime: plan.startTime.includes("Z") ? plan.startTime : `${plan.startTime}Z`,
+      endTime: plan.endTime.includes("Z") ? plan.endTime : `${plan.endTime}Z`,
       createdAt: plan.createdAt.toISOString(),
       updatedAt: plan.updatedAt.toISOString(),
     };

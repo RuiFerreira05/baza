@@ -45,5 +45,5 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
   },
-  "exclude": ["./tsup.config.ts"]
+  "exclude": ["./tsup.config.ts", "./tests", "./vitest.config.ts"]
 }
