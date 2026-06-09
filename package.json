@@ -19,7 +19,8 @@
     "dev:client": "pnpm --filter @baza/client start",
     "db:studio": "pnpm --filter @baza/db db:studio",
     "db:generate": "pnpm --filter @baza/db db:generate",
-    "db:migrate": "pnpm --filter @baza/db db:migrate"
+    "db:migrate": "pnpm --filter @baza/db db:migrate",
+    "db:seed": "tsx packages/db/src/seed.ts"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
