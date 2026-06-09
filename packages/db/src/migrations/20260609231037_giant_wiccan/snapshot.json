@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "6640a8a0-1ac5-456c-b2fb-b90c480e68ca",
+  "id": "60cf8c29-286b-485f-9d1d-c4ce85ee5467",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -1214,7 +1214,7 @@
       "table": "personal_events"
     },
     {
-      "type": "time",
+      "type": "timestamp",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
@@ -1227,7 +1227,7 @@
       "table": "personal_events"
     },
     {
-      "type": "time",
+      "type": "timestamp",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
@@ -1680,7 +1680,7 @@
         "id"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
+      "onDelete": "CASCADE",
       "name": "profiles_user_id_users_id_fkey",
       "entityType": "fks",
       "schema": "public",
@@ -1697,7 +1697,7 @@
         "username"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
+      "onDelete": "CASCADE",
       "name": "group_members_username_profiles_username_fkey",
       "entityType": "fks",
       "schema": "public",
@@ -1714,7 +1714,7 @@
         "id"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
+      "onDelete": "CASCADE",
       "name": "group_members_group_id_groups_id_fkey",
       "entityType": "fks",
       "schema": "public",
@@ -1731,7 +1731,7 @@
         "id"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
+      "onDelete": "CASCADE",
       "name": "event_confirmations_group_id_groups_id_fkey",
       "entityType": "fks",
       "schema": "public",
@@ -1748,7 +1748,7 @@
         "username"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
+      "onDelete": "CASCADE",
       "name": "event_confirmations_username_profiles_username_fkey",
       "entityType": "fks",
       "schema": "public",
@@ -1782,7 +1782,7 @@
         "id"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
+      "onDelete": "CASCADE",
       "name": "group_events_group_id_groups_id_fkey",
       "entityType": "fks",
       "schema": "public",
@@ -1833,7 +1833,7 @@
         "id"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
+      "onDelete": "CASCADE",
       "name": "group_events_final_group_id_groups_id_fkey",
       "entityType": "fks",
       "schema": "public",
@@ -1850,7 +1850,7 @@
         "id"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
+      "onDelete": "CASCADE",
       "name": "group_events_final_plan_id_plans_id_fkey",
       "entityType": "fks",
       "schema": "public",
@@ -1901,7 +1901,7 @@
         "id"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
+      "onDelete": "CASCADE",
       "name": "plans_group_event_id_group_events_id_fkey",
       "entityType": "fks",
       "schema": "public",
@@ -1969,7 +1969,7 @@
         "id"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "NO ACTION",
+      "onDelete": "CASCADE",
       "name": "preferences_group_event_id_group_events_id_fkey",
       "entityType": "fks",
       "schema": "public",

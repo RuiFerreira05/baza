@@ -2,7 +2,7 @@ import { defineRelations, defineRelationsPart } from "drizzle-orm";
 import { users, sessions, accounts } from "./auth";
 import { profiles, friends } from "./profile";
 import { groups, groupMembers } from "./group";
-import { personalEvents, groupEvents, groupEventsFinal } from "./event";
+import { personalEvents, groupEvents, groupEventsFinal, events } from "./event";
 import { plans, votes } from "./plan";
 import { preferences } from "./preference";
 
@@ -110,13 +110,31 @@ export const groupRelations = defineRelationsPart(
 );
 
 export const eventRelations = defineRelationsPart(
-  {personalEvents, groupEvents, groupEventsFinal, profiles, groups, plans, preferences},
+  {personalEvents, groupEvents, groupEventsFinal, profiles, groups, plans, preferences, events},
   (r) => ({
+    events: {
+      personalEvents: r.one.personalEvents({
+        from: r.events.id,
+        to: r.personalEvents.id
+      }),
+      groupEvents: r.one.groupEvents({
+        from: r.events.id,
+        to: r.groupEvents.id
+      }),
+      groupEventsFinal: r.one.groupEventsFinal({
+        from: r.events.id,
+        to: r.groupEventsFinal.id
+      }),
+    },
     personalEvents: {
       profiles: r.one.profiles({
         from: r.personalEvents.username,
         to: r.profiles.username,
-      })
+      }),
+      events: r.one.events({
+        from: r.personalEvents.id,
+        to: r.events.id
+      }),
     },
     groupEvents: {
       groups: r.one.groups({
@@ -135,6 +153,10 @@ export const eventRelations = defineRelationsPart(
         from: r.groupEvents.id,
         to: r.preferences.groupEventId,
       }),
+      events: r.one.events({
+        from: r.groupEvents.id,
+        to: r.events.id
+      }),
     },
     groupEventsFinal: {
       groups: r.one.groups({
@@ -144,6 +166,10 @@ export const eventRelations = defineRelationsPart(
       plans: r.one.plans({
         from: r.groupEventsFinal.planId,
         to: r.plans.id,
+      }),
+      events: r.one.events({
+        from: r.groupEventsFinal.id,
+        to: r.events.id
       })
     }
   })

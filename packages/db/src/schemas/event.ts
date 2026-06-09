@@ -3,6 +3,7 @@ import { pgTable, text, varchar, timestamp, date, time, boolean, pgEnum, primary
 import { profiles } from "./profile";
 import { groups } from "./group";
 import { plans } from "./plan";
+import { timeStamp } from "node:console";
 
 export const events = pgTable("events", {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -15,12 +16,12 @@ export const events = pgTable("events", {
 export const repeatEnum = pgEnum("every", ['day', 'week', 'month', 'year', 'never']);
 
 export const personalEvents = pgTable("personal_events", {
-  id: uuid("id").references(() => events.id),
-  username: text("username").references(() => profiles.username),
+  id: uuid("id").references(() => events.id).notNull(),
+  username: text("username").references(() => profiles.username).notNull(),
   date: date("date").notNull(),
   location: text("location"),
-  startTime: time("start_time").notNull(),
-  endTime: time("end_time").notNull(),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
   repeat: repeatEnum("repeat").notNull(),
   public: boolean("public").notNull(),
 },
@@ -54,8 +55,8 @@ export const groupEventsFinal = pgTable("group_events_final", {
 });
 
 export const eventConfirmations = pgTable("event_confirmations", {
-  groupId: uuid("group_id").references(() => groups.id, {onDelete: 'cascade'}),
-  username: text("username").references(() => profiles.username, {onDelete: 'cascade'}),
+  groupId: uuid("group_id").references(() => groups.id, {onDelete: 'cascade'}).notNull(),
+  username: text("username").references(() => profiles.username, {onDelete: 'cascade'}).notNull(),
   confirmedAt: text("confirmed_at").notNull(),
 },
   (t) => [

@@ -1,11 +1,10 @@
 import { profiles, users } from "@baza/db/schemas";
 import { db } from "../lib/db";
-import { eq, getColumns } from 'drizzle-orm';
-import { ErrorTypes, profileDTO, type CreateProfileBody, type ProfileDTO } from "@baza/shared-types";
+import { eq } from 'drizzle-orm';
+import { ErrorTypes, profileDTO, type CreateProfileBody, type PersonalEventDTO, type ProfileDTO } from "@baza/shared-types";
 import { Value } from "typebox/value";
 import { Err, Ok, type Result } from "../lib/types";
 import { app } from "../setup";
-import { username } from "better-auth/plugins";
 
 /**
  * This method fetches the profile data of a specific user from the database by their username, 

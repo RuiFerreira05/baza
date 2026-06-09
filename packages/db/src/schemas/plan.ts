@@ -25,8 +25,8 @@ export const plans = pgTable("plans", {
 );
 
 export const votes = pgTable("votes", {
-  planId: uuid("plan_id").references(() => plans.id),
-  username: text("username").references(() => profiles.username),
+  planId: uuid("plan_id").references(() => plans.id).notNull(),
+  username: text("username").references(() => profiles.username).notNull(),
 },
   (t) => [
     primaryKey({ columns: [t.planId, t.username]}),

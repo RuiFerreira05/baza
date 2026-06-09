@@ -15,8 +15,8 @@ export const profiles = pgTable("profiles", {
 export const friendStatusEnum = pgEnum("status", ['accepted', 'pending', 'rejected', 'blocked']);
 
 export const friends = pgTable("friends", {
-  sentBy: text("sent_by").references(() => profiles.username),
-  receivedBy: text("received_by").references(() => profiles.username),
+  sentBy: text("sent_by").references(() => profiles.username).notNull(),
+  receivedBy: text("received_by").references(() => profiles.username).notNull(),
   friendStatus: friendStatusEnum("friend_status").notNull(),
   requestAcceptedAt: timestamp("request_accepted_at"),
   requestSentAt: timestamp("request_sent_at").defaultNow().notNull(),

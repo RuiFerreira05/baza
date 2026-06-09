@@ -1,8 +1,9 @@
-import { profileDTO,  CreateProfileBody, EditProfileBody, ErrorTypes, StatusOK, StatusError, SimpleUsernameParam } from "@baza/shared-types";
+import { profileDTO,  CreateProfileBody, EditProfileBody, ErrorTypes, StatusOK, StatusError, SimpleUsernameParam, GetPersonalEventsParams, personalEventDTO } from "@baza/shared-types";
 import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
 import { getUserByUsernameHandler, createUserProfileHandler, deleteUserProfileHandler, editUserProfileHandler } from "../handlers/profileHandlers";
-
+import { getPersonalEventsHandler } from "../handlers/eventHandlers";
+import Type from "typebox";
 
 export const userRoutes: FastifyPluginAsync = async (fastify) => {
   const app = fastify.withTypeProvider<TypeBoxTypeProvider>();
@@ -28,7 +29,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
             "if there was an error converting the profile data to the expected format before sending the response",
           ),
         },
-        params: SimpleUsernameParam("Username of a user of the aplication whose profile is being created"),
+        params: SimpleUsernameParam("Username of a user of the aplication whose profile is being fetched"),
       },
     },
     getUserByUsernameHandler
@@ -111,29 +112,32 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     },
     editUserProfileHandler
   );
-    
 
-//   app.get(
-//     "/:id/events",
-//     {
-//       schema: {
-//         description: "This route fetches all events, in the given time period, from a user calendar.",
-//         tags: ["users"],
-//         querystring: {
-//           startDate: QueryStringParameter("Start date of the time period. Following ISO format: yyyy-mm-dd"),
-//           endDate: QueryStringParameter("End date of the time period. Following ISO format: yyyy-mm-dd"),
-//         },
-//         response: {
-//           200: getPersonalEventsResponseSchema,
-//           404: genericError(ErrorTypes.UnknownIdError, "No events of the user with said id were found at that period of time"),
-//           500: genericError(
-//             ErrorTypes.ConversionError,
-//             "There was an error converting the events data to the expected format before sending the response",
-//           ),
-//         },
-//         params: SimpleIdParam("username of user who is the owner of these events"),
-//       },
-//     },
-
-//   );
+  // GET /users/:username/events?startDate,endDate
+  app.get(
+    "/:username/events",
+    {
+      schema: {
+        description: "This route fetches all events, in the given time period, from a user calendar.",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username of the user whose events are being fetched"),
+        querystring: GetPersonalEventsParams,
+        response: {
+          200: StatusOK(
+            Type.Array(personalEventDTO),
+            "if the events' information was successfully fetched and converted to the expected format before sending the response",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownUsernameError,
+            "if no personal events from the user with the provided username was found",
+          ),
+          500: StatusError(
+            ErrorTypes.ConversionError,
+            "if there was an error converting the events' data to the expected format before sending the response",
+          ),
+        },
+      },
+    },
+    getPersonalEventsHandler
+  );
  }
