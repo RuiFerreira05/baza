@@ -1,9 +1,9 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "7d2b8bd6-d7e3-4a1c-8470-77c0f3125218",
+  "id": "5a9a2abd-3ee4-49d9-b7af-621b502fa078",
   "prevIds": [
-    "6f5975d0-6313-4671-bcac-8018e85a5c62"
+    "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
     {
@@ -1215,7 +1215,7 @@
       "table": "personal_events"
     },
     {
-      "type": "time",
+      "type": "timestamp",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
@@ -1228,7 +1228,7 @@
       "table": "personal_events"
     },
     {
-      "type": "time",
+      "type": "timestamp",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,

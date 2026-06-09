@@ -1,3 +1,0 @@
-ALTER TABLE "group_events" ALTER COLUMN "voting_end_time" SET DATA TYPE timestamp with time zone USING "voting_end_time"::timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "group_events" DROP CONSTRAINT "voting_time_check", ADD CONSTRAINT "voting_time_check" CHECK ((("voting_end_time" > CURRENT_TIMESTAMP) AND "state" = 'unfinished') OR 
-         (("voting_end_time" <= CURRENT_TIMESTAMP) AND ("state" = 'finished' OR "state" = 'needs_tiebreaker')));

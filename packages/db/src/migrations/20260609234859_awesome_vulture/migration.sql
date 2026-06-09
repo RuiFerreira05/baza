@@ -1,6 +1,6 @@
 CREATE TYPE "status" AS ENUM('accepted', 'pending', 'rejected', 'blocked');--> statement-breakpoint
 CREATE TYPE "every" AS ENUM('day', 'week', 'month', 'year', 'never');--> statement-breakpoint
-CREATE TYPE "state" AS ENUM('finished', 'unfinished');--> statement-breakpoint
+CREATE TYPE "state" AS ENUM('finished', 'unfinished', 'needs_tiebreaker');--> statement-breakpoint
 CREATE TABLE "accounts" (
 	"id" text PRIMARY KEY,
 	"account_id" text NOT NULL,
@@ -113,10 +113,8 @@ CREATE TABLE "group_events" (
 	"start_date" date NOT NULL,
 	"end_date" date NOT NULL,
 	"state" "state" NOT NULL,
-	"voting_end_time" timestamp,
-	"createdBy" text NOT NULL,
-	CONSTRAINT "voting_time_check" CHECK ((("voting_end_time" > CURRENT_TIMESTAMP) AND "state" = 'unfinished') OR 
-         (("voting_end_time" < CURRENT_TIMESTAMP) AND "state" = 'finished'))
+	"voting_end_time" timestamp with time zone,
+	"createdBy" text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "group_events_final" (
@@ -177,8 +175,8 @@ CREATE INDEX "sessions_userId_idx" ON "sessions" ("user_id");--> statement-break
 CREATE INDEX "verifications_identifier_idx" ON "verifications" ("identifier");--> statement-breakpoint
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "friends" ADD CONSTRAINT "friends_sent_by_profiles_username_fkey" FOREIGN KEY ("sent_by") REFERENCES "profiles"("username");--> statement-breakpoint
-ALTER TABLE "friends" ADD CONSTRAINT "friends_received_by_profiles_username_fkey" FOREIGN KEY ("received_by") REFERENCES "profiles"("username");--> statement-breakpoint
+ALTER TABLE "friends" ADD CONSTRAINT "friends_sent_by_profiles_username_fkey" FOREIGN KEY ("sent_by") REFERENCES "profiles"("username") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "friends" ADD CONSTRAINT "friends_received_by_profiles_username_fkey" FOREIGN KEY ("received_by") REFERENCES "profiles"("username") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "profiles" ADD CONSTRAINT "profiles_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "group_members" ADD CONSTRAINT "group_members_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "group_members" ADD CONSTRAINT "group_members_group_id_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "groups"("id") ON DELETE CASCADE;--> statement-breakpoint
@@ -186,15 +184,15 @@ ALTER TABLE "event_confirmations" ADD CONSTRAINT "event_confirmations_group_id_g
 ALTER TABLE "event_confirmations" ADD CONSTRAINT "event_confirmations_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "group_events" ADD CONSTRAINT "group_events_id_events_id_fkey" FOREIGN KEY ("id") REFERENCES "events"("id");--> statement-breakpoint
 ALTER TABLE "group_events" ADD CONSTRAINT "group_events_group_id_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "groups"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "group_events" ADD CONSTRAINT "group_events_createdBy_profiles_username_fkey" FOREIGN KEY ("createdBy") REFERENCES "profiles"("username");--> statement-breakpoint
-ALTER TABLE "group_events_final" ADD CONSTRAINT "group_events_final_id_events_id_fkey" FOREIGN KEY ("id") REFERENCES "events"("id");--> statement-breakpoint
+ALTER TABLE "group_events" ADD CONSTRAINT "group_events_createdBy_profiles_username_fkey" FOREIGN KEY ("createdBy") REFERENCES "profiles"("username") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "group_events_final" ADD CONSTRAINT "group_events_final_id_events_id_fkey" FOREIGN KEY ("id") REFERENCES "events"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "group_events_final" ADD CONSTRAINT "group_events_final_group_id_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "groups"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "group_events_final" ADD CONSTRAINT "group_events_final_plan_id_plans_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "plans"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "personal_events" ADD CONSTRAINT "personal_events_id_events_id_fkey" FOREIGN KEY ("id") REFERENCES "events"("id");--> statement-breakpoint
 ALTER TABLE "personal_events" ADD CONSTRAINT "personal_events_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username");--> statement-breakpoint
 ALTER TABLE "plans" ADD CONSTRAINT "plans_group_event_id_group_events_id_fkey" FOREIGN KEY ("group_event_id") REFERENCES "group_events"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "plans" ADD CONSTRAINT "plans_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username");--> statement-breakpoint
-ALTER TABLE "votes" ADD CONSTRAINT "votes_plan_id_plans_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "plans"("id");--> statement-breakpoint
-ALTER TABLE "votes" ADD CONSTRAINT "votes_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username");--> statement-breakpoint
+ALTER TABLE "plans" ADD CONSTRAINT "plans_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "votes" ADD CONSTRAINT "votes_plan_id_plans_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "plans"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "votes" ADD CONSTRAINT "votes_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "preferences" ADD CONSTRAINT "preferences_group_event_id_group_events_id_fkey" FOREIGN KEY ("group_event_id") REFERENCES "group_events"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "preferences" ADD CONSTRAINT "preferences_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username");
+ALTER TABLE "preferences" ADD CONSTRAINT "preferences_username_profiles_username_fkey" FOREIGN KEY ("username") REFERENCES "profiles"("username") ON DELETE CASCADE;
