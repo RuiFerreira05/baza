@@ -6,6 +6,7 @@ import {
   SimpleUsernameParam,
   createStatusError,
   createStatusOK,
+  UpdateMemberRoleBody,
 } from "@baza/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { FSUploadService } from "../lib/FSUploadService";
@@ -21,7 +22,6 @@ import {
   removeUserFromGroup,
   promoteUserToAdmin,
   dismissUserAsAdmin,
-  verifyGroupMembership,
 } from "../services/groupServices";
 import { app, fileUploadService } from "../setup";
 
@@ -36,20 +36,6 @@ export const getGroupByIdHandler = async (
 
   const { id } = req.params as SimpleIdParam;
   app.log.info(`Fetching group with id: ${id} for user: ${username}`);
-
-  // Enforce membership check
-  const isMember = await verifyGroupMembership(id, username);
-  if (!isMember) {
-    app.log.warn(`User ${username} is not an active member of group ${id}`);
-    return res
-      .status(403)
-      .send(
-        createStatusError(
-          ErrorTypes.UnauthorizedError,
-          "Access denied: You are not an active member of this group",
-        ),
-      );
-  }
 
   const group = await getGroupById(id);
 
@@ -390,13 +376,12 @@ export const getGroupMembersHandler = async (
   }
 };
 
-// POST /groups/:id/group-members/remove-user
+// DELETE /groups/:id/group-members/:username
 export const removeUserFromGroupHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
 ) => {
-  const { id: groupId } = req.params as SimpleIdParam;
-  const { username } = req.body as SimpleUsernameParam;
+  const { id: groupId, username } = req.params as { id: string; username: string };
 
   const result = await removeUserFromGroup(groupId, username);
 
@@ -427,15 +412,17 @@ export const removeUserFromGroupHandler = async (
   }
 };
 
-// PATCH /groups/:id/group-members/:username/promote-to-admin
-export const promoteUserToAdminHandler = async (
+// PATCH /groups/:id/group-members/:username
+export const updateUserGroupRoleHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
 ) => {
-  const { id: groupId } = req.params as SimpleIdParam;
-  const { username } = req.params as { username: string };
+  const { id: groupId, username } = req.params as { id: string; username: string };
+  const { admin } = req.body as UpdateMemberRoleBody;
 
-  const result = await promoteUserToAdmin(groupId, username);
+  const result = admin
+    ? await promoteUserToAdmin(groupId, username)
+    : await dismissUserAsAdmin(groupId, username);
 
   if (!result.ok) {
     switch (result.error) {
@@ -454,61 +441,17 @@ export const promoteUserToAdminHandler = async (
           .send(
             createStatusError(
               ErrorTypes.ConversionError,
-              "An error occurred while converting the promoted admin data",
+              "An error occurred while converting the updated member role data",
             ),
           );
       case ErrorTypes.UpdateError:
+      default:
         return res
           .status(500)
           .send(
             createStatusError(
               ErrorTypes.UpdateError,
-              "An error occurred while promoting the user to admin",
-            ),
-          );
-    }
-  } else {
-    return res.status(200).send(createStatusOK(result.value));
-  }
-};
-
-// PATCH /groups/:id/group-members/:username/dismiss-admin
-export const dismissUserAsAdminHandler = async (
-  req: FastifyRequest,
-  res: FastifyReply,
-) => {
-  const { id: groupId } = req.params as SimpleIdParam;
-  const { username } = req.params as { username: string };
-
-  const result = await dismissUserAsAdmin(groupId, username);
-
-  if (!result.ok) {
-    switch (result.error) {
-      case ErrorTypes.UnknownIdError:
-        return res
-          .status(404)
-          .send(
-            createStatusError(
-              ErrorTypes.UnknownIdError,
-              "A group or user with the provided id/username was not found",
-            ),
-          );
-      case ErrorTypes.ConversionError:
-        return res
-          .status(500)
-          .send(
-            createStatusError(
-              ErrorTypes.ConversionError,
-              "An error occurred while converting the dismissed admin data",
-            ),
-          );
-      case ErrorTypes.UpdateError:
-        return res
-          .status(500)
-          .send(
-            createStatusError(
-              ErrorTypes.UpdateError,
-              "An error occurred while dismissing the user as admin",
+              "An error occurred while updating the user's role",
             ),
           );
     }

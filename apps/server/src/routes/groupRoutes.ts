@@ -20,6 +20,7 @@ import {
   ResolveTieBody,
   groupCalendarDTO,
   eventConfirmationDTO,
+  UpdateMemberRoleBody,
 } from "@baza/shared-types";
 import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
@@ -33,8 +34,7 @@ import {
   getGroupPhotoHandler,
   inviteUsersToGroupHandler,
   removeUserFromGroupHandler,
-  promoteUserToAdminHandler,
-  dismissUserAsAdminHandler,
+  updateUserGroupRoleHandler,
 } from "../handlers/groupHandlers";
 import {
   createGroupEventHandler,
@@ -94,9 +94,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     getGroupByIdHandler,
   );
 
-  // POST /groups/create
+  // POST /groups
   app.post(
-    "/create",
+    "/",
     {
       schema: {
         description: "This route creates a new group",
@@ -117,9 +117,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     createGroupHandler,
   );
 
-  // DELETE /groups/:id/delete
+  // DELETE /groups/:id
   app.delete(
-    "/:id/delete",
+    "/:id",
     {
       schema: {
         description: "This route deletes a group",
@@ -144,9 +144,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     deleteGroupHandler,
   )
 
-  // PATCH /groups/:id/edit/photo
+  // PATCH /groups/:id/photo
   app.patch(
-    "/:id/edit/photo",
+    "/:id/photo",
     {
       schema: {
         description: "This route allows editing a group's photo",
@@ -201,9 +201,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     getGroupPhotoHandler,
   );
 
-  // PATCH /groups/:id/edit
+  // PATCH /groups/:id
   app.patch(
-    "/:id/edit",
+    "/:id",
     {
       schema: {
         description:
@@ -234,9 +234,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
 
   // ###### GROUP MEMBERS #######
 
-  // POST /groups/:id/group-members/invite-user
+  // POST /groups/:id/group-members
   app.post(
-    "/:id/group-members/invite-user",
+    "/:id/group-members",
     {
       schema: {
         description: "This route allows inviting users to a group",
@@ -266,19 +266,17 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     inviteUsersToGroupHandler,
   );
 
-  // POST /groups/:id/group-members/remove-user
-  app.post(
-    "/:id/group-members/remove-user",
+  // DELETE /groups/:id/group-members/:username
+  app.delete(
+    "/:id/group-members/:username",
     {
       schema: {
         description: "This route allows removing users from a group",
         tags: ["groups"],
-        params: SimpleIdParam(
-          "The UUID of the group from which users are being removed",
-        ),
-        body: SimpleUsernameParam(
-          "The username of the user being removed from the group",
-        ),
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          username: Type.String(),
+        }),
         response: {
           200: StatusOK(
             groupMemberDTO,
@@ -330,53 +328,33 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
 
   // ###### ADMIN PROMOTION/DISMISSAL ENDPOINTS ######
 
-  // PATCH /groups/:id/group-members/:username/promote-to-admin
+  // PATCH /groups/:id/group-members/:username
   app.patch(
-    "/:id/group-members/:username/promote-to-admin",
+    "/:id/group-members/:username",
     {
       schema: {
-        description: "Promote a group member to admin status",
+        description: "Update a group member's role status (admin status)",
         tags: ["groups"],
         params: Type.Object({
           id: Type.String({ format: "uuid" }),
           username: Type.String(),
         }),
+        body: UpdateMemberRoleBody,
         response: {
-          200: StatusOK(groupMemberDTO, "If the member was successfully promoted to admin"),
+          200: StatusOK(groupMemberDTO, "If the member's role was successfully updated"),
           404: StatusError(ErrorTypes.UnknownIdError, "If the group or user was not found"),
           500: StatusError(ErrorTypes.UpdateError, "If the database update failed"),
         },
       },
     },
-    promoteUserToAdminHandler,
-  );
-
-  // PATCH /groups/:id/group-members/:username/dismiss-admin
-  app.patch(
-    "/:id/group-members/:username/dismiss-admin",
-    {
-      schema: {
-        description: "Dismiss admin status from a group member",
-        tags: ["groups"],
-        params: Type.Object({
-          id: Type.String({ format: "uuid" }),
-          username: Type.String(),
-        }),
-        response: {
-          200: StatusOK(groupMemberDTO, "If the member was successfully dismissed as admin"),
-          404: StatusError(ErrorTypes.UnknownIdError, "If the group or user was not found"),
-          500: StatusError(ErrorTypes.UpdateError, "If the database update failed"),
-        },
-      },
-    },
-    dismissUserAsAdminHandler,
+    updateUserGroupRoleHandler,
   );
 
   // ###### GROUP EVENTS ENDPOINTS ######
 
-  // POST /groups/:id/events/create
+  // POST /groups/:id/events
   app.post(
-    "/:id/events/create",
+    "/:id/events",
     {
       schema: {
         description: "Create a new group event with a dynamic voting deadline",
@@ -458,9 +436,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     getGroupEventByIdHandler,
   );
 
-  // PATCH /groups/:id/events/:idevent/edit
+  // PATCH /groups/:id/events/:idevent
   app.patch(
-    "/:id/events/:idevent/edit",
+    "/:id/events/:idevent",
     {
       schema: {
         description: "Modify an existing group event's title, description or voting deadline",
@@ -505,9 +483,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
 
   // ###### EVENT PLANNING PREFERENCES ENDPOINTS ######
 
-  // POST /groups/:id/events/:idevent/preferences/create
+  // POST /groups/:id/events/:idevent/preferences
   app.post(
-    "/:id/events/:idevent/preferences/create",
+    "/:id/events/:idevent/preferences",
     {
       schema: {
         description: "Create or update user planning preferences for a group event",
@@ -548,9 +526,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     getGroupPreferenceAggregationHandler,
   );
 
-  // GET /groups/:id/events/:idevent/preferences/all
+  // GET /groups/:id/events/:idevent/preferences
   app.get(
-    "/:id/events/:idevent/preferences/all",
+    "/:id/events/:idevent/preferences",
     {
       schema: {
         description: "Retrieve all members' preferences (hiding private preferences of other members)",
@@ -614,9 +592,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     getEventPlansHandler,
   );
 
-  // POST /groups/:id/events/:idevent/plans/create
+  // POST /groups/:id/events/:idevent/plans
   app.post(
-    "/:id/events/:idevent/plans/create",
+    "/:id/events/:idevent/plans",
     {
       schema: {
         description: "Propose a new plan coordinate/option for a group event",
@@ -658,9 +636,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     getEventPlanByIdHandler,
   );
 
-  // PATCH /groups/:id/events/:idevent/plans/:idplan/edit
+  // PATCH /groups/:id/events/:idevent/plans/:idplan
   app.patch(
-    "/:id/events/:idevent/plans/:idplan/edit",
+    "/:id/events/:idevent/plans/:idplan",
     {
       schema: {
         description: "Edit proposed plan coordinates (restricted to the original plan proposer)",
@@ -682,9 +660,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     editEventPlanHandler,
   );
 
-  // POST /groups/:id/events/:idevent/plans/:idplan/vote
+  // POST /groups/:id/events/:idevent/plans/:idplan/votes
   app.post(
-    "/:id/events/:idevent/plans/:idplan/vote",
+    "/:id/events/:idevent/plans/:idplan/votes",
     {
       schema: {
         description: "Cast an approval vote for a proposed event plan",
@@ -703,9 +681,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     voteEventPlanHandler,
   );
 
-  // POST /groups/:id/events/:idevent/plans/:idplan/remove-vote
-  app.post(
-    "/:id/events/:idevent/plans/:idplan/remove-vote",
+  // DELETE /groups/:id/events/:idevent/plans/:idplan/votes
+  app.delete(
+    "/:id/events/:idevent/plans/:idplan/votes",
     {
       schema: {
         description: "Remove a previously casted approval vote",
@@ -726,9 +704,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
 
   // ###### EVENT ATTENDANCE CONFIRMATION ENDPOINTS ######
 
-  // POST /groups/:id/events/:idevent/confirm
+  // POST /groups/:id/events/:idevent/confirmations
   app.post(
-    "/:id/events/:idevent/confirm",
+    "/:id/events/:idevent/confirmations",
     {
       schema: {
         description: "Confirm group member attendance for a group event",
@@ -746,9 +724,9 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     confirmEventAttendanceHandler,
   );
 
-  // DELETE /groups/:id/events/:idevent/confirm
+  // DELETE /groups/:id/events/:idevent/confirmations
   app.delete(
-    "/:id/events/:idevent/confirm",
+    "/:id/events/:idevent/confirmations",
     {
       schema: {
         description: "Revoke attendance confirmation for a group event",

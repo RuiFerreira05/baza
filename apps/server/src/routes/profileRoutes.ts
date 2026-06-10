@@ -15,6 +15,9 @@ import {
   SendFriendRequestBody,
   FriendRequestDTO,
   SentFriendRequestDTO,
+  RespondFriendRequestBody,
+  RespondGroupInviteBody,
+  BlockUserBody,
 } from "@baza/shared-types";
 import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
@@ -31,8 +34,7 @@ import {
   removeFriendHandler,
   sendFriendRequestHandler,
   getPendingFriendRequestsHandler,
-  acceptFriendRequestHandler,
-  declineFriendRequestHandler,
+  respondFriendRequestHandler,
   blockUserHandler,
   unblockUserHandler,
   getPendingSentFriendRequestsHandler,
@@ -45,8 +47,7 @@ import {
   getUserGroupsHandler,
   getUserGroupByIdHandler,
   getUserGroupInvitesHandler,
-  acceptGroupInviteHandler,
-  declineGroupInviteHandler
+  respondGroupInviteHandler,
 } from "../handlers/userGroupHandlers";
 import Type from "typebox";
 
@@ -80,9 +81,9 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     getUserByUsernameHandler
   );
 
-  // DELETE /users/create
+  // POST /users
   app.post(
-    "/create",
+    "/",
     {
       schema: {
         description: "This route creates a profile for a user of the app",
@@ -103,9 +104,9 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     createUserProfileHandler
   );
 
-  // DELETE /users/:username/delete
+  // DELETE /users/:username
   app.delete(
-    "/:username/delete",
+    "/:username",
     {
       schema: {
         description: "This route deletes a user's profile",
@@ -130,9 +131,9 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     deleteUserProfileHandler
   );
 
-  // PATCH /users/:username/edit
+  // PATCH /users/:username
   app.patch(
-    "/:username/edit",
+    "/:username",
     {
       schema: {
         description: "This route edits a user's profile information (except photo and settings)",
@@ -207,9 +208,9 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     getPersonalEventByIdHandler
   );
 
-  // POST /users/:username/events/create
+  // POST /users/:username/events
   app.post(
-    "/:username/events/create",
+    "/:username/events",
     {
       schema: {
         description: "This route creates a new personal event.",
@@ -226,9 +227,9 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     createPersonalEventHandler
   );
 
-  // PATCH /users/:username/events/:idEvent/edit
+  // PATCH /users/:username/events/:idEvent
   app.patch(
-    "/:username/events/:idEvent/edit",
+    "/:username/events/:idEvent",
     {
       schema: {
         description: "This route edits an existing personal event.",
@@ -283,46 +284,29 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     getUserGroupInvitesHandler
   );
 
-  // POST /users/:username/groups/invites/:groupId/accept
-  app.post(
-    "/:username/groups/invites/:groupId/accept",
+  // PATCH /users/:username/groups/invites/:groupId
+  app.patch(
+    "/:username/groups/invites/:groupId",
     {
       schema: {
-        description: "This route accepts a group invitation.",
+        description: "This route responds (accept or decline) to a group invitation.",
         tags: ["users"],
         params: Type.Object({
           username: Type.String(),
           groupId: Type.String({ format: "uuid" }),
         }),
+        body: RespondGroupInviteBody,
         response: {
-          200: StatusOK(groupMemberDTO, "Accepted"),
+          200: StatusOK(
+            Type.Union([groupMemberDTO, Type.Null()]),
+            "If the group invite response was successful",
+          ),
           404: StatusError(ErrorTypes.UnknownIdError, "Not found"),
           500: StatusError(ErrorTypes.UpdateError, "Error"),
         },
       },
     },
-    acceptGroupInviteHandler
-  );
-
-  // POST /users/:username/groups/invites/:groupId/decline
-  app.post(
-    "/:username/groups/invites/:groupId/decline",
-    {
-      schema: {
-        description: "This route declines a group invitation.",
-        tags: ["users"],
-        params: Type.Object({
-          username: Type.String(),
-          groupId: Type.String({ format: "uuid" }),
-        }),
-        response: {
-          200: StatusOK(Type.Null(), "Declined"),
-          404: StatusError(ErrorTypes.UnknownIdError, "Not found"),
-          500: StatusError(ErrorTypes.DeleteError, "Error"),
-        },
-      },
-    },
-    declineGroupInviteHandler
+    respondGroupInviteHandler
   );
 
   // GET /users/:username/friends
@@ -384,17 +368,15 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     removeFriendHandler
   );
 
-  // POST /users/:username/friends/:friendUsername/block
+  // POST /users/:username/blocks
   app.post(
-    "/:username/friends/:friendUsername/block",
+    "/:username/blocks",
     {
       schema: {
         description: "This route blocks a user.",
         tags: ["users"],
-        params: Type.Object({
-          username: Type.String(),
-          friendUsername: Type.String(),
-        }),
+        params: SimpleUsernameParam("The username of the blocker"),
+        body: BlockUserBody,
         response: {
           200: StatusOK(Type.Null(), "Blocked"),
           404: StatusError(ErrorTypes.UnknownUsernameError, "Not found"),
@@ -405,16 +387,16 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     blockUserHandler
   );
 
-  // POST /users/:username/friends/:friendUsername/unblock
-  app.post(
-    "/:username/friends/:friendUsername/unblock",
+  // DELETE /users/:username/blocks/:blockedUsername
+  app.delete(
+    "/:username/blocks/:blockedUsername",
     {
       schema: {
         description: "This route unblocks a user.",
         tags: ["users"],
         params: Type.Object({
           username: Type.String(),
-          friendUsername: Type.String(),
+          blockedUsername: Type.String(),
         }),
         response: {
           200: StatusOK(Type.Null(), "Unblocked"),
@@ -426,9 +408,9 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     unblockUserHandler
   );
 
-  // POST /users/:username/friends/sendRequest
+  // POST /users/:username/friends/requests
   app.post(
-    "/:username/friends/sendRequest",
+    "/:username/friends/requests",
     {
       schema: {
         description: "This route sends a new friend request.",
@@ -479,46 +461,26 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     getPendingSentFriendRequestsHandler
   );
 
-  // POST /users/:username/friends/requests/:senderUsername/accept
-  app.post(
-    "/:username/friends/requests/:senderUsername/accept",
+  // PATCH /users/:username/friends/requests/:senderUsername
+  app.patch(
+    "/:username/friends/requests/:senderUsername",
     {
       schema: {
-        description: "This route accepts a pending friend request.",
+        description: "This route responds to (accepts/declines) a pending friend request.",
         tags: ["users"],
         params: Type.Object({
           username: Type.String(),
           senderUsername: Type.String(),
         }),
+        body: RespondFriendRequestBody,
         response: {
-          200: StatusOK(Type.Null(), "Accepted"),
+          200: StatusOK(Type.Null(), "Responded successfully"),
           404: StatusError(ErrorTypes.UnknownUsernameError, "Not found"),
           500: StatusError(ErrorTypes.UpdateError, "Error"),
         },
       },
     },
-    acceptFriendRequestHandler
-  );
-
-  // POST /users/:username/friends/requests/:senderUsername/decline
-  app.post(
-    "/:username/friends/requests/:senderUsername/decline",
-    {
-      schema: {
-        description: "This route declines a pending friend request.",
-        tags: ["users"],
-        params: Type.Object({
-          username: Type.String(),
-          senderUsername: Type.String(),
-        }),
-        response: {
-          200: StatusOK(Type.Null(), "Declined"),
-          404: StatusError(ErrorTypes.UnknownUsernameError, "Not found"),
-          500: StatusError(ErrorTypes.UpdateError, "Error"),
-        },
-      },
-    },
-    declineFriendRequestHandler
+    respondFriendRequestHandler
   );
 
   // GET /users/:username/settings

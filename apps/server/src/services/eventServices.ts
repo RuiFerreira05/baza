@@ -628,7 +628,7 @@ export const getPersonalEventById = async (
 ): Promise<Result<PersonalEventDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>> => {
   try {
     const record = await db.query.personalEvents.findFirst({
-      where: (pe, { eq, and }) => and(eq(pe.id, eventId), eq(pe.username, username)),
+      where: { id: eventId, username: username },
       with: {
         events: true,
       },
@@ -750,7 +750,7 @@ export const editPersonalEvent = async (
 ): Promise<Result<PersonalEventDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError | ErrorTypes.MalformedRequestError | ErrorTypes.UpdateError>> => {
   try {
     const existing = await db.query.personalEvents.findFirst({
-      where: (pe, { eq, and }) => and(eq(pe.id, eventId), eq(pe.username, username)),
+      where: { id: eventId, username: username },
     });
 
     if (!existing) {

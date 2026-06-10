@@ -102,3 +102,19 @@ export const SentFriendRequestDTO = Type.Object({
 });
 export type SentFriendRequestDTO = Type.Static<typeof SentFriendRequestDTO>;
 
+// PATCH /users/:username/friends/requests/:senderUsername
+export const RespondFriendRequestBody = Type.Object({
+  status: Type.Union([Type.Literal("accepted"), Type.Literal("declined")], {
+    description: "Accept or decline the friend request.",
+  }),
+});
+export type RespondFriendRequestBody = Type.Static<typeof RespondFriendRequestBody>;
+
+// POST /users/:username/blocks
+export const BlockUserBody = Type.Object({
+  blockedUsername: Type.String({
+    description: "The username of the user to block.",
+  }),
+});
+export type BlockUserBody = Type.Static<typeof BlockUserBody>;
+

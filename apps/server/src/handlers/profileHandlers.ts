@@ -34,7 +34,7 @@ export const getUserByUsernameHandler = async (req: FastifyRequest, res: Fastify
   }
 }
 
-// POST /users/create
+// POST /users
 export const createUserProfileHandler = async (req: FastifyRequest, res: FastifyReply) => {
   app.log.info("Received create user's profile request")
   const body = req.body as CreateProfileBody;

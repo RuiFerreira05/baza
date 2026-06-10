@@ -212,7 +212,7 @@ export const getUserSettings = async (
       columns: {
         settings: true,
       },
-      where: (p, { eq }) => eq(p.username, username),
+      where: { username: username },
     });
 
     if (!profile) {
@@ -565,7 +565,7 @@ export const sendFriendRequest = async (
     }
 
     const recipient = await db.query.profiles.findFirst({
-      where: (p, { eq }) => eq(p.username, recipientUsername),
+      where: { username: recipientUsername },
     });
 
     if (!recipient) {
@@ -745,7 +745,7 @@ export const blockUser = async (
 ): Promise<Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.UpdateError>> => {
   try {
     const recipient = await db.query.profiles.findFirst({
-      where: (p, { eq }) => eq(p.username, friendUsername),
+      where: { username: friendUsername },
     });
     if (!recipient) {
       return Err(ErrorTypes.UnknownUsernameError);

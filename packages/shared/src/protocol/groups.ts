@@ -77,3 +77,19 @@ export const EditGroupBody = Type.Object({
   ),
 });
 export type EditGroupBody = Type.Static<typeof EditGroupBody>;
+
+// PATCH /groups/:id/group-members/:username
+export const UpdateMemberRoleBody = Type.Object({
+  admin: Type.Boolean({
+    description: "Whether the member should be promoted to admin (true) or dismissed (false).",
+  }),
+});
+export type UpdateMemberRoleBody = Type.Static<typeof UpdateMemberRoleBody>;
+
+// PATCH /users/:username/groups/invites/:groupId
+export const RespondGroupInviteBody = Type.Object({
+  status: Type.Union([Type.Literal("accepted"), Type.Literal("declined")], {
+    description: "Accept or decline the group invite.",
+  }),
+});
+export type RespondGroupInviteBody = Type.Static<typeof RespondGroupInviteBody>;

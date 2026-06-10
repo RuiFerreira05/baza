@@ -59,7 +59,7 @@ describe("Plan Routes", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: `/v1/restricted/groups/${group.id}/events/${event.id}/plans/create`,
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}/plans`,
       payload: {
         title: "Proposed Plan",
         date: "2026-08-01",
@@ -231,7 +231,7 @@ describe("Plan Routes", () => {
 
     const response = await app.inject({
       method: "PATCH",
-      url: `/v1/restricted/groups/${group.id}/events/${event.id}/plans/${plan.id}/edit`,
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}/plans/${plan.id}`,
       payload: {
         title: "Updated Plan Title",
         activity: "Singing",
@@ -289,7 +289,7 @@ describe("Plan Routes", () => {
 
     const voteResponse = await app.inject({
       method: "POST",
-      url: `/v1/restricted/groups/${group.id}/events/${event.id}/plans/${plan.id}/vote`,
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}/plans/${plan.id}/votes`,
     });
 
     expect(voteResponse.statusCode).toBe(200);
@@ -301,8 +301,8 @@ describe("Plan Routes", () => {
     expect(voteCheck).toBeDefined();
 
     const removeResponse = await app.inject({
-      method: "POST",
-      url: `/v1/restricted/groups/${group.id}/events/${event.id}/plans/${plan.id}/remove-vote`,
+      method: "DELETE",
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}/plans/${plan.id}/votes`,
     });
 
     expect(removeResponse.statusCode).toBe(200);

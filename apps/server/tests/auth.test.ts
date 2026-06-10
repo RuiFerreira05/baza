@@ -19,10 +19,12 @@ vi.mock("../src/lib/auth", async (importOriginal) => {
 import { getAuthenticatedUsername, auth } from "../src/lib/auth";
 import { app } from "../src/setup";
 import { db } from "../src/lib/db";
-import { users } from "@baza/db/schemas";
+import { users, profiles, groups, groupMembers } from "@baza/db/schemas";
 import { clearDatabase } from "./helpers/dbHelper";
 
-describe("Authentication Middleware", () => {
+const VALID_USER_ID = "11111111-1111-1111-1111-111111111111";
+
+describe("Authentication & Access Control Middleware", () => {
   beforeEach(async () => {
     await clearDatabase();
     vi.restoreAllMocks();
@@ -52,7 +54,7 @@ describe("Authentication Middleware", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/v1/restricted/users/create",
+      url: "/v1/restricted/users",
       headers: {
         "test-force-session-check": "true",
       },
@@ -90,7 +92,7 @@ describe("Authentication Middleware", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/v1/restricted/users/create",
+      url: "/v1/restricted/users",
       headers: {
         "test-force-session-check": "true",
       },
@@ -135,7 +137,7 @@ describe("Authentication Middleware", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/v1/restricted/users/create",
+      url: "/v1/restricted/users",
       headers: {
         "test-force-session-check": "true",
       },
@@ -148,5 +150,102 @@ describe("Authentication Middleware", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json().status).toBe("OK");
     expect(response.json().data.username).toBe("matchinguser");
+  });
+
+  /* Access Control (RLS) Tests */
+
+  it("should block group access if user is not a member of the group", async () => {
+    vi.mocked(getAuthenticatedUsername).mockResolvedValue("johndoe");
+
+    await db.insert(users).values({ id: VALID_USER_ID, name: "John Doe", email: "john@example.com" });
+    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "johndoe", settings: {} });
+    const [group] = await db.insert(groups).values({ groupname: "test_group" }).returning();
+
+    const response = await app.inject({
+      method: "GET",
+      url: `/v1/restricted/groups/${group.id}`,
+    });
+
+    expect(response.statusCode).toBe(403);
+    expect(response.json().error.type).toBe("UnauthorizedError");
+  });
+
+  it("should allow group access if user is an active member of the group", async () => {
+    vi.mocked(getAuthenticatedUsername).mockResolvedValue("johndoe");
+
+    await db.insert(users).values({ id: VALID_USER_ID, name: "John Doe", email: "john@example.com" });
+    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "johndoe", settings: {} });
+    const [group] = await db.insert(groups).values({ groupname: "test_group" }).returning();
+    await db.insert(groupMembers).values({
+      groupId: group.id,
+      username: "johndoe",
+      admin: false,
+      banned: false,
+      acceptedInvite: true,
+      acceptedAt: new Date(),
+      invitedAt: new Date(),
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `/v1/restricted/groups/${group.id}`,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().status).toBe("OK");
+  });
+
+  it("should allow viewing another user's profile detail (public view)", async () => {
+    vi.mocked(getAuthenticatedUsername).mockResolvedValue("johndoe");
+
+    await db.insert(users).values({ id: VALID_USER_ID, name: "John Doe", email: "john@example.com" });
+    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "johndoe", settings: {} });
+
+    const otherUserId = "22222222-2222-2222-2222-222222222222";
+    await db.insert(users).values({ id: otherUserId, name: "Other User", email: "other@example.com" });
+    await db.insert(profiles).values({ userId: otherUserId, username: "otheruser", settings: {} });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/restricted/users/otheruser",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().status).toBe("OK");
+  });
+
+  it("should block accessing another user's settings (private view)", async () => {
+    vi.mocked(getAuthenticatedUsername).mockResolvedValue("johndoe");
+
+    await db.insert(users).values({ id: VALID_USER_ID, name: "John Doe", email: "john@example.com" });
+    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "johndoe", settings: {} });
+
+    const otherUserId = "22222222-2222-2222-2222-222222222222";
+    await db.insert(users).values({ id: otherUserId, name: "Other User", email: "other@example.com" });
+    await db.insert(profiles).values({ userId: otherUserId, username: "otheruser", settings: {} });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/restricted/users/otheruser/settings",
+    });
+
+    expect(response.statusCode).toBe(403);
+    expect(response.json().error.type).toBe("UnauthorizedError");
+  });
+
+  it("should allow accessing own settings", async () => {
+    vi.mocked(getAuthenticatedUsername).mockResolvedValue("johndoe");
+
+    await db.insert(users).values({ id: VALID_USER_ID, name: "John Doe", email: "john@example.com" });
+    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "johndoe", settings: { theme: "dark" } });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/restricted/users/johndoe/settings",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().status).toBe("OK");
+    expect(response.json().data.theme).toBe("dark");
   });
 });

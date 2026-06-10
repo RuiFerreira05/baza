@@ -58,7 +58,7 @@ describe("Preference Routes", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: `/v1/restricted/groups/${group.id}/events/${event.id}/preferences/create`,
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}/preferences`,
       payload: {
         preference: {
           availableDates: ["2026-08-01"],
@@ -220,7 +220,7 @@ describe("Preference Routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/v1/restricted/groups/${group.id}/events/${event.id}/preferences/all`,
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}/preferences`,
     });
 
     expect(response.statusCode).toBe(200);

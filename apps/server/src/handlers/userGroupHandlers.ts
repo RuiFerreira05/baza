@@ -6,7 +6,7 @@ import {
   acceptGroupInvite,
   declineGroupInvite,
 } from "../services/profileServices";
-import { createStatusError, createStatusOK, ErrorTypes, type SimpleUsernameParam } from "@baza/shared-types";
+import { createStatusError, createStatusOK, ErrorTypes, type SimpleUsernameParam, RespondGroupInviteBody } from "@baza/shared-types";
 import { app } from "../setup";
 
 // GET /users/:username/groups
@@ -78,64 +78,58 @@ export const getUserGroupInvitesHandler = async (req: FastifyRequest, res: Fasti
   }
 };
 
-// POST /users/:username/groups/invites/:groupId/accept
-export const acceptGroupInviteHandler = async (req: FastifyRequest, res: FastifyReply) => {
-  app.log.info("Received accept group invite request");
+// PATCH /users/:username/groups/invites/:groupId
+export const respondGroupInviteHandler = async (req: FastifyRequest, res: FastifyReply) => {
+  app.log.info("Received respond group invite request");
   const { username } = req.params as SimpleUsernameParam;
   const { groupId } = req.params as { groupId: string };
+  const { status } = req.body as RespondGroupInviteBody;
 
-  const result = await acceptGroupInvite(username, groupId);
-
-  if (!result.ok) {
-    switch (result.error) {
-      case ErrorTypes.UnknownIdError:
-        return res.status(404).send(
-          createStatusError(
-            ErrorTypes.UnknownIdError,
-            "Group invitation not found."
-          )
-        );
-      case ErrorTypes.UpdateError:
-      default:
-        return res.status(500).send(
-          createStatusError(
-            ErrorTypes.UpdateError,
-            "Failed to accept group invitation."
-          )
-        );
+  if (status === "accepted") {
+    const result = await acceptGroupInvite(username, groupId);
+    if (!result.ok) {
+      switch (result.error) {
+        case ErrorTypes.UnknownIdError:
+          return res.status(404).send(
+            createStatusError(
+              ErrorTypes.UnknownIdError,
+              "Group invitation not found."
+            )
+          );
+        case ErrorTypes.UpdateError:
+        default:
+          return res.status(500).send(
+            createStatusError(
+              ErrorTypes.UpdateError,
+              "Failed to accept group invitation."
+            )
+          );
+      }
+    } else {
+      return res.status(200).send(createStatusOK(result.value));
     }
   } else {
-    return res.status(200).send(createStatusOK(result.value));
-  }
-};
-
-// POST /users/:username/groups/invites/:groupId/decline
-export const declineGroupInviteHandler = async (req: FastifyRequest, res: FastifyReply) => {
-  app.log.info("Received decline group invite request");
-  const { username } = req.params as SimpleUsernameParam;
-  const { groupId } = req.params as { groupId: string };
-
-  const result = await declineGroupInvite(username, groupId);
-
-  if (!result.ok) {
-    switch (result.error) {
-      case ErrorTypes.UnknownIdError:
-        return res.status(404).send(
-          createStatusError(
-            ErrorTypes.UnknownIdError,
-            "Group invitation not found."
-          )
-        );
-      case ErrorTypes.DeleteError:
-      default:
-        return res.status(500).send(
-          createStatusError(
-            ErrorTypes.DeleteError,
-            "Failed to decline group invitation."
-          )
-        );
+    const result = await declineGroupInvite(username, groupId);
+    if (!result.ok) {
+      switch (result.error) {
+        case ErrorTypes.UnknownIdError:
+          return res.status(404).send(
+            createStatusError(
+              ErrorTypes.UnknownIdError,
+              "Group invitation not found."
+            )
+          );
+        case ErrorTypes.DeleteError:
+        default:
+          return res.status(500).send(
+            createStatusError(
+              ErrorTypes.DeleteError,
+              "Failed to decline group invitation."
+            )
+          );
+      }
+    } else {
+      return res.status(200).send(createStatusOK(result.value));
     }
-  } else {
-    return res.status(200).send(createStatusOK(result.value));
   }
 };

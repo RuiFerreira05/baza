@@ -12,7 +12,15 @@ vi.mock("../src/lib/auth", async (importOriginal) => {
 import { getAuthenticatedUsername } from "../src/lib/auth";
 import { app } from "../src/setup";
 import { db } from "../src/lib/db";
-import { users, profiles, groups, groupMembers, events, groupEvents, plans } from "@baza/db/schemas";
+import {
+  users,
+  profiles,
+  groups,
+  groupMembers,
+  events,
+  groupEvents,
+  plans,
+} from "@baza/db/schemas";
 import { clearDatabase } from "./helpers/dbHelper";
 
 const VALID_USER_ID = "11111111-1111-1111-1111-111111111111";
@@ -28,9 +36,20 @@ describe("Event Routes", () => {
   });
 
   it("POST /v1/restricted/groups/:id/events/create should create a group event", async () => {
-    await db.insert(users).values({ id: VALID_USER_ID, name: "Creator", email: "creator@example.com" });
-    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
-    const [group] = await db.insert(groups).values({ groupname: "test_group" }).returning();
+    await db
+      .insert(users)
+      .values({
+        id: VALID_USER_ID,
+        name: "Creator",
+        email: "creator@example.com",
+      });
+    await db
+      .insert(profiles)
+      .values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
+    const [group] = await db
+      .insert(groups)
+      .values({ groupname: "test_group" })
+      .returning();
     await db.insert(groupMembers).values({
       groupId: group.id,
       username: "testcreator",
@@ -38,12 +57,12 @@ describe("Event Routes", () => {
       banned: false,
       acceptedInvite: true,
       acceptedAt: new Date(),
-      invitedAt: new Date()
+      invitedAt: new Date(),
     });
 
     const response = await app.inject({
       method: "POST",
-      url: `/v1/restricted/groups/${group.id}/events/create`,
+      url: `/v1/restricted/groups/${group.id}/events`,
       payload: {
         title: "Summer Party",
         description: "Yearly get-together",
@@ -61,9 +80,20 @@ describe("Event Routes", () => {
   });
 
   it("GET /v1/restricted/groups/:id/events should list group events", async () => {
-    await db.insert(users).values({ id: VALID_USER_ID, name: "Creator", email: "creator@example.com" });
-    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
-    const [group] = await db.insert(groups).values({ groupname: "test_group" }).returning();
+    await db
+      .insert(users)
+      .values({
+        id: VALID_USER_ID,
+        name: "Creator",
+        email: "creator@example.com",
+      });
+    await db
+      .insert(profiles)
+      .values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
+    const [group] = await db
+      .insert(groups)
+      .values({ groupname: "test_group" })
+      .returning();
     await db.insert(groupMembers).values({
       groupId: group.id,
       username: "testcreator",
@@ -71,23 +101,29 @@ describe("Event Routes", () => {
       banned: false,
       acceptedInvite: true,
       acceptedAt: new Date(),
-      invitedAt: new Date()
+      invitedAt: new Date(),
     });
 
-    const [baseEvent] = await db.insert(events).values({
-      title: "Event One",
-      description: "Desc One"
-    }).returning();
+    const [baseEvent] = await db
+      .insert(events)
+      .values({
+        title: "Event One",
+        description: "Desc One",
+      })
+      .returning();
 
-    await db.insert(groupEvents).values({
-      id: baseEvent.id,
-      groupId: group.id,
-      startDate: "2026-08-01",
-      endDate: "2026-08-02",
-      votingEndTime: new Date("2026-07-31T23:59:59.000Z"),
-      createdBy: "testcreator",
-      state: "unfinished",
-    }).returning();
+    await db
+      .insert(groupEvents)
+      .values({
+        id: baseEvent.id,
+        groupId: group.id,
+        startDate: "2026-08-01",
+        endDate: "2026-08-02",
+        votingEndTime: new Date("2026-07-31T23:59:59.000Z"),
+        createdBy: "testcreator",
+        state: "unfinished",
+      })
+      .returning();
 
     const response = await app.inject({
       method: "GET",
@@ -102,9 +138,20 @@ describe("Event Routes", () => {
   });
 
   it("GET /v1/restricted/groups/:id/events/:idevent should retrieve details", async () => {
-    await db.insert(users).values({ id: VALID_USER_ID, name: "Creator", email: "creator@example.com" });
-    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
-    const [group] = await db.insert(groups).values({ groupname: "test_group" }).returning();
+    await db
+      .insert(users)
+      .values({
+        id: VALID_USER_ID,
+        name: "Creator",
+        email: "creator@example.com",
+      });
+    await db
+      .insert(profiles)
+      .values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
+    const [group] = await db
+      .insert(groups)
+      .values({ groupname: "test_group" })
+      .returning();
     await db.insert(groupMembers).values({
       groupId: group.id,
       username: "testcreator",
@@ -112,23 +159,29 @@ describe("Event Routes", () => {
       banned: false,
       acceptedInvite: true,
       acceptedAt: new Date(),
-      invitedAt: new Date()
+      invitedAt: new Date(),
     });
 
-    const [baseEvent] = await db.insert(events).values({
-      title: "Event One",
-      description: "Desc One"
-    }).returning();
+    const [baseEvent] = await db
+      .insert(events)
+      .values({
+        title: "Event One",
+        description: "Desc One",
+      })
+      .returning();
 
-    const [event] = await db.insert(groupEvents).values({
-      id: baseEvent.id,
-      groupId: group.id,
-      startDate: "2026-08-01",
-      endDate: "2026-08-02",
-      votingEndTime: new Date("2026-07-31T23:59:59.000Z"),
-      createdBy: "testcreator",
-      state: "unfinished",
-    }).returning();
+    const [event] = await db
+      .insert(groupEvents)
+      .values({
+        id: baseEvent.id,
+        groupId: group.id,
+        startDate: "2026-08-01",
+        endDate: "2026-08-02",
+        votingEndTime: new Date("2026-07-31T23:59:59.000Z"),
+        createdBy: "testcreator",
+        state: "unfinished",
+      })
+      .returning();
 
     const response = await app.inject({
       method: "GET",
@@ -142,9 +195,20 @@ describe("Event Routes", () => {
   });
 
   it("PATCH /v1/restricted/groups/:id/events/:idevent/edit should modify group event", async () => {
-    await db.insert(users).values({ id: VALID_USER_ID, name: "Creator", email: "creator@example.com" });
-    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
-    const [group] = await db.insert(groups).values({ groupname: "test_group" }).returning();
+    await db
+      .insert(users)
+      .values({
+        id: VALID_USER_ID,
+        name: "Creator",
+        email: "creator@example.com",
+      });
+    await db
+      .insert(profiles)
+      .values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
+    const [group] = await db
+      .insert(groups)
+      .values({ groupname: "test_group" })
+      .returning();
     await db.insert(groupMembers).values({
       groupId: group.id,
       username: "testcreator",
@@ -152,27 +216,33 @@ describe("Event Routes", () => {
       banned: false,
       acceptedInvite: true,
       acceptedAt: new Date(),
-      invitedAt: new Date()
+      invitedAt: new Date(),
     });
 
-    const [baseEvent] = await db.insert(events).values({
-      title: "Old Title",
-      description: "Old Description"
-    }).returning();
+    const [baseEvent] = await db
+      .insert(events)
+      .values({
+        title: "Old Title",
+        description: "Old Description",
+      })
+      .returning();
 
-    const [event] = await db.insert(groupEvents).values({
-      id: baseEvent.id,
-      groupId: group.id,
-      startDate: "2026-08-01",
-      endDate: "2026-08-02",
-      votingEndTime: new Date("2026-07-31T23:59:59.000Z"),
-      createdBy: "testcreator",
-      state: "unfinished",
-    }).returning();
+    const [event] = await db
+      .insert(groupEvents)
+      .values({
+        id: baseEvent.id,
+        groupId: group.id,
+        startDate: "2026-08-01",
+        endDate: "2026-08-02",
+        votingEndTime: new Date("2026-07-31T23:59:59.000Z"),
+        createdBy: "testcreator",
+        state: "unfinished",
+      })
+      .returning();
 
     const response = await app.inject({
       method: "PATCH",
-      url: `/v1/restricted/groups/${group.id}/events/${event.id}/edit`,
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}`,
       payload: {
         title: "New Title",
         description: "New Description",
@@ -186,9 +256,20 @@ describe("Event Routes", () => {
   });
 
   it("POST /v1/restricted/groups/:id/events/:idevent/resolve-tie should break a tie", async () => {
-    await db.insert(users).values({ id: VALID_USER_ID, name: "Creator", email: "creator@example.com" });
-    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
-    const [group] = await db.insert(groups).values({ groupname: "test_group" }).returning();
+    await db
+      .insert(users)
+      .values({
+        id: VALID_USER_ID,
+        name: "Creator",
+        email: "creator@example.com",
+      });
+    await db
+      .insert(profiles)
+      .values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
+    const [group] = await db
+      .insert(groups)
+      .values({ groupname: "test_group" })
+      .returning();
     await db.insert(groupMembers).values({
       groupId: group.id,
       username: "testcreator",
@@ -196,49 +277,61 @@ describe("Event Routes", () => {
       banned: false,
       acceptedInvite: true,
       acceptedAt: new Date(),
-      invitedAt: new Date()
+      invitedAt: new Date(),
     });
 
-    const [baseEvent] = await db.insert(events).values({
-      title: "Tied Event",
-      description: "Tied description"
-    }).returning();
+    const [baseEvent] = await db
+      .insert(events)
+      .values({
+        title: "Tied Event",
+        description: "Tied description",
+      })
+      .returning();
 
-    const [event] = await db.insert(groupEvents).values({
-      id: baseEvent.id,
-      groupId: group.id,
-      startDate: "2026-08-01",
-      endDate: "2026-08-02",
-      votingEndTime: new Date("2026-07-31T23:59:59.000Z"),
-      createdBy: "testcreator",
-      state: "needs_tiebreaker",
-    }).returning();
+    const [event] = await db
+      .insert(groupEvents)
+      .values({
+        id: baseEvent.id,
+        groupId: group.id,
+        startDate: "2026-08-01",
+        endDate: "2026-08-02",
+        votingEndTime: new Date("2026-07-31T23:59:59.000Z"),
+        createdBy: "testcreator",
+        state: "needs_tiebreaker",
+      })
+      .returning();
 
-    const [plan1] = await db.insert(plans).values({
-      groupEventId: event.id,
-      username: "testcreator",
-      title: "Plan A",
-      date: "2026-08-01",
-      startTime: "12:00",
-      endTime: "13:00",
-      activity: "Eat pizza",
-      location: "Pizzeria",
-      minBudget: 10,
-      maxBudget: 20,
-    }).returning();
+    const [plan1] = await db
+      .insert(plans)
+      .values({
+        groupEventId: event.id,
+        username: "testcreator",
+        title: "Plan A",
+        date: "2026-08-01",
+        startTime: "12:00",
+        endTime: "13:00",
+        activity: "Eat pizza",
+        location: "Pizzeria",
+        minBudget: 10,
+        maxBudget: 20,
+      })
+      .returning();
 
-    const [plan2] = await db.insert(plans).values({
-      groupEventId: event.id,
-      username: "testcreator",
-      title: "Plan B",
-      date: "2026-08-01",
-      startTime: "13:00",
-      endTime: "14:00",
-      activity: "Drink coffee",
-      location: "Coffee shop",
-      minBudget: 5,
-      maxBudget: 10,
-    }).returning();
+    const [plan2] = await db
+      .insert(plans)
+      .values({
+        groupEventId: event.id,
+        username: "testcreator",
+        title: "Plan B",
+        date: "2026-08-01",
+        startTime: "13:00",
+        endTime: "14:00",
+        activity: "Drink coffee",
+        location: "Coffee shop",
+        minBudget: 5,
+        maxBudget: 10,
+      })
+      .returning();
 
     const response = await app.inject({
       method: "POST",
@@ -252,16 +345,29 @@ describe("Event Routes", () => {
     expect(response.json().status).toBe("OK");
 
     const checkEvent = await db.query.groupEvents.findFirst({
-      where: (e, { eq }) => eq(e.id, event.id),
+      where: {
+        id: event.id,
+      },
     });
     expect(checkEvent?.state).toBe("finished");
   });
 
   it("should handle event attendance confirmation CRUD operations", async () => {
     // 1. Setup user, profile, group, and member
-    await db.insert(users).values({ id: VALID_USER_ID, name: "Creator", email: "creator@example.com" });
-    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
-    const [group] = await db.insert(groups).values({ groupname: "test_group" }).returning();
+    await db
+      .insert(users)
+      .values({
+        id: VALID_USER_ID,
+        name: "Creator",
+        email: "creator@example.com",
+      });
+    await db
+      .insert(profiles)
+      .values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
+    const [group] = await db
+      .insert(groups)
+      .values({ groupname: "test_group" })
+      .returning();
     await db.insert(groupMembers).values({
       groupId: group.id,
       username: "testcreator",
@@ -269,28 +375,34 @@ describe("Event Routes", () => {
       banned: false,
       acceptedInvite: true,
       acceptedAt: new Date(),
-      invitedAt: new Date()
+      invitedAt: new Date(),
     });
 
-    const [baseEvent] = await db.insert(events).values({
-      title: "Confirm Event",
-      description: "Confirmation test event"
-    }).returning();
+    const [baseEvent] = await db
+      .insert(events)
+      .values({
+        title: "Confirm Event",
+        description: "Confirmation test event",
+      })
+      .returning();
 
-    const [event] = await db.insert(groupEvents).values({
-      id: baseEvent.id,
-      groupId: group.id,
-      startDate: "2026-08-01",
-      endDate: "2026-08-02",
-      votingEndTime: new Date("2026-07-31T23:59:59.000Z"),
-      createdBy: "testcreator",
-      state: "unfinished",
-    }).returning();
+    const [event] = await db
+      .insert(groupEvents)
+      .values({
+        id: baseEvent.id,
+        groupId: group.id,
+        startDate: "2026-08-01",
+        endDate: "2026-08-02",
+        votingEndTime: new Date("2026-07-31T23:59:59.000Z"),
+        createdBy: "testcreator",
+        state: "unfinished",
+      })
+      .returning();
 
     // 2. Confirm attendance
     const confirmRes = await app.inject({
       method: "POST",
-      url: `/v1/restricted/groups/${group.id}/events/${event.id}/confirm`,
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}/confirmations`,
     });
     expect(confirmRes.statusCode).toBe(200);
     expect(confirmRes.json().status).toBe("OK");
@@ -310,7 +422,7 @@ describe("Event Routes", () => {
     // 4. Revoke confirmation
     const revokeRes = await app.inject({
       method: "DELETE",
-      url: `/v1/restricted/groups/${group.id}/events/${event.id}/confirm`,
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}/confirmations`,
     });
     expect(revokeRes.statusCode).toBe(200);
     expect(revokeRes.json().status).toBe("OK");

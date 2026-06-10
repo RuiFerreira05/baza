@@ -17,6 +17,8 @@ import {
   ErrorTypes,
   type SimpleUsernameParam,
   type SendFriendRequestBody,
+  RespondFriendRequestBody,
+  BlockUserBody,
 } from "@baza/shared-types";
 import { app } from "../setup";
 
@@ -164,75 +166,69 @@ export const getPendingFriendRequestsHandler = async (req: FastifyRequest, res: 
   }
 };
 
-// POST /users/:username/friends/requests/:senderUsername/accept
-export const acceptFriendRequestHandler = async (req: FastifyRequest, res: FastifyReply) => {
-  app.log.info("Received accept friend request");
+// PATCH /users/:username/friends/requests/:senderUsername
+export const respondFriendRequestHandler = async (req: FastifyRequest, res: FastifyReply) => {
+  app.log.info("Received respond friend request");
   const { username } = req.params as SimpleUsernameParam;
   const { senderUsername } = req.params as { senderUsername: string };
+  const { status } = req.body as RespondFriendRequestBody;
 
-  const result = await acceptFriendRequest(username, senderUsername);
-
-  if (!result.ok) {
-    switch (result.error) {
-      case ErrorTypes.UnknownUsernameError:
-        return res.status(404).send(
-          createStatusError(
-            ErrorTypes.UnknownUsernameError,
-            "Pending friend request not found."
-          )
-        );
-      case ErrorTypes.UpdateError:
-      default:
-        return res.status(500).send(
-          createStatusError(
-            ErrorTypes.UpdateError,
-            "Failed to accept friend request."
-          )
-        );
+  if (status === "accepted") {
+    const result = await acceptFriendRequest(username, senderUsername);
+    if (!result.ok) {
+      switch (result.error) {
+        case ErrorTypes.UnknownUsernameError:
+          return res.status(404).send(
+            createStatusError(
+              ErrorTypes.UnknownUsernameError,
+              "Pending friend request not found."
+            )
+          );
+        case ErrorTypes.UpdateError:
+        default:
+          return res.status(500).send(
+            createStatusError(
+              ErrorTypes.UpdateError,
+              "Failed to accept friend request."
+            )
+          );
+      }
+    } else {
+      return res.status(200).send(createStatusOK(result.value));
     }
   } else {
-    return res.status(200).send(createStatusOK(result.value));
+    const result = await declineFriendRequest(username, senderUsername);
+    if (!result.ok) {
+      switch (result.error) {
+        case ErrorTypes.UnknownUsernameError:
+          return res.status(404).send(
+            createStatusError(
+              ErrorTypes.UnknownUsernameError,
+              "Pending friend request not found."
+            )
+          );
+        case ErrorTypes.UpdateError:
+        default:
+          return res.status(500).send(
+            createStatusError(
+              ErrorTypes.UpdateError,
+              "Failed to decline friend request."
+            )
+          );
+      }
+    } else {
+      return res.status(200).send(createStatusOK(result.value));
+    }
   }
 };
 
-// POST /users/:username/friends/requests/:senderUsername/decline
-export const declineFriendRequestHandler = async (req: FastifyRequest, res: FastifyReply) => {
-  app.log.info("Received decline friend request");
-  const { username } = req.params as SimpleUsernameParam;
-  const { senderUsername } = req.params as { senderUsername: string };
-
-  const result = await declineFriendRequest(username, senderUsername);
-
-  if (!result.ok) {
-    switch (result.error) {
-      case ErrorTypes.UnknownUsernameError:
-        return res.status(404).send(
-          createStatusError(
-            ErrorTypes.UnknownUsernameError,
-            "Pending friend request not found."
-          )
-        );
-      case ErrorTypes.UpdateError:
-      default:
-        return res.status(500).send(
-          createStatusError(
-            ErrorTypes.UpdateError,
-            "Failed to decline friend request."
-          )
-        );
-    }
-  } else {
-    return res.status(200).send(createStatusOK(result.value));
-  }
-};
-
-// POST /users/:username/friends/:friendUsername/block
+// POST /users/:username/blocks
 export const blockUserHandler = async (req: FastifyRequest, res: FastifyReply) => {
   app.log.info("Received block user request");
   const { username } = req.params as SimpleUsernameParam;
-  const { friendUsername } = req.params as { friendUsername: string };
+  const { blockedUsername } = req.body as BlockUserBody;
 
-  const result = await blockUser(username, friendUsername);
+  const result = await blockUser(username, blockedUsername);
 
   if (!result.ok) {
     switch (result.error) {
@@ -257,13 +253,13 @@ export const blockUserHandler = async (req: FastifyRequest, res: FastifyReply) =
   }
 };
 
-// POST /users/:username/friends/:friendUsername/unblock
+// DELETE /users/:username/blocks/:blockedUsername
 export const unblockUserHandler = async (req: FastifyRequest, res: FastifyReply) => {
   app.log.info("Received unblock user request");
   const { username } = req.params as SimpleUsernameParam;
-  const { friendUsername } = req.params as { friendUsername: string };
+  const { blockedUsername } = req.params as { blockedUsername: string };
 
-  const result = await unblockUser(username, friendUsername);
+  const result = await unblockUser(username, blockedUsername);
 
   if (!result.ok) {
     switch (result.error) {

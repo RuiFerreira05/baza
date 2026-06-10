@@ -6,62 +6,63 @@ This is a compiled reference of all backend routes registered on the Baza server
 
 ## 👤 User / Profile Routes (Mounted at `/v1/restricted/users`)
 
-| Method | Path | Description | Type |
-| :--- | :--- | :--- | :--- |
-| **GET** | `/:username` | Fetch public profile details | **[Original]** |
-| **POST** | `/create` | Initialize user profile | **[Original]** |
-| **DELETE** | `/:username/delete` | Delete user profile | **[Original]** |
-| **PATCH** | `/:username/edit` | Edit user profile (username/bio) | **[Original]** |
-| **GET** | `/:username/events` | List all user calendar events in a date window | **[Original]** |
-| **GET** | `/:username/events/:idEvent` | Retrieve details of a specific personal event | **[AI Generated]** |
-| **POST** | `/:username/events/create` | Create a new personal event | **[AI Generated]** |
-| **PATCH** | `/:username/events/:idEvent/edit` | Modify personal event parameters | **[AI Generated]** |
-| **GET** | `/:username/groups` | List all groups the user is active in | **[AI Generated]** |
-| **GET** | `/:username/groups/:idGroup` | Retrieve details of a specific user group | **[AI Generated]** |
-| **GET** | `/:username/groups/invites` | Retrieve pending group invitations | **[AI Generated]** |
-| **POST** | `/:username/groups/invites/:groupId/accept` | Accept a group invitation | **[AI Generated]** |
-| **POST** | `/:username/groups/invites/:groupId/decline` | Decline a group invitation | **[AI Generated]** |
-| **GET** | `/:username/friends` | Retrieve accepted friends list | **[AI Generated]** |
-| **GET** | `/:username/friends/:friendUsername` | Retrieve profile of an accepted friend | **[AI Generated]** |
-| **POST** | `/:username/friends/:friendUsername/remove` | Unfriend/remove friendship | **[AI Generated]** |
-| **DELETE** | `/:username/friends/:friendUsername/remove` | Unfriend/remove friendship | **[AI Generated]** |
-| **POST** | `/:username/friends/sendRequest` | Send a new friend request | **[AI Generated]** |
-| **GET** | `/:username/friends/requests` | List received pending friend requests | **[AI Generated]** |
-| **POST** | `/:username/friends/requests/:senderUsername/accept` | Accept a friend request | **[AI Generated]** |
-| **POST** | `/:username/friends/requests/:senderUsername/decline` | Decline a friend request | **[AI Generated]** |
-| **GET** | `/:username/settings` | Retrieve user profile settings | **[AI Generated]** |
-| **PATCH** | `/:username/settings` | Update user profile settings | **[AI Generated]** |
+| Method     | Path                                          | Description                                             |
+| :--------- | :-------------------------------------------- | :------------------------------------------------------ |
+| **GET**    | `/:username`                                  | Fetch public profile details                            |
+| **POST**   | `/`                                           | Initialize user profile                                 |
+| **DELETE** | `/:username`                                  | Delete user profile                                     |
+| **PATCH**  | `/:username`                                  | Edit user profile (username/bio)                        |
+| **GET**    | `/:username/events`                           | List all user calendar events in a date window          |
+| **GET**    | `/:username/events/:idEvent`                  | Retrieve details of a specific personal event           |
+| **POST**   | `/:username/events`                           | Create a new personal event                             |
+| **PATCH**  | `/:username/events/:idEvent`                  | Modify personal event parameters                        |
+| **GET**    | `/:username/groups`                           | List all groups the user is active in                   |
+| **GET**    | `/:username/groups/invites`                   | Retrieve pending group invitations                      |
+| **PATCH**  | `/:username/groups/invites/:groupId`          | Respond (accept or decline) to a group invitation       |
+| **GET**    | `/:username/friends`                          | Retrieve accepted friends list                          |
+| **GET**    | `/:username/friends/:friendUsername`          | Retrieve profile of an accepted friend                  |
+| **DELETE** | `/:username/friends/:friendUsername`          | Unfriend/remove friendship                              |
+| **POST**   | `/:username/friends/requests`                 | Send a new friend request                               |
+| **GET**    | `/:username/friends/requests`                 | List received pending friend requests                   |
+| **GET**    | `/:username/friends/requests/sent`            | List outgoing pending friend requests                   |
+| **PATCH**  | `/:username/friends/requests/:senderUsername` | Respond (accept or decline) to a pending friend request |
+| **POST**   | `/:username/blocks`                           | Block a user                                            |
+| **DELETE** | `/:username/blocks/:blockedUsername`          | Unblock a user                                          |
+| **GET**    | `/:username/settings`                         | Retrieve user profile settings                          |
+| **PATCH**  | `/:username/settings`                         | Update user profile settings                            |
 
 ---
 
 ## 👥 Group / Event / Plan Routes (Mounted at `/v1/restricted/groups`)
 
-| Method | Path | Description | Type |
-| :--- | :--- | :--- | :--- |
-| **GET** | `/:id` | Fetch group details | **[Original]** |
-| **POST** | `/create` | Create a new group | **[Original]** |
-| **DELETE** | `/:id/delete` | Delete a group | **[Original]** |
-| **PATCH** | `/:id/edit` | Edit group details (name/description) | **[Original]** |
-| **PATCH** | `/:id/edit/photo` | Upload group profile icon | **[Original]** |
-| **GET** | `/:id/photo` | Download group profile icon | **[Original]** |
-| **POST** | `/:id/group-members/invite-user` | Invite a user to the group | **[Original]** |
-| **POST** | `/:id/group-members/remove-user` | Kick/remove member from group | **[Original]** |
-| **GET** | `/:id/group-members` | List group members (with invite/ban status) | **[Original]** |
-| **PATCH** | `/:id/group-members/:username/promote-to-admin` | Promote member to group admin | **[AI Generated]** |
-| **PATCH** | `/:id/group-members/:username/dismiss-admin` | Remove admin status from member | **[AI Generated]** |
-| **POST** | `/:id/events/create` | Create group event with voting deadline | **[AI Generated]** |
-| **GET** | `/:id/events` | List all group events | **[AI Generated]** |
-| **GET** | `/:id/calendar` | Fetch combined group calendar (overlaps & masking) | **[AI Generated]** |
-| **GET** | `/:id/events/:idevent` | Retrieve details of a specific group event | **[AI Generated]** |
-| **PATCH** | `/:id/events/:idevent/edit` | Modify group event parameters | **[AI Generated]** |
-| **POST** | `/:id/events/:idevent/resolve-tie` | Break a tie between voting plans | **[AI Generated]** |
-| **POST** | `/:id/events/:idevent/preferences/create` | Submit user planning preferences for event | **[AI Generated]** |
-| **GET** | `/:id/events/:idevent/preferences/group` | Get aggregated group preference report | **[AI Generated]** |
-| **GET** | `/:id/events/:idevent/preferences/all` | Get all member preferences (respects privacy) | **[AI Generated]** |
-| **GET** | `/:id/events/:idevent/preferences/:username` | Get specific member preference | **[AI Generated]** |
-| **GET** | `/:id/events/:idevent/plans` | Fetch proposed plans list with votes | **[AI Generated]** |
-| **POST** | `/:id/events/:idevent/plans/create` | Propose a plan for the group event | **[AI Generated]** |
-| **GET** | `/:id/events/:idevent/plans/:idplan` | Get details of a proposed plan | **[AI Generated]** |
-| **PATCH** | `/:id/events/:idevent/plans/:idplan/edit` | Edit proposed plan coordinates | **[AI Generated]** |
-| **POST** | `/:id/events/:idevent/plans/:idplan/vote` | Approve a plan proposal | **[AI Generated]** |
-| **POST** | `/:id/events/:idevent/plans/:idplan/remove-vote` | Remove approval from plan proposal | **[AI Generated]** |
+| Method     | Path                                         | Description                                        |
+| :--------- | :------------------------------------------- | :------------------------------------------------- |
+| **GET**    | `/:id`                                       | Fetch group details                                |
+| **POST**   | `/`                                          | Create a new group                                 |
+| **DELETE** | `/:id`                                       | Delete a group                                     |
+| **PATCH**  | `/:id`                                       | Edit group details (name/description)              |
+| **PATCH**  | `/:id/photo`                                 | Upload group profile icon                          |
+| **GET**    | `/:id/photo`                                 | Download group profile icon                        |
+| **POST**   | `/:id/group-members`                         | Invite a user to the group                         |
+| **DELETE** | `/:id/group-members/:username`               | Kick/remove member from group                      |
+| **GET**    | `/:id/group-members`                         | List group members (with invite/ban status)        |
+| **PATCH**  | `/:id/group-members/:username`               | Update a member's role (admin status)              |
+| **POST**   | `/:id/events`                                | Create group event with voting deadline            |
+| **GET**    | `/:id/events`                                | List all group events                              |
+| **GET**    | `/:id/calendar`                              | Fetch combined group calendar (overlaps & masking) |
+| **GET**    | `/:id/events/:idevent`                       | Retrieve details of a specific group event         |
+| **PATCH**  | `/:id/events/:idevent`                       | Modify group event parameters                      |
+| **POST**   | `/:id/events/:idevent/resolve-tie`           | Break a tie between voting plans                   |
+| **POST**   | `/:id/events/:idevent/preferences`           | Submit user planning preferences for event         |
+| **GET**    | `/:id/events/:idevent/preferences/group`     | Get aggregated group preference report             |
+| **GET**    | `/:id/events/:idevent/preferences`           | Get all member preferences (respects privacy)      |
+| **GET**    | `/:id/events/:idevent/preferences/:username` | Get specific member preference                     |
+| **GET**    | `/:id/events/:idevent/plans`                 | Fetch proposed plans list with votes               |
+| **POST**   | `/:id/events/:idevent/plans`                 | Propose a plan for the group event                 |
+| **GET**    | `/:id/events/:idevent/plans/:idplan`         | Get details of a proposed plan                     |
+| **PATCH**  | `/:id/events/:idevent/plans/:idplan`         | Edit proposed plan coordinates                     |
+| **POST**   | `/:id/events/:idevent/plans/:idplan/votes`   | Approve a plan proposal                            |
+| **DELETE** | `/:id/events/:idevent/plans/:idplan/votes`   | Remove approval from plan proposal                 |
+| **POST**   | `/:id/events/:idevent/confirmations`         | Confirm attendance for group event                 |
+| **DELETE** | `/:id/events/:idevent/confirmations`         | Revoke attendance confirmation                     |
+| **GET**    | `/:id/events/:idevent/confirmations`         | Retrieve all attendance confirmations              |
