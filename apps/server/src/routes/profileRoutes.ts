@@ -13,7 +13,8 @@ import {
   groupDTO,
   groupMemberDTO,
   SendFriendRequestBody,
-  FriendRequestDTO
+  FriendRequestDTO,
+  SentFriendRequestDTO,
 } from "@baza/shared-types";
 import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
@@ -31,7 +32,10 @@ import {
   sendFriendRequestHandler,
   getPendingFriendRequestsHandler,
   acceptFriendRequestHandler,
-  declineFriendRequestHandler
+  declineFriendRequestHandler,
+  blockUserHandler,
+  unblockUserHandler,
+  getPendingSentFriendRequestsHandler,
 } from "../handlers/friendHandlers";
 import {
   getUserSettingsHandler,
@@ -262,27 +266,6 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     getUserGroupsHandler
   );
 
-  // GET /users/:username/groups/:idGroup
-  app.get(
-    "/:username/groups/:idGroup",
-    {
-      schema: {
-        description: "This route fetches details of a specific user group.",
-        tags: ["users"],
-        params: Type.Object({
-          username: Type.String(),
-          idGroup: Type.String({ format: "uuid" }),
-        }),
-        response: {
-          200: StatusOK(groupDTO, "Success"),
-          404: StatusError(ErrorTypes.UnknownIdError, "Not found"),
-          500: StatusError(ErrorTypes.ConversionError, "Error"),
-        },
-      },
-    },
-    getUserGroupByIdHandler
-  );
-
   // GET /users/:username/groups/invites
   app.get(
     "/:username/groups/invites",
@@ -380,9 +363,9 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     getFriendProfileHandler
   );
 
-  // POST /users/:username/friends/:friendUsername/remove
-  app.post(
-    "/:username/friends/:friendUsername/remove",
+  // DELETE /users/:username/friends/:friendUsername
+  app.delete(
+    "/:username/friends/:friendUsername",
     {
       schema: {
         description: "This route removes an existing friend relationship.",
@@ -401,25 +384,46 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     removeFriendHandler
   );
 
-  // DELETE /users/:username/friends/:friendUsername/remove
-  app.delete(
-    "/:username/friends/:friendUsername/remove",
+  // POST /users/:username/friends/:friendUsername/block
+  app.post(
+    "/:username/friends/:friendUsername/block",
     {
       schema: {
-        description: "This route removes an existing friend relationship.",
+        description: "This route blocks a user.",
         tags: ["users"],
         params: Type.Object({
           username: Type.String(),
           friendUsername: Type.String(),
         }),
         response: {
-          200: StatusOK(Type.Null(), "Removed"),
+          200: StatusOK(Type.Null(), "Blocked"),
+          404: StatusError(ErrorTypes.UnknownUsernameError, "Not found"),
+          500: StatusError(ErrorTypes.UpdateError, "Error"),
+        },
+      },
+    },
+    blockUserHandler
+  );
+
+  // POST /users/:username/friends/:friendUsername/unblock
+  app.post(
+    "/:username/friends/:friendUsername/unblock",
+    {
+      schema: {
+        description: "This route unblocks a user.",
+        tags: ["users"],
+        params: Type.Object({
+          username: Type.String(),
+          friendUsername: Type.String(),
+        }),
+        response: {
+          200: StatusOK(Type.Null(), "Unblocked"),
           404: StatusError(ErrorTypes.UnknownUsernameError, "Not found"),
           500: StatusError(ErrorTypes.DeleteError, "Error"),
         },
       },
     },
-    removeFriendHandler
+    unblockUserHandler
   );
 
   // POST /users/:username/friends/sendRequest
@@ -456,6 +460,23 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     getPendingFriendRequestsHandler
+  );
+
+  // GET /users/:username/friends/requests/sent
+  app.get(
+    "/:username/friends/requests/sent",
+    {
+      schema: {
+        description: "This route fetches all pending outgoing friend requests sent by the user.",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username"),
+        response: {
+          200: StatusOK(Type.Array(SentFriendRequestDTO), "Success"),
+          500: StatusError(ErrorTypes.ConversionError, "Error"),
+        },
+      },
+    },
+    getPendingSentFriendRequestsHandler
   );
 
   // POST /users/:username/friends/requests/:senderUsername/accept

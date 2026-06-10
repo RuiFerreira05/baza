@@ -490,3 +490,31 @@ export const dismissUserAsAdmin = async (
     return Err(ErrorTypes.UpdateError);
   }
 };
+
+/**
+ * Checks if a user is an active member or admin of a group (accepted invite, not banned).
+ */
+export const verifyGroupMembership = async (
+  groupId: string,
+  username: string,
+): Promise<boolean> => {
+  try {
+    const [membership] = await db
+      .select({ id: groupMembers.groupId })
+      .from(groupMembers)
+      .where(
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.username, username),
+          eq(groupMembers.acceptedInvite, true),
+          eq(groupMembers.banned, false),
+        ),
+      )
+      .limit(1);
+    return !!membership;
+  } catch (error) {
+    app.log.error(error as any, "Failed to verify group membership");
+    return false;
+  }
+};
+

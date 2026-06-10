@@ -1,5 +1,6 @@
 import Type from "typebox";
 import { nullable } from "./general";
+import { planDTO } from "./plans";
 
 // ####### DTO #######
 
@@ -41,6 +42,7 @@ export const groupEventDTO = Type.Object({
   createdBy: Type.String({ description: "Creator username" }),
   createdAt: Type.String({ format: "date-time" }),
   updatedAt: Type.String({ format: "date-time" }),
+  winningPlan: Type.Optional(nullable(planDTO)),
 }, {
   description: "Group event data.",
   title: "GroupEventDTO",
@@ -156,3 +158,14 @@ export const groupCalendarDTO = Type.Object({
   title: "GroupCalendarDTO",
 });
 export type GroupCalendarDTO = Type.Static<typeof groupCalendarDTO>;
+
+// Event confirmation DTO
+export const eventConfirmationDTO = Type.Object({
+  groupId: Type.String({ format: "uuid" }),
+  username: Type.String(),
+  confirmedAt: Type.String(),
+}, {
+  description: "Group member attendance confirmation details",
+  title: "EventConfirmationDTO",
+});
+export type EventConfirmationDTO = Type.Static<typeof eventConfirmationDTO>;

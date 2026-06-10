@@ -1,14 +1,27 @@
-import { describe, it, expect, beforeEach, afterAll } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterAll } from "vitest";
+
+// Mock auth module before imports
+vi.mock("../src/lib/auth", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../src/lib/auth")>();
+  return {
+    ...actual,
+    getAuthenticatedUsername: vi.fn(),
+  };
+});
+
+import { getAuthenticatedUsername } from "../src/lib/auth";
 import { app } from "../src/setup";
 import { db } from "../src/lib/db";
 import { users, profiles, friends, groups, groupMembers, events, personalEvents } from "@baza/db/schemas";
 import { clearDatabase } from "./helpers/dbHelper";
+import { and, eq, sql } from "drizzle-orm";
 
 const VALID_USER_ID = "11111111-1111-1111-1111-111111111111";
 
 describe("Profile Routes", () => {
   beforeEach(async () => {
     await clearDatabase();
+    vi.mocked(getAuthenticatedUsername).mockResolvedValue("johndoe");
   });
 
   afterAll(async () => {
@@ -286,10 +299,10 @@ describe("Profile Routes", () => {
     expect(invitesRes.json().data.length).toBe(1);
     expect(invitesRes.json().data[0].groupname).toBe("invitedgroup");
 
-    // 5. Test get group detail
+    // 5. Test get group detail (standardized route)
     const detailRes = await app.inject({
       method: "GET",
-      url: `/v1/restricted/users/johndoe/groups/${groupId1}`,
+      url: `/v1/restricted/groups/${groupId1}`,
     });
     expect(detailRes.statusCode).toBe(200);
     expect(detailRes.json().data.groupname).toBe("activegroup");
@@ -393,10 +406,10 @@ describe("Profile Routes", () => {
     expect(friendProfileRes.statusCode).toBe(200);
     expect(friendProfileRes.json().data.username).toBe("userb");
 
-    // 7. Remove friend (unfriend)
+    // 7. Remove friend (unfriend) via standardized DELETE
     const removeRes = await app.inject({
-      method: "POST",
-      url: "/v1/restricted/users/usera/friends/userb/remove",
+      method: "DELETE",
+      url: "/v1/restricted/users/usera/friends/userb",
     });
     expect(removeRes.statusCode).toBe(200);
 
@@ -407,5 +420,71 @@ describe("Profile Routes", () => {
     });
     expect(checkFriends.json().data.length).toBe(0);
   });
-});
 
+  it("should handle blocking, unblocking, and pending sent requests", async () => {
+    // 1. Setup users and profiles
+    const USER_ID_A = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+    const USER_ID_B = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
+    await db.insert(users).values([
+      { id: USER_ID_A, name: "User A", email: "usera@example.com" },
+      { id: USER_ID_B, name: "User B", email: "userb@example.com" }
+    ]);
+    await db.insert(profiles).values([
+      { userId: USER_ID_A, username: "usera", settings: {} },
+      { userId: USER_ID_B, username: "userb", settings: {} }
+    ]);
+
+    // 2. Send friend request from usera to userb
+    const reqRes = await app.inject({
+      method: "POST",
+      url: "/v1/restricted/users/usera/friends/sendRequest",
+      payload: {
+        recipientUsername: "userb",
+      },
+    });
+    expect(reqRes.statusCode).toBe(200);
+
+    // 3. Get pending sent requests for usera
+    const sentRes = await app.inject({
+      method: "GET",
+      url: "/v1/restricted/users/usera/friends/requests/sent",
+    });
+    expect(sentRes.statusCode).toBe(200);
+    expect(sentRes.json().status).toBe("OK");
+    expect(sentRes.json().data).toHaveLength(1);
+    expect(sentRes.json().data[0].recipient.username).toBe("userb");
+
+    // 4. Block userb
+    const blockRes = await app.inject({
+      method: "POST",
+      url: "/v1/restricted/users/usera/friends/userb/block",
+    });
+    expect(blockRes.statusCode).toBe(200);
+
+    // Verify friendship status is now blocked in DB
+    const [friendship] = await db.select().from(friends).where(
+      and(
+        eq(friends.sentBy, "usera"),
+        eq(friends.receivedBy, "userb")
+      )
+    );
+    expect(friendship).toBeDefined();
+    expect(friendship.friendStatus).toBe("blocked");
+
+    // 5. Unblock userb
+    const unblockRes = await app.inject({
+      method: "POST",
+      url: "/v1/restricted/users/usera/friends/userb/unblock",
+    });
+    expect(unblockRes.statusCode).toBe(200);
+
+    // Verify friendship is deleted from DB
+    const checkFriendship = await db.select().from(friends).where(
+      and(
+        eq(friends.sentBy, "usera"),
+        eq(friends.receivedBy, "userb")
+      )
+    );
+    expect(checkFriendship).toHaveLength(0);
+  });
+});

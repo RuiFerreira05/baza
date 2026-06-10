@@ -1,4 +1,15 @@
-import { describe, it, expect, beforeEach, afterAll } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterAll } from "vitest";
+
+// Mock auth module before imports
+vi.mock("../src/lib/auth", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../src/lib/auth")>();
+  return {
+    ...actual,
+    getAuthenticatedUsername: vi.fn(),
+  };
+});
+
+import { getAuthenticatedUsername } from "../src/lib/auth";
 import { app } from "../src/setup";
 import { db } from "../src/lib/db";
 import { users, profiles, groups, groupMembers } from "@baza/db/schemas";
@@ -11,6 +22,7 @@ const VALID_USER_ID = "11111111-1111-1111-1111-111111111111";
 describe("Group Routes", () => {
   beforeEach(async () => {
     await clearDatabase();
+    vi.mocked(getAuthenticatedUsername).mockResolvedValue("testrequester");
   });
 
   afterAll(async () => {
@@ -33,10 +45,23 @@ describe("Group Routes", () => {
     expect(body.data.id).toBeDefined();
   });
 
-  it("GET /v1/restricted/groups/:id should retrieve group details", async () => {
+  it("GET /v1/restricted/groups/:id should retrieve group details if user is a member", async () => {
+    await db.insert(users).values({ id: VALID_USER_ID, name: "User One", email: "one@example.com" });
+    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "testrequester", settings: {} });
+
     const [group] = await db.insert(groups).values({
       groupname: "my_group",
     }).returning();
+
+    await db.insert(groupMembers).values({
+      groupId: group.id,
+      username: "testrequester",
+      admin: false,
+      banned: false,
+      acceptedInvite: true,
+      acceptedAt: new Date(),
+      invitedAt: new Date()
+    });
 
     const response = await app.inject({
       method: "GET",
@@ -47,6 +72,24 @@ describe("Group Routes", () => {
     const body = response.json();
     expect(body.status).toBe("OK");
     expect(body.data.groupname).toBe("my_group");
+  });
+
+  it("GET /v1/restricted/groups/:id should return 403 if user is not a member", async () => {
+    await db.insert(users).values({ id: VALID_USER_ID, name: "User One", email: "one@example.com" });
+    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "testrequester", settings: {} });
+
+    const [group] = await db.insert(groups).values({
+      groupname: "my_group",
+    }).returning();
+
+    const response = await app.inject({
+      method: "GET",
+      url: `/v1/restricted/groups/${group.id}`,
+    });
+
+    expect(response.statusCode).toBe(403);
+    expect(response.json().status).toBe("ERROR");
+    expect(response.json().error.type).toBe("UnauthorizedError");
   });
 
   it("PATCH /v1/restricted/groups/:id/edit should update group info", async () => {

@@ -91,3 +91,14 @@ export const FriendRequestDTO = Type.Object({
   requestSentAt: Type.String({ format: "date-time" }),
 });
 export type FriendRequestDTO = Type.Static<typeof FriendRequestDTO>;
+
+// DTO for Sent Friend Requests
+export const SentFriendRequestDTO = Type.Object({
+  recipient: profileDTO,
+  requestSentAt: Type.String({ format: "date-time" }),
+}, {
+  description: "Pending sent friend request details",
+  title: "SentFriendRequestDTO",
+});
+export type SentFriendRequestDTO = Type.Static<typeof SentFriendRequestDTO>;
+

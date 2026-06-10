@@ -256,4 +256,71 @@ describe("Event Routes", () => {
     });
     expect(checkEvent?.state).toBe("finished");
   });
+
+  it("should handle event attendance confirmation CRUD operations", async () => {
+    // 1. Setup user, profile, group, and member
+    await db.insert(users).values({ id: VALID_USER_ID, name: "Creator", email: "creator@example.com" });
+    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
+    const [group] = await db.insert(groups).values({ groupname: "test_group" }).returning();
+    await db.insert(groupMembers).values({
+      groupId: group.id,
+      username: "testcreator",
+      admin: true,
+      banned: false,
+      acceptedInvite: true,
+      acceptedAt: new Date(),
+      invitedAt: new Date()
+    });
+
+    const [baseEvent] = await db.insert(events).values({
+      title: "Confirm Event",
+      description: "Confirmation test event"
+    }).returning();
+
+    const [event] = await db.insert(groupEvents).values({
+      id: baseEvent.id,
+      groupId: group.id,
+      startDate: "2026-08-01",
+      endDate: "2026-08-02",
+      votingEndTime: new Date("2026-07-31T23:59:59.000Z"),
+      createdBy: "testcreator",
+      state: "unfinished",
+    }).returning();
+
+    // 2. Confirm attendance
+    const confirmRes = await app.inject({
+      method: "POST",
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}/confirm`,
+    });
+    expect(confirmRes.statusCode).toBe(200);
+    expect(confirmRes.json().status).toBe("OK");
+    expect(confirmRes.json().data.groupId).toBe(group.id);
+    expect(confirmRes.json().data.username).toBe("testcreator");
+
+    // 3. Get confirmations
+    const getConfirmationsRes = await app.inject({
+      method: "GET",
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}/confirmations`,
+    });
+    expect(getConfirmationsRes.statusCode).toBe(200);
+    expect(getConfirmationsRes.json().status).toBe("OK");
+    expect(getConfirmationsRes.json().data).toHaveLength(1);
+    expect(getConfirmationsRes.json().data[0].username).toBe("testcreator");
+
+    // 4. Revoke confirmation
+    const revokeRes = await app.inject({
+      method: "DELETE",
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}/confirm`,
+    });
+    expect(revokeRes.statusCode).toBe(200);
+    expect(revokeRes.json().status).toBe("OK");
+
+    // 5. Get confirmations again (should be empty)
+    const getConfirmationsRes2 = await app.inject({
+      method: "GET",
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}/confirmations`,
+    });
+    expect(getConfirmationsRes2.statusCode).toBe(200);
+    expect(getConfirmationsRes2.json().data).toHaveLength(0);
+  });
 });

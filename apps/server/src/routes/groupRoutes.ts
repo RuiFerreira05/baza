@@ -19,6 +19,7 @@ import {
   CreatePreferenceBody,
   ResolveTieBody,
   groupCalendarDTO,
+  eventConfirmationDTO,
 } from "@baza/shared-types";
 import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
@@ -57,6 +58,11 @@ import {
   getEventPreferencesHandler,
   getGroupPreferenceAggregationHandler,
 } from "../handlers/preferenceHandlers";
+import {
+  confirmEventAttendanceHandler,
+  revokeEventAttendanceHandler,
+  getEventConfirmationsHandler,
+} from "../handlers/confirmationHandlers";
 
 export const groupRoutes: FastifyPluginAsync = async (fastify) => {
   const app = fastify.withTypeProvider<TypeBoxTypeProvider>();
@@ -716,5 +722,68 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     removeVoteEventPlanHandler,
+  );
+
+  // ###### EVENT ATTENDANCE CONFIRMATION ENDPOINTS ######
+
+  // POST /groups/:id/events/:idevent/confirm
+  app.post(
+    "/:id/events/:idevent/confirm",
+    {
+      schema: {
+        description: "Confirm group member attendance for a group event",
+        tags: ["confirmations"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid", description: "Group UUID" }),
+          idevent: Type.String({ format: "uuid", description: "Event UUID" }),
+        }),
+        response: {
+          200: StatusOK(eventConfirmationDTO, "Attendance confirmed successfully"),
+          500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
+        },
+      },
+    },
+    confirmEventAttendanceHandler,
+  );
+
+  // DELETE /groups/:id/events/:idevent/confirm
+  app.delete(
+    "/:id/events/:idevent/confirm",
+    {
+      schema: {
+        description: "Revoke attendance confirmation for a group event",
+        tags: ["confirmations"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid", description: "Group UUID" }),
+          idevent: Type.String({ format: "uuid", description: "Event UUID" }),
+        }),
+        response: {
+          200: StatusOK(Type.Null(), "Attendance confirmation revoked successfully"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Attendance confirmation not found"),
+          500: StatusError(ErrorTypes.DeleteError, "Database execution failed"),
+        },
+      },
+    },
+    revokeEventAttendanceHandler,
+  );
+
+  // GET /groups/:id/events/:idevent/confirmations
+  app.get(
+    "/:id/events/:idevent/confirmations",
+    {
+      schema: {
+        description: "Get all attendance confirmations for a group event",
+        tags: ["confirmations"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid", description: "Group UUID" }),
+          idevent: Type.String({ format: "uuid", description: "Event UUID" }),
+        }),
+        response: {
+          200: StatusOK(Type.Array(eventConfirmationDTO), "List of confirmations retrieved successfully"),
+          500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
+        },
+      },
+    },
+    getEventConfirmationsHandler,
   );
 };

@@ -12,6 +12,7 @@ import { env } from "./lib/env";
 import { FSUploadService } from "./lib/FSUploadService";
 import { groupRoutes } from "./routes/groupRoutes";
 import { userRoutes } from "./routes/profileRoutes";
+import { authPreHandler } from "./middlewares/authMiddleware";
 
 // ##### APP SETUP #####
 
@@ -81,8 +82,12 @@ app.route({
 
 // ##### ROUTES SETUP #####
 
-app.register(userRoutes, { prefix: "/v1/restricted/users" });
-app.register(groupRoutes, { prefix: "/v1/restricted/groups" });
+app.register(async (restrictedApp) => {
+  restrictedApp.addHook("preHandler", authPreHandler);
+
+  await restrictedApp.register(userRoutes, { prefix: "/users" });
+  await restrictedApp.register(groupRoutes, { prefix: "/groups" });
+}, { prefix: "/v1/restricted" });
 
 if (env.FILE_UPLOAD_SERVICE === "fs") {
   app.register(fastifyStatic, {

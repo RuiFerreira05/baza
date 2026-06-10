@@ -7,6 +7,9 @@ import {
   getPendingFriendRequests,
   acceptFriendRequest,
   declineFriendRequest,
+  blockUser,
+  unblockUser,
+  getPendingSentFriendRequests,
 } from "../services/profileServices";
 import {
   createStatusError,
@@ -222,3 +225,85 @@ export const declineFriendRequestHandler = async (req: FastifyRequest, res: Fast
     return res.status(200).send(createStatusOK(result.value));
   }
 };
+
+// POST /users/:username/friends/:friendUsername/block
+export const blockUserHandler = async (req: FastifyRequest, res: FastifyReply) => {
+  app.log.info("Received block user request");
+  const { username } = req.params as SimpleUsernameParam;
+  const { friendUsername } = req.params as { friendUsername: string };
+
+  const result = await blockUser(username, friendUsername);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownUsernameError:
+        return res.status(404).send(
+          createStatusError(
+            ErrorTypes.UnknownUsernameError,
+            "User to block not found."
+          )
+        );
+      case ErrorTypes.UpdateError:
+      default:
+        return res.status(500).send(
+          createStatusError(
+            ErrorTypes.UpdateError,
+            "Failed to block user."
+          )
+        );
+    }
+  } else {
+    return res.status(200).send(createStatusOK(result.value));
+  }
+};
+
+// POST /users/:username/friends/:friendUsername/unblock
+export const unblockUserHandler = async (req: FastifyRequest, res: FastifyReply) => {
+  app.log.info("Received unblock user request");
+  const { username } = req.params as SimpleUsernameParam;
+  const { friendUsername } = req.params as { friendUsername: string };
+
+  const result = await unblockUser(username, friendUsername);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownUsernameError:
+        return res.status(404).send(
+          createStatusError(
+            ErrorTypes.UnknownUsernameError,
+            "Blocked relationship not found."
+          )
+        );
+      case ErrorTypes.DeleteError:
+      default:
+        return res.status(500).send(
+          createStatusError(
+            ErrorTypes.DeleteError,
+            "Failed to unblock user."
+          )
+        );
+    }
+  } else {
+    return res.status(200).send(createStatusOK(result.value));
+  }
+};
+
+// GET /users/:username/friends/requests/sent
+export const getPendingSentFriendRequestsHandler = async (req: FastifyRequest, res: FastifyReply) => {
+  app.log.info("Received get pending sent friend requests request");
+  const { username } = req.params as SimpleUsernameParam;
+
+  const result = await getPendingSentFriendRequests(username);
+
+  if (!result.ok) {
+    return res.status(500).send(
+      createStatusError(
+        ErrorTypes.ConversionError,
+        "Failed to convert pending sent requests data."
+      )
+    );
+  } else {
+    return res.status(200).send(createStatusOK(result.value));
+  }
+};
+

@@ -1,7 +1,7 @@
 import { profiles, users, friends, groups, groupMembers } from "@baza/db/schemas";
 import { db } from "../lib/db";
 import { eq, and, sql } from 'drizzle-orm';
-import { ErrorTypes, profileDTO, groupDTO, groupMemberDTO, FriendRequestDTO, type CreateProfileBody, type PersonalEventDTO, type ProfileDTO, type GroupDTO, type GroupMemberDTO } from "@baza/shared-types";
+import { ErrorTypes, profileDTO, groupDTO, groupMemberDTO, FriendRequestDTO, SentFriendRequestDTO, type CreateProfileBody, type PersonalEventDTO, type ProfileDTO, type GroupDTO, type GroupMemberDTO } from "@baza/shared-types";
 import { Value } from "typebox/value";
 import { Type } from "typebox";
 import { Err, Ok, type Result } from "../lib/types";
@@ -734,4 +734,138 @@ export const declineFriendRequest = async (
     app.log.error(error as any, "Failed to decline friend request");
     return Err(ErrorTypes.UpdateError);
   }
-};
+};
+
+/**
+ * Blocks a user.
+ */
+export const blockUser = async (
+  username: string,
+  friendUsername: string
+): Promise<Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.UpdateError>> => {
+  try {
+    const recipient = await db.query.profiles.findFirst({
+      where: (p, { eq }) => eq(p.username, friendUsername),
+    });
+    if (!recipient) {
+      return Err(ErrorTypes.UnknownUsernameError);
+    }
+
+    const [existing] = await db
+      .select()
+      .from(friends)
+      .where(
+        sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${friendUsername}) OR (${friends.sentBy} = ${friendUsername} AND ${friends.receivedBy} = ${username}))`
+      )
+      .limit(1);
+
+    if (existing) {
+      await db
+        .update(friends)
+        .set({
+          sentBy: username,
+          receivedBy: friendUsername,
+          friendStatus: "blocked",
+          requestAcceptedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(
+          sql`((${friends.sentBy} = ${existing.sentBy} AND ${friends.receivedBy} = ${existing.receivedBy}))`
+        );
+    } else {
+      await db.insert(friends).values({
+        sentBy: username,
+        receivedBy: friendUsername,
+        friendStatus: "blocked",
+        requestAcceptedAt: new Date(),
+      });
+    }
+
+    return Ok(null);
+  } catch (error) {
+    app.log.error(error as any, "Failed to block user");
+    return Err(ErrorTypes.UpdateError);
+  }
+};
+
+/**
+ * Unblocks a user.
+ */
+export const unblockUser = async (
+  username: string,
+  friendUsername: string
+): Promise<Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.DeleteError>> => {
+  try {
+    const deleted = await db
+      .delete(friends)
+      .where(
+        and(
+          eq(friends.sentBy, username),
+          eq(friends.receivedBy, friendUsername),
+          eq(friends.friendStatus, "blocked")
+        )
+      )
+      .returning();
+
+    if (deleted.length === 0) {
+      return Err(ErrorTypes.UnknownUsernameError);
+    }
+
+    return Ok(null);
+  } catch (error) {
+    app.log.error(error as any, "Failed to unblock user");
+    return Err(ErrorTypes.DeleteError);
+  }
+};
+
+/**
+ * Gets pending outgoing (sent) friend requests.
+ */
+export const getPendingSentFriendRequests = async (
+  username: string
+): Promise<Result<any[], ErrorTypes.ConversionError>> => {
+  try {
+    const records = await db
+      .select({
+        username: profiles.username,
+        photo: profiles.photo,
+        description: profiles.description,
+        userId: profiles.userId,
+        createdAt: profiles.createdAt,
+        updatedAt: profiles.updatedAt,
+        requestSentAt: friends.requestSentAt,
+      })
+      .from(friends)
+      .innerJoin(profiles, eq(friends.receivedBy, profiles.username))
+      .where(
+        and(
+          eq(friends.sentBy, username),
+          eq(friends.friendStatus, "pending")
+        )
+      );
+
+    const formatted = records.map((r) => ({
+      recipient: {
+        username: r.username,
+        photo: r.photo,
+        description: r.description,
+        userId: r.userId,
+        createdAt: r.createdAt.toISOString(),
+        updatedAt: r.updatedAt.toISOString(),
+      },
+      requestSentAt: r.requestSentAt.toISOString(),
+    }));
+
+    const checkSchema = Value.Convert(Type.Array(SentFriendRequestDTO), formatted);
+    if (Value.Check(Type.Array(SentFriendRequestDTO), checkSchema)) {
+      return Ok(checkSchema as any[]);
+    } else {
+      app.log.error(Value.Errors(Type.Array(SentFriendRequestDTO), checkSchema));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(error as any, "Failed to fetch pending sent requests");
+    return Err(ErrorTypes.ConversionError);
+  }
+};
+

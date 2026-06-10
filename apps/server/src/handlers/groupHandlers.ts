@@ -9,6 +9,7 @@ import {
 } from "@baza/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { FSUploadService } from "../lib/FSUploadService";
+import { getAuthenticatedUsername } from "../lib/auth";
 import {
   createGroup,
   deleteGroup,
@@ -20,6 +21,7 @@ import {
   removeUserFromGroup,
   promoteUserToAdmin,
   dismissUserAsAdmin,
+  verifyGroupMembership,
 } from "../services/groupServices";
 import { app, fileUploadService } from "../setup";
 
@@ -29,8 +31,25 @@ export const getGroupByIdHandler = async (
   res: FastifyReply,
 ) => {
   app.log.info("Received get group by id request");
+  const username = await getAuthenticatedUsername(req, res);
+  if (!username) return;
+
   const { id } = req.params as SimpleIdParam;
-  app.log.info(`Fetching group with id: ${id}`);
+  app.log.info(`Fetching group with id: ${id} for user: ${username}`);
+
+  // Enforce membership check
+  const isMember = await verifyGroupMembership(id, username);
+  if (!isMember) {
+    app.log.warn(`User ${username} is not an active member of group ${id}`);
+    return res
+      .status(403)
+      .send(
+        createStatusError(
+          ErrorTypes.UnauthorizedError,
+          "Access denied: You are not an active member of this group",
+        ),
+      );
+  }
 
   const group = await getGroupById(id);
 

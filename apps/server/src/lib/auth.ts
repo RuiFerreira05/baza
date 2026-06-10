@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import type { Session, User } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
 import { env } from "./env";
@@ -29,14 +30,29 @@ export const auth = betterAuth({
   baseURL: env.PUBLIC_SERVER_URL,
 });
 
+declare module "fastify" {
+  interface FastifyRequest {
+    session?: {
+      session: Session;
+      user: User;
+    } | null;
+    username?: string;
+  }
+}
+
 export const getAuthenticatedUsername = async (
   req: FastifyRequest,
   res: FastifyReply
 ): Promise<string | null> => {
+  if (req.username) {
+    return req.username;
+  }
   try {
-    const session = await auth.api.getSession({
-      headers: fromNodeHeaders(req.headers),
-    });
+    const session = req.session !== undefined
+      ? req.session
+      : await auth.api.getSession({
+          headers: fromNodeHeaders(req.headers),
+        });
 
     if (!session || !session.user) {
       res.status(401).send(
@@ -47,6 +63,8 @@ export const getAuthenticatedUsername = async (
       );
       return null;
     }
+
+    req.session = session;
 
     const [profile] = await db
       .select({ username: profiles.username })
@@ -64,6 +82,7 @@ export const getAuthenticatedUsername = async (
       return null;
     }
 
+    req.username = profile.username;
     return profile.username;
   } catch (error) {
     req.log.error(error as any, "Authentication check failed");

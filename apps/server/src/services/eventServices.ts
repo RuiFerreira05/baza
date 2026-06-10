@@ -1,7 +1,7 @@
-import { events, groupEvents, personalEvents, groupMembers, groups } from "@baza/db/schemas";
+import { events, groupEvents, personalEvents, groupMembers, groups, groupEventsFinal, plans, eventConfirmations } from "@baza/db/schemas";
 import { db } from "../lib/db";
 import { eq, and, lte, gte, inArray } from "drizzle-orm";
-import { ErrorTypes, groupEventDTO, personalEventDTO, groupCalendarDTO, type PersonalEventDTO, type GroupCalendarDTO, type GroupEventDTO, type CreateEventBody, type EditEventBody, type CreatePersonalEventBody, type EditPersonalEventBody } from "@baza/shared-types";
+import { ErrorTypes, groupEventDTO, personalEventDTO, groupCalendarDTO, type PersonalEventDTO, type GroupCalendarDTO, type GroupEventDTO, type CreateEventBody, type EditEventBody, type CreatePersonalEventBody, type EditPersonalEventBody, eventConfirmationDTO, type EventConfirmationDTO } from "@baza/shared-types";
 import { Value } from "typebox/value";
 import { Type } from "typebox";
 import { Err, Ok, type Result } from "../lib/types";
@@ -121,9 +121,27 @@ export const getGroupEvents = async (
       createdBy: groupEvents.createdBy,
       createdAt: events.createdAt,
       updatedAt: events.updatedAt,
+      winningPlanId: groupEventsFinal.planId,
+      winningPlan: {
+        id: plans.id,
+        groupEventId: plans.groupEventId,
+        username: plans.username,
+        title: plans.title,
+        date: plans.date,
+        startTime: plans.startTime,
+        endTime: plans.endTime,
+        activity: plans.activity,
+        location: plans.location,
+        minBudget: plans.minBudget,
+        maxBudget: plans.maxBudget,
+        createdAt: plans.createdAt,
+        updatedAt: plans.updatedAt,
+      }
     })
     .from(groupEvents)
     .innerJoin(events, eq(groupEvents.id, events.id))
+    .leftJoin(groupEventsFinal, eq(groupEvents.id, groupEventsFinal.id))
+    .leftJoin(plans, eq(groupEventsFinal.planId, plans.id))
     .where(and(...conditions));
 
     const unfinishedEvents = await db
@@ -143,19 +161,31 @@ export const getGroupEvents = async (
 
     const rows = await query;
 
-    const formatted = rows.map(row => ({
-      id: row.id,
-      groupId: row.groupId!,
-      title: row.title,
-      description: row.description,
-      startDate: row.startDate,
-      endDate: row.endDate,
-      state: row.state as GroupEventDTO["state"],
-      votingEndTime: row.votingEndTime?.toISOString() ?? null,
-      createdBy: row.createdBy,
-      createdAt: row.createdAt.toISOString(),
-      updatedAt: row.updatedAt.toISOString(),
-    }));
+    const formatted = rows.map(row => {
+      let winningPlan: any = null;
+      if (row.winningPlanId && row.winningPlan && row.winningPlan.id) {
+        winningPlan = {
+          ...row.winningPlan,
+          createdAt: row.winningPlan.createdAt.toISOString(),
+          updatedAt: row.winningPlan.updatedAt.toISOString(),
+        };
+      }
+
+      return {
+        id: row.id,
+        groupId: row.groupId!,
+        title: row.title,
+        description: row.description,
+        startDate: row.startDate,
+        endDate: row.endDate,
+        state: row.state as GroupEventDTO["state"],
+        votingEndTime: row.votingEndTime?.toISOString() ?? null,
+        createdBy: row.createdBy,
+        createdAt: row.createdAt.toISOString(),
+        updatedAt: row.updatedAt.toISOString(),
+        winningPlan,
+      };
+    });
 
     const checkSchema = Value.Convert(Type.Array(groupEventDTO), formatted);
     if (Value.Check(Type.Array(groupEventDTO), checkSchema)) {
@@ -205,13 +235,40 @@ export const getGroupEventById = async (
       createdBy: groupEvents.createdBy,
       createdAt: events.createdAt,
       updatedAt: events.updatedAt,
+      winningPlanId: groupEventsFinal.planId,
+      winningPlan: {
+        id: plans.id,
+        groupEventId: plans.groupEventId,
+        username: plans.username,
+        title: plans.title,
+        date: plans.date,
+        startTime: plans.startTime,
+        endTime: plans.endTime,
+        activity: plans.activity,
+        location: plans.location,
+        minBudget: plans.minBudget,
+        maxBudget: plans.maxBudget,
+        createdAt: plans.createdAt,
+        updatedAt: plans.updatedAt,
+      }
     })
     .from(groupEvents)
     .innerJoin(events, eq(groupEvents.id, events.id))
+    .leftJoin(groupEventsFinal, eq(groupEvents.id, groupEventsFinal.id))
+    .leftJoin(plans, eq(groupEventsFinal.planId, plans.id))
     .where(and(eq(groupEvents.groupId, groupId), eq(groupEvents.id, eventId)));
 
     if (rows.length === 1) {
       const row = rows[0]!;
+      let winningPlan: any = null;
+      if (row.winningPlanId && row.winningPlan && row.winningPlan.id) {
+        winningPlan = {
+          ...row.winningPlan,
+          createdAt: row.winningPlan.createdAt.toISOString(),
+          updatedAt: row.winningPlan.updatedAt.toISOString(),
+        };
+      }
+
       const formatted = {
         id: row.id,
         groupId: row.groupId!,
@@ -224,6 +281,7 @@ export const getGroupEventById = async (
         createdBy: row.createdBy,
         createdAt: row.createdAt.toISOString(),
         updatedAt: row.updatedAt.toISOString(),
+        winningPlan,
       };
 
       const conv = Value.Convert(groupEventDTO, formatted);
@@ -735,4 +793,98 @@ export const editPersonalEvent = async (
     app.log.error(error as any, "Failed to edit personal event");
     return Err(ErrorTypes.UpdateError);
   }
-};
+};
+
+/**
+ * Confirms a member's attendance to a group event.
+ */
+export const confirmEventAttendance = async (
+  groupId: string,
+  username: string,
+  confirmedAt: string
+): Promise<Result<EventConfirmationDTO, ErrorTypes.ResourceCreationError | ErrorTypes.ConversionError>> => {
+  try {
+    const [inserted] = await db
+      .insert(eventConfirmations)
+      .values({
+        groupId,
+        username,
+        confirmedAt,
+      })
+      .onConflictDoUpdate({
+        target: [eventConfirmations.groupId, eventConfirmations.username],
+        set: { confirmedAt },
+      })
+      .returning();
+
+    if (!inserted) {
+      return Err(ErrorTypes.ResourceCreationError);
+    }
+
+    const conv = Value.Convert(eventConfirmationDTO, inserted);
+    if (Value.Check(eventConfirmationDTO, conv)) {
+      return Ok(conv);
+    } else {
+      app.log.error(Value.Errors(eventConfirmationDTO, conv));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(error as any, "Failed to confirm event attendance");
+    return Err(ErrorTypes.ResourceCreationError);
+  }
+};
+
+/**
+ * Revokes a member's attendance confirmation.
+ */
+export const revokeEventAttendance = async (
+  groupId: string,
+  username: string
+): Promise<Result<null, ErrorTypes.DeleteError | ErrorTypes.UnknownIdError>> => {
+  try {
+    const deleted = await db
+      .delete(eventConfirmations)
+      .where(
+        and(
+          eq(eventConfirmations.groupId, groupId),
+          eq(eventConfirmations.username, username)
+        )
+      )
+      .returning();
+
+    if (deleted.length === 0) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+
+    return Ok(null);
+  } catch (error) {
+    app.log.error(error as any, "Failed to revoke event attendance confirmation");
+    return Err(ErrorTypes.DeleteError);
+  }
+};
+
+/**
+ * Lists all attendance confirmations for a group event.
+ */
+export const getEventConfirmations = async (
+  groupId: string
+): Promise<Result<EventConfirmationDTO[], ErrorTypes.ConversionError>> => {
+  try {
+    const rows = await db
+      .select()
+      .from(eventConfirmations)
+      .where(eq(eventConfirmations.groupId, groupId));
+
+    const checkSchema = Value.Convert(Type.Array(eventConfirmationDTO), rows);
+    if (Value.Check(Type.Array(eventConfirmationDTO), checkSchema)) {
+      return Ok(checkSchema as EventConfirmationDTO[]);
+    } else {
+      app.log.error(Value.Errors(Type.Array(eventConfirmationDTO), checkSchema));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(error as any, "Failed to retrieve event confirmations");
+    return Err(ErrorTypes.ConversionError);
+  }
+};
+
