@@ -166,7 +166,7 @@ Promise<Result<ProfileDTO, ErrorTypes.UnknownUsernameError | ErrorTypes.Conversi
     },
   })
 
-  if(!usernameCheck){
+  if(!usernameCheck || newUserName == undefined){
     const [profile] = await db.update(profiles).set({
       username: newUserName,
       description: description,
