@@ -114,8 +114,8 @@ describe("Calendar Routes", () => {
       username: "testrequester",
       date: "2026-06-10",
       location: "Dentist Clinic",
-      startTime: "09:00:00",
-      endTime: "10:00:00",
+      startTime: new Date("2026-06-10T09:00:00.000Z"),
+      endTime: new Date("2026-06-10T10:00:00.000Z"),
       repeat: "never",
       public: false
     });
@@ -130,8 +130,8 @@ describe("Calendar Routes", () => {
       username: "otheruser",
       date: "2026-06-10",
       location: "Central Park",
-      startTime: "11:00:00",
-      endTime: "12:00:00",
+      startTime: new Date("2026-06-10T11:00:00.000Z"),
+      endTime: new Date("2026-06-10T12:00:00.000Z"),
       repeat: "never",
       public: true
     });
@@ -146,8 +146,8 @@ describe("Calendar Routes", () => {
       username: "otheruser",
       date: "2026-06-10",
       location: "Private Studio",
-      startTime: "14:00:00",
-      endTime: "15:00:00",
+      startTime: new Date("2026-06-10T14:00:00.000Z"),
+      endTime: new Date("2026-06-10T15:00:00.000Z"),
       repeat: "never",
       public: false
     });
@@ -234,8 +234,8 @@ describe("Calendar Routes", () => {
       id: basePersonalEvent1.id,
       username: "testrequester",
       date: "2026-06-10",
-      startTime: "10:00:00",
-      endTime: "11:00:00",
+      startTime: new Date("2026-06-10T10:00:00.000Z"),
+      endTime: new Date("2026-06-10T11:00:00.000Z"),
       repeat: "never",
       public: true
     });
@@ -246,8 +246,8 @@ describe("Calendar Routes", () => {
       id: basePersonalEvent2.id,
       username: "testrequester",
       date: "2026-06-01",
-      startTime: "10:00:00",
-      endTime: "11:00:00",
+      startTime: new Date("2026-06-01T10:00:00.000Z"),
+      endTime: new Date("2026-06-01T11:00:00.000Z"),
       repeat: "never",
       public: true
     });

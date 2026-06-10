@@ -1,23 +1,23 @@
 # Remaining group endpoints
 
-- [ ] `/groups/:idgroup/groupMembers/:username/promoteToAdmin/`
-- [ ] `/groups/:idgroup/groupMembers/:username/dismissAdmin/`
-- [ ] `/groups/:idgroup/events/`
-- [ ] `/groups/:idgroup/events?startDate,endDate/`
-- [ ] `/groups/:idgroup/events/create/`
-- [ ] `/groups/:idgroup/events/:idevent/`
-- [ ] `/groups/:idgroup/events/:idevent/edit/`
-- [ ] `/groups/:idgroup/events/:idevent/preferences/group/`
-- [ ] `/groups/:idgroup/events/:idevent/preferences/all/`
-- [ ] `/groups/:idgroup/events/:idevent/preferences/:username/`
-- [ ] `/groups/:idgroup/events/:idevent/preferences/:username/edit/`
-- [ ] `/groups/:idgroup/events/:idevent/preferences/create/`
-- [ ] `/groups/:idgroup/events/:idevent/plans/`
-- [ ] `/groups/:idgroup/events/:idevent/plans/create/`
-- [ ] `/groups/:idgroup/events/:idevent/plans/:idplan/`
-- [ ] `/groups/:idgroup/events/:idevent/plans/:idplan/edit/`
-- [ ] `/groups/:idgroup/events/:idevent/plans/:idplan/vote/`
-- [ ] `/groups/:idgroup/events/:idevent/plans/:idplan/removeVote/`
+- [x] `/groups/:idgroup/groupMembers/:username/promoteToAdmin/`
+- [x] `/groups/:idgroup/groupMembers/:username/dismissAdmin/`
+- [x] `/groups/:idgroup/events/`
+- [x] `/groups/:idgroup/events?startDate,endDate/`
+- [x] `/groups/:idgroup/events/create/`
+- [x] `/groups/:idgroup/events/:idevent/`
+- [x] `/groups/:idgroup/events/:idevent/edit/`
+- [x] `/groups/:idgroup/events/:idevent/preferences/group/`
+- [x] `/groups/:idgroup/events/:idevent/preferences/all/`
+- [x] `/groups/:idgroup/events/:idevent/preferences/:username/`
+- [x] `/groups/:idgroup/events/:idevent/preferences/:username/edit/`
+- [x] `/groups/:idgroup/events/:idevent/preferences/create/`
+- [x] `/groups/:idgroup/events/:idevent/plans/`
+- [x] `/groups/:idgroup/events/:idevent/plans/create/`
+- [x] `/groups/:idgroup/events/:idevent/plans/:idplan/`
+- [x] `/groups/:idgroup/events/:idevent/plans/:idplan/edit/`
+- [x] `/groups/:idgroup/events/:idevent/plans/:idplan/vote/`
+- [x] `/groups/:idgroup/events/:idevent/plans/:idplan/removeVote/`
 
 # Remaining profile endpoints
 - [ ] `/users/:id/events/:idEvent/`

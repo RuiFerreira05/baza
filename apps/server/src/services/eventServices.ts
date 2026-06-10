@@ -424,6 +424,8 @@ export const getGroupCalendar = async (
         public: personalEvents.public,
         title: events.title,
         description: events.description,
+        createdAt: events.createdAt,
+        updatedAt: events.updatedAt,
       })
       .from(personalEvents)
       .innerJoin(events, eq(personalEvents.id, events.id))
@@ -433,12 +435,9 @@ export const getGroupCalendar = async (
         const isOwner = row.username === requestingUsername;
         const isPrivate = !row.public;
 
-        // format date as ISO date-time string (T00:00:00.000Z) to satisfy personalEventDTO validation
-        const isoDate = new Date(row.date).toISOString();
-
-        // format time by suffixing with 'Z' as required by AJV format time validator (Best Practice #9)
-        const formattedStartTime = `${row.startTime}Z`;
-        const formattedEndTime = `${row.endTime}Z`;
+        const isoDate = row.date;
+        const formattedStartTime = row.startTime.toISOString();
+        const formattedEndTime = row.endTime.toISOString();
 
         if (isPrivate && !isOwner) {
           // Mask private events for other users
@@ -453,6 +452,8 @@ export const getGroupCalendar = async (
             public: false,
             title: "Busy",
             description: null,
+            createdAt: row.createdAt.toISOString(),
+            updatedAt: row.updatedAt.toISOString(),
           };
         } else {
           // Keep intact for own events or public events
@@ -467,6 +468,8 @@ export const getGroupCalendar = async (
             public: row.public,
             title: row.title,
             description: row.description,
+            createdAt: row.createdAt.toISOString(),
+            updatedAt: row.updatedAt.toISOString(),
           };
         }
       });
