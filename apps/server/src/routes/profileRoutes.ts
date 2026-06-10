@@ -1,8 +1,49 @@
-import { profileDTO,  CreateProfileBody, EditProfileBody, ErrorTypes, StatusOK, StatusError, SimpleUsernameParam, GetPersonalEventsParams, personalEventDTO } from "@baza/shared-types";
+import {
+  profileDTO,
+  CreateProfileBody,
+  EditProfileBody,
+  ErrorTypes,
+  StatusOK,
+  StatusError,
+  SimpleUsernameParam,
+  GetPersonalEventsParams,
+  personalEventDTO,
+  CreatePersonalEventBody,
+  EditPersonalEventBody,
+  groupDTO,
+  groupMemberDTO,
+  SendFriendRequestBody,
+  FriendRequestDTO
+} from "@baza/shared-types";
 import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
 import { getUserByUsernameHandler, createUserProfileHandler, deleteUserProfileHandler, editUserProfileHandler } from "../handlers/profileHandlers";
-import { getPersonalEventsHandler } from "../handlers/eventHandlers";
+import {
+  getPersonalEventsHandler,
+  getPersonalEventByIdHandler,
+  createPersonalEventHandler,
+  editPersonalEventHandler
+} from "../handlers/eventHandlers";
+import {
+  getFriendsHandler,
+  getFriendProfileHandler,
+  removeFriendHandler,
+  sendFriendRequestHandler,
+  getPendingFriendRequestsHandler,
+  acceptFriendRequestHandler,
+  declineFriendRequestHandler
+} from "../handlers/friendHandlers";
+import {
+  getUserSettingsHandler,
+  updateUserSettingsHandler
+} from "../handlers/settingsHandlers";
+import {
+  getUserGroupsHandler,
+  getUserGroupByIdHandler,
+  getUserGroupInvitesHandler,
+  acceptGroupInviteHandler,
+  declineGroupInviteHandler
+} from "../handlers/userGroupHandlers";
 import Type from "typebox";
 
 export const userRoutes: FastifyPluginAsync = async (fastify) => {
@@ -140,4 +181,358 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     },
     getPersonalEventsHandler
   );
- }
+
+  // GET /users/:username/events/:idEvent
+  app.get(
+    "/:username/events/:idEvent",
+    {
+      schema: {
+        description: "This route fetches a single personal event by username and event ID.",
+        tags: ["users"],
+        params: Type.Object({
+          username: Type.String(),
+          idEvent: Type.String({ format: "uuid" }),
+        }),
+        response: {
+          200: StatusOK(personalEventDTO, "Success"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Not found"),
+          500: StatusError(ErrorTypes.ConversionError, "Error"),
+        },
+      },
+    },
+    getPersonalEventByIdHandler
+  );
+
+  // POST /users/:username/events/create
+  app.post(
+    "/:username/events/create",
+    {
+      schema: {
+        description: "This route creates a new personal event.",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username of the user creating the event"),
+        body: CreatePersonalEventBody,
+        response: {
+          201: StatusOK(personalEventDTO, "Created"),
+          400: StatusError(ErrorTypes.MalformedRequestError, "Bad request"),
+          500: StatusError(ErrorTypes.ResourceCreationError, "Error"),
+        },
+      },
+    },
+    createPersonalEventHandler
+  );
+
+  // PATCH /users/:username/events/:idEvent/edit
+  app.patch(
+    "/:username/events/:idEvent/edit",
+    {
+      schema: {
+        description: "This route edits an existing personal event.",
+        tags: ["users"],
+        params: Type.Object({
+          username: Type.String(),
+          idEvent: Type.String({ format: "uuid" }),
+        }),
+        body: EditPersonalEventBody,
+        response: {
+          200: StatusOK(personalEventDTO, "Updated"),
+          400: StatusError(ErrorTypes.MalformedRequestError, "Bad request"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Not found"),
+          500: StatusError(ErrorTypes.UpdateError, "Error"),
+        },
+      },
+    },
+    editPersonalEventHandler
+  );
+
+  // GET /users/:username/groups
+  app.get(
+    "/:username/groups",
+    {
+      schema: {
+        description: "This route fetches all groups that the user is an active member of.",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username"),
+        response: {
+          200: StatusOK(Type.Array(groupDTO), "Success"),
+          500: StatusError(ErrorTypes.ConversionError, "Error"),
+        },
+      },
+    },
+    getUserGroupsHandler
+  );
+
+  // GET /users/:username/groups/:idGroup
+  app.get(
+    "/:username/groups/:idGroup",
+    {
+      schema: {
+        description: "This route fetches details of a specific user group.",
+        tags: ["users"],
+        params: Type.Object({
+          username: Type.String(),
+          idGroup: Type.String({ format: "uuid" }),
+        }),
+        response: {
+          200: StatusOK(groupDTO, "Success"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Not found"),
+          500: StatusError(ErrorTypes.ConversionError, "Error"),
+        },
+      },
+    },
+    getUserGroupByIdHandler
+  );
+
+  // GET /users/:username/groups/invites
+  app.get(
+    "/:username/groups/invites",
+    {
+      schema: {
+        description: "This route fetches pending group invites for the user.",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username"),
+        response: {
+          200: StatusOK(Type.Array(groupDTO), "Success"),
+          500: StatusError(ErrorTypes.ConversionError, "Error"),
+        },
+      },
+    },
+    getUserGroupInvitesHandler
+  );
+
+  // POST /users/:username/groups/invites/:groupId/accept
+  app.post(
+    "/:username/groups/invites/:groupId/accept",
+    {
+      schema: {
+        description: "This route accepts a group invitation.",
+        tags: ["users"],
+        params: Type.Object({
+          username: Type.String(),
+          groupId: Type.String({ format: "uuid" }),
+        }),
+        response: {
+          200: StatusOK(groupMemberDTO, "Accepted"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Not found"),
+          500: StatusError(ErrorTypes.UpdateError, "Error"),
+        },
+      },
+    },
+    acceptGroupInviteHandler
+  );
+
+  // POST /users/:username/groups/invites/:groupId/decline
+  app.post(
+    "/:username/groups/invites/:groupId/decline",
+    {
+      schema: {
+        description: "This route declines a group invitation.",
+        tags: ["users"],
+        params: Type.Object({
+          username: Type.String(),
+          groupId: Type.String({ format: "uuid" }),
+        }),
+        response: {
+          200: StatusOK(Type.Null(), "Declined"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Not found"),
+          500: StatusError(ErrorTypes.DeleteError, "Error"),
+        },
+      },
+    },
+    declineGroupInviteHandler
+  );
+
+  // GET /users/:username/friends
+  app.get(
+    "/:username/friends",
+    {
+      schema: {
+        description: "This route fetches all accepted friends of the user.",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username"),
+        response: {
+          200: StatusOK(Type.Array(profileDTO), "Success"),
+          500: StatusError(ErrorTypes.ConversionError, "Error"),
+        },
+      },
+    },
+    getFriendsHandler
+  );
+
+  // GET /users/:username/friends/:friendUsername
+  app.get(
+    "/:username/friends/:friendUsername",
+    {
+      schema: {
+        description: "This route fetches a specific friend's profile details.",
+        tags: ["users"],
+        params: Type.Object({
+          username: Type.String(),
+          friendUsername: Type.String(),
+        }),
+        response: {
+          200: StatusOK(profileDTO, "Success"),
+          404: StatusError(ErrorTypes.UnknownUsernameError, "Not found"),
+          500: StatusError(ErrorTypes.ConversionError, "Error"),
+        },
+      },
+    },
+    getFriendProfileHandler
+  );
+
+  // POST /users/:username/friends/:friendUsername/remove
+  app.post(
+    "/:username/friends/:friendUsername/remove",
+    {
+      schema: {
+        description: "This route removes an existing friend relationship.",
+        tags: ["users"],
+        params: Type.Object({
+          username: Type.String(),
+          friendUsername: Type.String(),
+        }),
+        response: {
+          200: StatusOK(Type.Null(), "Removed"),
+          404: StatusError(ErrorTypes.UnknownUsernameError, "Not found"),
+          500: StatusError(ErrorTypes.DeleteError, "Error"),
+        },
+      },
+    },
+    removeFriendHandler
+  );
+
+  // DELETE /users/:username/friends/:friendUsername/remove
+  app.delete(
+    "/:username/friends/:friendUsername/remove",
+    {
+      schema: {
+        description: "This route removes an existing friend relationship.",
+        tags: ["users"],
+        params: Type.Object({
+          username: Type.String(),
+          friendUsername: Type.String(),
+        }),
+        response: {
+          200: StatusOK(Type.Null(), "Removed"),
+          404: StatusError(ErrorTypes.UnknownUsernameError, "Not found"),
+          500: StatusError(ErrorTypes.DeleteError, "Error"),
+        },
+      },
+    },
+    removeFriendHandler
+  );
+
+  // POST /users/:username/friends/sendRequest
+  app.post(
+    "/:username/friends/sendRequest",
+    {
+      schema: {
+        description: "This route sends a new friend request.",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username"),
+        body: SendFriendRequestBody,
+        response: {
+          200: StatusOK(Type.Null(), "Request sent"),
+          400: StatusError(ErrorTypes.ExistingResourceError, "Already exists"),
+          404: StatusError(ErrorTypes.UnknownUsernameError, "Not found"),
+        },
+      },
+    },
+    sendFriendRequestHandler
+  );
+
+  // GET /users/:username/friends/requests
+  app.get(
+    "/:username/friends/requests",
+    {
+      schema: {
+        description: "This route fetches all pending received friend requests.",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username"),
+        response: {
+          200: StatusOK(Type.Array(FriendRequestDTO), "Success"),
+          500: StatusError(ErrorTypes.ConversionError, "Error"),
+        },
+      },
+    },
+    getPendingFriendRequestsHandler
+  );
+
+  // POST /users/:username/friends/requests/:senderUsername/accept
+  app.post(
+    "/:username/friends/requests/:senderUsername/accept",
+    {
+      schema: {
+        description: "This route accepts a pending friend request.",
+        tags: ["users"],
+        params: Type.Object({
+          username: Type.String(),
+          senderUsername: Type.String(),
+        }),
+        response: {
+          200: StatusOK(Type.Null(), "Accepted"),
+          404: StatusError(ErrorTypes.UnknownUsernameError, "Not found"),
+          500: StatusError(ErrorTypes.UpdateError, "Error"),
+        },
+      },
+    },
+    acceptFriendRequestHandler
+  );
+
+  // POST /users/:username/friends/requests/:senderUsername/decline
+  app.post(
+    "/:username/friends/requests/:senderUsername/decline",
+    {
+      schema: {
+        description: "This route declines a pending friend request.",
+        tags: ["users"],
+        params: Type.Object({
+          username: Type.String(),
+          senderUsername: Type.String(),
+        }),
+        response: {
+          200: StatusOK(Type.Null(), "Declined"),
+          404: StatusError(ErrorTypes.UnknownUsernameError, "Not found"),
+          500: StatusError(ErrorTypes.UpdateError, "Error"),
+        },
+      },
+    },
+    declineFriendRequestHandler
+  );
+
+  // GET /users/:username/settings
+  app.get(
+    "/:username/settings",
+    {
+      schema: {
+        description: "This route fetches user profile settings.",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username"),
+        response: {
+          200: StatusOK(Type.Any(), "Success"),
+          404: StatusError(ErrorTypes.UnknownUsernameError, "Not found"),
+        },
+      },
+    },
+    getUserSettingsHandler
+  );
+
+  // PATCH /users/:username/settings
+  app.patch(
+    "/:username/settings",
+    {
+      schema: {
+        description: "This route updates user profile settings.",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username"),
+        body: Type.Any(),
+        response: {
+          200: StatusOK(Type.Any(), "Updated"),
+          404: StatusError(ErrorTypes.UnknownUsernameError, "Not found"),
+          500: StatusError(ErrorTypes.UpdateError, "Error"),
+        },
+      },
+    },
+    updateUserSettingsHandler
+  );
+}

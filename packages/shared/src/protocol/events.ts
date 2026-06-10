@@ -130,6 +130,23 @@ export const GetPersonalEventsParams = Type.Object({
 });
 export type GetPersonalEventsParams = Type.Static<typeof GetPersonalEventsParams>;
 
+// POST /users/:id/events/create
+export const CreatePersonalEventBody = Type.Object({
+  title: Type.String({ minLength: 1, maxLength: 64 }),
+  description: Type.Optional(Type.String()),
+  date: Type.String({ format: "date" }),
+  location: Type.Optional(Type.String()),
+  startTime: Type.String({ format: "date-time" }),
+  endTime: Type.String({ format: "date-time" }),
+  repeat: Type.Union([Type.Literal("day"), Type.Literal("week"), Type.Literal("month"), Type.Literal("year"), Type.Literal("never")]),
+  public: Type.Boolean(),
+});
+export type CreatePersonalEventBody = Type.Static<typeof CreatePersonalEventBody>;
+
+// PATCH /users/:id/events/:idEvent/edit
+export const EditPersonalEventBody = Type.Partial(CreatePersonalEventBody);
+export type EditPersonalEventBody = Type.Static<typeof EditPersonalEventBody>;
+
 // GET /groups/:id/calendar
 export const groupCalendarDTO = Type.Object({
   groupEvents: Type.Array(groupEventDTO),

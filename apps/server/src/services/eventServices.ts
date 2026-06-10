@@ -1,7 +1,7 @@
 import { events, groupEvents, personalEvents, groupMembers, groups } from "@baza/db/schemas";
 import { db } from "../lib/db";
 import { eq, and, lte, gte, inArray } from "drizzle-orm";
-import { ErrorTypes, groupEventDTO, personalEventDTO, groupCalendarDTO, type PersonalEventDTO, type GroupCalendarDTO, type GroupEventDTO, type CreateEventBody, type EditEventBody } from "@baza/shared-types";
+import { ErrorTypes, groupEventDTO, personalEventDTO, groupCalendarDTO, type PersonalEventDTO, type GroupCalendarDTO, type GroupEventDTO, type CreateEventBody, type EditEventBody, type CreatePersonalEventBody, type EditPersonalEventBody } from "@baza/shared-types";
 import { Value } from "typebox/value";
 import { Type } from "typebox";
 import { Err, Ok, type Result } from "../lib/types";
@@ -560,3 +560,179 @@ Promise<Result<PersonalEventDTO[], ErrorTypes.ConversionError | ErrorTypes.Unkno
     return Err(ErrorTypes.UnknownUsernameError);
   }
 };
+
+/**
+ * Fetches a single personal event by username and event ID.
+ */
+export const getPersonalEventById = async (
+  username: string,
+  eventId: string
+): Promise<Result<PersonalEventDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>> => {
+  try {
+    const record = await db.query.personalEvents.findFirst({
+      where: (pe, { eq, and }) => and(eq(pe.id, eventId), eq(pe.username, username)),
+      with: {
+        events: true,
+      },
+    });
+
+    if (!record || !record.events) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+
+    const formatted = {
+      id: record.events.id,
+      username: record.username,
+      title: record.events.title,
+      description: record.events.description,
+      date: record.date,
+      location: record.location,
+      startTime: record.startTime.toISOString(),
+      endTime: record.endTime.toISOString(),
+      repeat: record.repeat,
+      public: record.public,
+      createdAt: record.events.createdAt.toISOString(),
+      updatedAt: record.events.updatedAt.toISOString(),
+    };
+
+    const conv = Value.Convert(personalEventDTO, formatted);
+    if (Value.Check(personalEventDTO, conv)) {
+      return Ok(conv);
+    } else {
+      app.log.error(Value.Errors(personalEventDTO, conv));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(error as any, "Failed to query personal event by ID");
+    return Err(ErrorTypes.ConversionError);
+  }
+};
+
+/**
+ * Creates a personal event.
+ */
+export const createPersonalEvent = async (
+  username: string,
+  body: CreatePersonalEventBody
+): Promise<Result<PersonalEventDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreationError | ErrorTypes.MalformedRequestError>> => {
+  try {
+    const startTimeVal = new Date(body.startTime);
+    const endTimeVal = new Date(body.endTime);
+
+    if (startTimeVal >= endTimeVal) {
+      app.log.warn(`Create personal event constraint violated: startTime (${body.startTime}) must be earlier than endTime (${body.endTime})`);
+      return Err(ErrorTypes.MalformedRequestError);
+    }
+
+    const created = await db.transaction(async (tx) => {
+      const [newEvent] = await tx.insert(events).values({
+        title: body.title,
+        description: body.description,
+      }).returning();
+
+      if (!newEvent) {
+        throw new Error("Failed to insert base event");
+      }
+
+      const [newPersonalEvent] = await tx.insert(personalEvents).values({
+        id: newEvent.id,
+        username: username,
+        date: body.date,
+        location: body.location ?? null,
+        startTime: startTimeVal,
+        endTime: endTimeVal,
+        repeat: body.repeat,
+        public: body.public,
+      }).returning();
+
+      if (!newPersonalEvent) {
+        throw new Error("Failed to insert personal event");
+      }
+
+      return {
+        id: newEvent.id,
+        username: username,
+        title: newEvent.title,
+        description: newEvent.description,
+        date: newPersonalEvent.date,
+        location: newPersonalEvent.location,
+        startTime: newPersonalEvent.startTime.toISOString(),
+        endTime: newPersonalEvent.endTime.toISOString(),
+        repeat: newPersonalEvent.repeat,
+        public: newPersonalEvent.public,
+        createdAt: newEvent.createdAt.toISOString(),
+        updatedAt: newEvent.updatedAt.toISOString(),
+      };
+    });
+
+    if (created) {
+      const conv = Value.Convert(personalEventDTO, created);
+      if (Value.Check(personalEventDTO, conv)) {
+        return Ok(conv);
+      } else {
+        app.log.error(Value.Errors(personalEventDTO, conv));
+        return Err(ErrorTypes.ConversionError);
+      }
+    } else {
+      return Err(ErrorTypes.ResourceCreationError);
+    }
+  } catch (error) {
+    app.log.error(error as any, "Failed to create personal event");
+    return Err(ErrorTypes.ResourceCreationError);
+  }
+};
+
+/**
+ * Modifies an existing personal event.
+ */
+export const editPersonalEvent = async (
+  username: string,
+  eventId: string,
+  body: EditPersonalEventBody
+): Promise<Result<PersonalEventDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError | ErrorTypes.MalformedRequestError | ErrorTypes.UpdateError>> => {
+  try {
+    const existing = await db.query.personalEvents.findFirst({
+      where: (pe, { eq, and }) => and(eq(pe.id, eventId), eq(pe.username, username)),
+    });
+
+    if (!existing) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+
+    const startTimeStr = body.startTime !== undefined ? body.startTime : existing.startTime.toISOString();
+    const endTimeStr = body.endTime !== undefined ? body.endTime : existing.endTime.toISOString();
+    if (new Date(startTimeStr) >= new Date(endTimeStr)) {
+      app.log.warn(`Edit personal event constraint violated: startTime (${startTimeStr}) must be earlier than endTime (${endTimeStr})`);
+      return Err(ErrorTypes.MalformedRequestError);
+    }
+
+    await db.transaction(async (tx) => {
+      if (body.title !== undefined || body.description !== undefined) {
+        await tx.update(events).set({
+          title: body.title,
+          description: body.description,
+          updatedAt: new Date(),
+        }).where(eq(events.id, eventId));
+      }
+
+      const updateValues: Record<string, any> = {};
+      if (body.date !== undefined) updateValues.date = body.date;
+      if (body.location !== undefined) updateValues.location = body.location;
+      if (body.startTime !== undefined) updateValues.startTime = new Date(body.startTime);
+      if (body.endTime !== undefined) updateValues.endTime = new Date(body.endTime);
+      if (body.repeat !== undefined) updateValues.repeat = body.repeat;
+      if (body.public !== undefined) updateValues.public = body.public;
+
+      if (Object.keys(updateValues).length > 0) {
+        await tx.update(personalEvents)
+          .set(updateValues)
+          .where(and(eq(personalEvents.id, eventId), eq(personalEvents.username, username)));
+      }
+    });
+
+    return getPersonalEventById(username, eventId);
+  } catch (error) {
+    app.log.error(error as any, "Failed to edit personal event");
+    return Err(ErrorTypes.UpdateError);
+  }
+};

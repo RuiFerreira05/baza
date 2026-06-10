@@ -76,3 +76,18 @@ export const EditProfileBody = Type.Object({
   ),
 });
 export type EditProfileBody = Type.Static<typeof EditProfileBody>;
+
+// POST /users/:username/friends/sendRequest
+export const SendFriendRequestBody = Type.Object({
+  recipientUsername: Type.String({
+    description: "The username of the user to send the friend request to.",
+  }),
+});
+export type SendFriendRequestBody = Type.Static<typeof SendFriendRequestBody>;
+
+// DTO for Friend Requests
+export const FriendRequestDTO = Type.Object({
+  sender: profileDTO,
+  requestSentAt: Type.String({ format: "date-time" }),
+});
+export type FriendRequestDTO = Type.Static<typeof FriendRequestDTO>;

@@ -1,8 +1,9 @@
-import { profiles, users } from "@baza/db/schemas";
+import { profiles, users, friends, groups, groupMembers } from "@baza/db/schemas";
 import { db } from "../lib/db";
-import { eq } from 'drizzle-orm';
-import { ErrorTypes, profileDTO, type CreateProfileBody, type PersonalEventDTO, type ProfileDTO } from "@baza/shared-types";
+import { eq, and, sql } from 'drizzle-orm';
+import { ErrorTypes, profileDTO, groupDTO, groupMemberDTO, FriendRequestDTO, type CreateProfileBody, type PersonalEventDTO, type ProfileDTO, type GroupDTO, type GroupMemberDTO } from "@baza/shared-types";
 import { Value } from "typebox/value";
+import { Type } from "typebox";
 import { Err, Ok, type Result } from "../lib/types";
 import { app } from "../setup";
 
@@ -199,3 +200,538 @@ Promise<Result<ProfileDTO, ErrorTypes.UnknownUsernameError | ErrorTypes.Conversi
     return Err(ErrorTypes.ExistingResourceError);
   }
 }
+
+/**
+ * Gets user settings.
+ */
+export const getUserSettings = async (
+  username: string
+): Promise<Result<any, ErrorTypes.UnknownUsernameError>> => {
+  try {
+    const profile = await db.query.profiles.findFirst({
+      columns: {
+        settings: true,
+      },
+      where: (p, { eq }) => eq(p.username, username),
+    });
+
+    if (!profile) {
+      return Err(ErrorTypes.UnknownUsernameError);
+    }
+
+    return Ok(profile.settings);
+  } catch (error) {
+    app.log.error(error as any, "Failed to get user settings");
+    return Err(ErrorTypes.UnknownUsernameError);
+  }
+};
+
+/**
+ * Updates user settings.
+ */
+export const updateUserSettings = async (
+  username: string,
+  settings: any
+): Promise<Result<any, ErrorTypes.UnknownUsernameError | ErrorTypes.UpdateError>> => {
+  try {
+    const [updated] = await db
+      .update(profiles)
+      .set({
+        settings,
+        updatedAt: new Date(),
+      })
+      .where(eq(profiles.username, username))
+      .returning();
+
+    if (!updated) {
+      return Err(ErrorTypes.UnknownUsernameError);
+    }
+
+    return Ok(updated.settings);
+  } catch (error) {
+    app.log.error(error as any, "Failed to update user settings");
+    return Err(ErrorTypes.UpdateError);
+  }
+};
+
+/**
+ * Retrieves the groups that the user is an active member of.
+ */
+export const getUserGroups = async (
+  username: string
+): Promise<Result<GroupDTO[], ErrorTypes.ConversionError>> => {
+  try {
+    const rows = await db
+      .select({
+        id: groups.id,
+        groupname: groups.groupname,
+        description: groups.description,
+        photo: groups.photo,
+      })
+      .from(groupMembers)
+      .innerJoin(groups, eq(groupMembers.groupId, groups.id))
+      .where(
+        and(
+          eq(groupMembers.username, username),
+          eq(groupMembers.acceptedInvite, true),
+          eq(groupMembers.banned, false)
+        )
+      );
+
+    const checkSchema = Value.Convert(Type.Array(groupDTO), rows);
+    if (Value.Check(Type.Array(groupDTO), checkSchema)) {
+      return Ok(checkSchema as GroupDTO[]);
+    } else {
+      app.log.error(Value.Errors(Type.Array(groupDTO), checkSchema));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(error as any, "Failed to fetch user groups");
+    return Err(ErrorTypes.ConversionError);
+  }
+};
+
+/**
+ * Gets details of a specific group that the user is an active member of.
+ */
+export const getUserGroupById = async (
+  username: string,
+  groupId: string
+): Promise<Result<GroupDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>> => {
+  try {
+    const [row] = await db
+      .select({
+        id: groups.id,
+        groupname: groups.groupname,
+        description: groups.description,
+        photo: groups.photo,
+      })
+      .from(groupMembers)
+      .innerJoin(groups, eq(groupMembers.groupId, groups.id))
+      .where(
+        and(
+          eq(groupMembers.username, username),
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.acceptedInvite, true),
+          eq(groupMembers.banned, false)
+        )
+      )
+      .limit(1);
+
+    if (!row) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+
+    const conv = Value.Convert(groupDTO, row);
+    if (Value.Check(groupDTO, conv)) {
+      return Ok(conv);
+    } else {
+      app.log.error(Value.Errors(groupDTO, conv));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(error as any, "Failed to fetch user group by ID");
+    return Err(ErrorTypes.UnknownIdError);
+  }
+};
+
+/**
+ * Retrieves the pending group invitations for the user.
+ */
+export const getUserGroupInvites = async (
+  username: string
+): Promise<Result<GroupDTO[], ErrorTypes.ConversionError>> => {
+  try {
+    const rows = await db
+      .select({
+        id: groups.id,
+        groupname: groups.groupname,
+        description: groups.description,
+        photo: groups.photo,
+      })
+      .from(groupMembers)
+      .innerJoin(groups, eq(groupMembers.groupId, groups.id))
+      .where(
+        and(
+          eq(groupMembers.username, username),
+          eq(groupMembers.acceptedInvite, false),
+          eq(groupMembers.banned, false)
+        )
+      );
+
+    const checkSchema = Value.Convert(Type.Array(groupDTO), rows);
+    if (Value.Check(Type.Array(groupDTO), checkSchema)) {
+      return Ok(checkSchema as GroupDTO[]);
+    } else {
+      app.log.error(Value.Errors(Type.Array(groupDTO), checkSchema));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(error as any, "Failed to fetch user group invites");
+    return Err(ErrorTypes.ConversionError);
+  }
+};
+
+/**
+ * Accepts a group invitation.
+ */
+export const acceptGroupInvite = async (
+  username: string,
+  groupId: string
+): Promise<Result<GroupMemberDTO, ErrorTypes.UnknownIdError | ErrorTypes.UpdateError | ErrorTypes.ConversionError>> => {
+  try {
+    const [updated] = await db
+      .update(groupMembers)
+      .set({
+        acceptedInvite: true,
+        acceptedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(groupMembers.username, username),
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.acceptedInvite, false)
+        )
+      )
+      .returning();
+
+    if (!updated) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+
+    const conv = Value.Convert(groupMemberDTO, updated);
+    if (Value.Check(groupMemberDTO, conv)) {
+      return Ok(conv);
+    } else {
+      app.log.error(Value.Errors(groupMemberDTO, conv));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(error as any, "Failed to accept group invite");
+    return Err(ErrorTypes.UpdateError);
+  }
+};
+
+/**
+ * Declines a group invitation.
+ */
+export const declineGroupInvite = async (
+  username: string,
+  groupId: string
+): Promise<Result<null, ErrorTypes.UnknownIdError | ErrorTypes.DeleteError>> => {
+  try {
+    const result = await db
+      .delete(groupMembers)
+      .where(
+        and(
+          eq(groupMembers.username, username),
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.acceptedInvite, false)
+        )
+      )
+      .returning();
+
+    if (result.length === 0) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+
+    return Ok(null);
+  } catch (error) {
+    app.log.error(error as any, "Failed to decline group invite");
+    return Err(ErrorTypes.DeleteError);
+  }
+};
+
+/**
+ * Gets the profile of all accepted friends.
+ */
+export const getFriends = async (
+  username: string
+): Promise<Result<ProfileDTO[], ErrorTypes.ConversionError>> => {
+  try {
+    const sentFriends = await db
+      .select({
+        username: profiles.username,
+        photo: profiles.photo,
+        description: profiles.description,
+        userId: profiles.userId,
+        createdAt: profiles.createdAt,
+        updatedAt: profiles.updatedAt,
+      })
+      .from(friends)
+      .innerJoin(profiles, eq(friends.receivedBy, profiles.username))
+      .where(and(eq(friends.sentBy, username), eq(friends.friendStatus, "accepted")));
+
+    const receivedFriends = await db
+      .select({
+        username: profiles.username,
+        photo: profiles.photo,
+        description: profiles.description,
+        userId: profiles.userId,
+        createdAt: profiles.createdAt,
+        updatedAt: profiles.updatedAt,
+      })
+      .from(friends)
+      .innerJoin(profiles, eq(friends.sentBy, profiles.username))
+      .where(and(eq(friends.receivedBy, username), eq(friends.friendStatus, "accepted")));
+
+    const records = [...sentFriends, ...receivedFriends];
+
+    const formatted = records.map((r) => ({
+      ...r,
+      createdAt: r.createdAt.toISOString(),
+      updatedAt: r.updatedAt.toISOString(),
+    }));
+
+    const checkSchema = Value.Convert(Type.Array(profileDTO), formatted);
+    if (Value.Check(Type.Array(profileDTO), checkSchema)) {
+      return Ok(checkSchema as ProfileDTO[]);
+    } else {
+      app.log.error(Value.Errors(Type.Array(profileDTO), checkSchema));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(error as any, "Failed to fetch friends list");
+    return Err(ErrorTypes.ConversionError);
+  }
+};
+
+/**
+ * Gets a specific friend's profile.
+ */
+export const getFriendProfile = async (
+  username: string,
+  friendUsername: string
+): Promise<Result<ProfileDTO, ErrorTypes.UnknownUsernameError | ErrorTypes.ConversionError>> => {
+  try {
+    const [friendship] = await db
+      .select()
+      .from(friends)
+      .where(
+        and(
+          sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${friendUsername}) OR (${friends.sentBy} = ${friendUsername} AND ${friends.receivedBy} = ${username}))`,
+          eq(friends.friendStatus, "accepted")
+        )
+      )
+      .limit(1);
+
+    if (!friendship) {
+      return Err(ErrorTypes.UnknownUsernameError);
+    }
+
+    return getUserByUsername(friendUsername);
+  } catch (error) {
+    app.log.error(error as any, "Failed to fetch friend profile");
+    return Err(ErrorTypes.UnknownUsernameError);
+  }
+};
+
+/**
+ * Removes a friend.
+ */
+export const removeFriend = async (
+  username: string,
+  friendUsername: string
+): Promise<Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.DeleteError>> => {
+  try {
+    const deleted = await db
+      .delete(friends)
+      .where(
+        sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${friendUsername}) OR (${friends.sentBy} = ${friendUsername} AND ${friends.receivedBy} = ${username}))`
+      )
+      .returning();
+
+    if (deleted.length === 0) {
+      return Err(ErrorTypes.UnknownUsernameError);
+    }
+
+    return Ok(null);
+  } catch (error) {
+    app.log.error(error as any, "Failed to remove friend");
+    return Err(ErrorTypes.DeleteError);
+  }
+};
+
+/**
+ * Sends a friend request.
+ */
+export const sendFriendRequest = async (
+  username: string,
+  recipientUsername: string
+): Promise<Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.MalformedRequestError | ErrorTypes.ExistingResourceError>> => {
+  try {
+    if (username === recipientUsername) {
+      return Err(ErrorTypes.MalformedRequestError);
+    }
+
+    const recipient = await db.query.profiles.findFirst({
+      where: (p, { eq }) => eq(p.username, recipientUsername),
+    });
+
+    if (!recipient) {
+      return Err(ErrorTypes.UnknownUsernameError);
+    }
+
+    const [existing] = await db
+      .select()
+      .from(friends)
+      .where(
+        sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${recipientUsername}) OR (${friends.sentBy} = ${recipientUsername} AND ${friends.receivedBy} = ${username}))`
+      )
+      .limit(1);
+
+    if (existing) {
+      if (existing.friendStatus === "accepted" || existing.friendStatus === "pending") {
+        return Err(ErrorTypes.ExistingResourceError);
+      }
+      if (existing.friendStatus === "blocked") {
+        return Err(ErrorTypes.MalformedRequestError);
+      }
+      // If rejected, reset it to pending
+      await db
+        .update(friends)
+        .set({
+          sentBy: username,
+          receivedBy: recipientUsername,
+          friendStatus: "pending",
+          requestSentAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(
+          sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${recipientUsername}) OR (${friends.sentBy} = ${recipientUsername} AND ${friends.receivedBy} = ${username}))`
+        );
+      return Ok(null);
+    }
+
+    await db.insert(friends).values({
+      sentBy: username,
+      receivedBy: recipientUsername,
+      friendStatus: "pending",
+    });
+
+    return Ok(null);
+  } catch (error) {
+    app.log.error(error as any, "Failed to send friend request");
+    return Err(ErrorTypes.MalformedRequestError);
+  }
+};
+
+/**
+ * Gets pending received friend requests.
+ */
+export const getPendingFriendRequests = async (
+  username: string
+): Promise<Result<any[], ErrorTypes.ConversionError>> => {
+  try {
+    const records = await db
+      .select({
+        username: profiles.username,
+        photo: profiles.photo,
+        description: profiles.description,
+        userId: profiles.userId,
+        createdAt: profiles.createdAt,
+        updatedAt: profiles.updatedAt,
+        requestSentAt: friends.requestSentAt,
+      })
+      .from(friends)
+      .innerJoin(profiles, eq(friends.sentBy, profiles.username))
+      .where(
+        and(
+          eq(friends.receivedBy, username),
+          eq(friends.friendStatus, "pending")
+        )
+      );
+
+    const formatted = records.map((r) => ({
+      sender: {
+        username: r.username,
+        photo: r.photo,
+        description: r.description,
+        userId: r.userId,
+        createdAt: r.createdAt.toISOString(),
+        updatedAt: r.updatedAt.toISOString(),
+      },
+      requestSentAt: r.requestSentAt.toISOString(),
+    }));
+
+    const checkSchema = Value.Convert(Type.Array(FriendRequestDTO), formatted);
+    if (Value.Check(Type.Array(FriendRequestDTO), checkSchema)) {
+      return Ok(checkSchema as any[]);
+    } else {
+      app.log.error(Value.Errors(Type.Array(FriendRequestDTO), checkSchema));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(error as any, "Failed to fetch pending requests");
+    return Err(ErrorTypes.ConversionError);
+  }
+};
+
+/**
+ * Accepts a friend request.
+ */
+export const acceptFriendRequest = async (
+  username: string,
+  senderUsername: string
+): Promise<Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.UpdateError>> => {
+  try {
+    const [updated] = await db
+      .update(friends)
+      .set({
+        friendStatus: "accepted",
+        requestAcceptedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(friends.sentBy, senderUsername),
+          eq(friends.receivedBy, username),
+          eq(friends.friendStatus, "pending")
+        )
+      )
+      .returning();
+
+    if (!updated) {
+      return Err(ErrorTypes.UnknownUsernameError);
+    }
+
+    return Ok(null);
+  } catch (error) {
+    app.log.error(error as any, "Failed to accept friend request");
+    return Err(ErrorTypes.UpdateError);
+  }
+};
+
+/**
+ * Declines a friend request.
+ */
+export const declineFriendRequest = async (
+  username: string,
+  senderUsername: string
+): Promise<Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.UpdateError>> => {
+  try {
+    const [updated] = await db
+      .update(friends)
+      .set({
+        friendStatus: "rejected",
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(friends.sentBy, senderUsername),
+          eq(friends.receivedBy, username),
+          eq(friends.friendStatus, "pending")
+        )
+      )
+      .returning();
+
+    if (!updated) {
+      return Err(ErrorTypes.UnknownUsernameError);
+    }
+
+    return Ok(null);
+  } catch (error) {
+    app.log.error(error as any, "Failed to decline friend request");
+    return Err(ErrorTypes.UpdateError);
+  }
+};

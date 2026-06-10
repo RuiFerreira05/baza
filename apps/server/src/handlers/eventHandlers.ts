@@ -1,8 +1,8 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { getAuthenticatedUsername } from "../lib/auth";
-import { createGroupEvent, getGroupEvents, getGroupEventById, editGroupEvent, getGroupCalendar, getUserEvents } from "../services/eventServices";
+import { createGroupEvent, getGroupEvents, getGroupEventById, editGroupEvent, getGroupCalendar, getUserEvents, createPersonalEvent, editPersonalEvent, getPersonalEventById } from "../services/eventServices";
 import { resolveTie } from "../services/finalizationService";
-import { createStatusError, createStatusOK, ErrorTypes, type SimpleUsernameParam, type GetPersonalEventsParams, type SimpleIdParam, type CreateEventBody, type EditEventBody } from "@baza/shared-types";
+import { createStatusError, createStatusOK, ErrorTypes, type SimpleUsernameParam, type GetPersonalEventsParams, type SimpleIdParam, type CreateEventBody, type EditEventBody, type CreatePersonalEventBody, type EditPersonalEventBody } from "@baza/shared-types";
 import { app } from "../setup";
 
 // POST /groups/:id/events/create
@@ -253,3 +253,127 @@ export const getPersonalEventsHandler = async (req: FastifyRequest, res: Fastify
     return res.status(200).send(createStatusOK(result.value))
   }
 };
+
+// GET /users/:username/events/:idEvent
+export const getPersonalEventByIdHandler = async (req: FastifyRequest, res: FastifyReply) => {
+  app.log.info("Received get user's personal event by ID request");
+  const { username } = req.params as SimpleUsernameParam;
+  const { idEvent: eventId } = req.params as { idEvent: string };
+
+  const result = await getPersonalEventById(username, eventId);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownIdError:
+        app.log.warn(`Personal event not found`);
+        return res.status(404).send(
+          createStatusError(
+            ErrorTypes.UnknownIdError,
+            "The personal event with the provided ID was not found"
+          )
+        );
+      case ErrorTypes.ConversionError:
+      default:
+        app.log.error(`Failed to convert event data`);
+        return res.status(500).send(
+          createStatusError(
+            ErrorTypes.ConversionError,
+            "An error occurred while converting the event data"
+          )
+        );
+    }
+  } else {
+    return res.status(200).send(createStatusOK(result.value));
+  }
+};
+
+// POST /users/:username/events/create
+export const createPersonalEventHandler = async (req: FastifyRequest, res: FastifyReply) => {
+  app.log.info("Received create user's personal event request");
+  const { username } = req.params as SimpleUsernameParam;
+  const body = req.body as CreatePersonalEventBody;
+
+  const result = await createPersonalEvent(username, body);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.MalformedRequestError:
+        app.log.warn(`Create personal event validation failed`);
+        return res.status(400).send(
+          createStatusError(
+            ErrorTypes.MalformedRequestError,
+            "Validation failed: startTime must be earlier than endTime"
+          )
+        );
+      case ErrorTypes.ConversionError:
+        app.log.error(`Failed to convert created event data`);
+        return res.status(500).send(
+          createStatusError(
+            ErrorTypes.ConversionError,
+            "Failed to convert created event data"
+          )
+        );
+      case ErrorTypes.ResourceCreationError:
+      default:
+        app.log.error(`Failed to create personal event`);
+        return res.status(500).send(
+          createStatusError(
+            ErrorTypes.ResourceCreationError,
+            "An error occurred while creating the personal event"
+          )
+        );
+    }
+  } else {
+    return res.status(201).send(createStatusOK(result.value));
+  }
+};
+
+// PATCH /users/:username/events/:idEvent/edit
+export const editPersonalEventHandler = async (req: FastifyRequest, res: FastifyReply) => {
+  app.log.info("Received edit user's personal event request");
+  const { username } = req.params as SimpleUsernameParam;
+  const { idEvent: eventId } = req.params as { idEvent: string };
+  const body = req.body as EditPersonalEventBody;
+
+  const result = await editPersonalEvent(username, eventId, body);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownIdError:
+        app.log.warn(`Personal event not found for edit`);
+        return res.status(404).send(
+          createStatusError(
+            ErrorTypes.UnknownIdError,
+            "The personal event with the provided ID was not found"
+          )
+        );
+      case ErrorTypes.MalformedRequestError:
+        app.log.warn(`Edit personal event validation failed`);
+        return res.status(400).send(
+          createStatusError(
+            ErrorTypes.MalformedRequestError,
+            "Validation failed: startTime must be earlier than endTime"
+          )
+        );
+      case ErrorTypes.ConversionError:
+        app.log.error(`Failed to convert edited event data`);
+        return res.status(500).send(
+          createStatusError(
+            ErrorTypes.ConversionError,
+            "Failed to convert edited event data"
+          )
+        );
+      case ErrorTypes.UpdateError:
+      default:
+        app.log.error(`Failed to edit personal event`);
+        return res.status(500).send(
+          createStatusError(
+            ErrorTypes.UpdateError,
+            "An error occurred while updating the personal event"
+          )
+        );
+    }
+  } else {
+    return res.status(200).send(createStatusOK(result.value));
+  }
+};
