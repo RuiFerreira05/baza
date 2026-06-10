@@ -1,0 +1,104 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/users/:username/friends/:friendUsername"
+  method: GET
+  headers:
+    Accept: "*/*"
+  pathVariables:
+    username: string
+    friendUsername: string
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": {
+          "username": "random_user123",
+          "photo": "string",
+          "description": "Hi, i'm random_user123!",
+          "userId": "e8c61a6a-5a4d-b652-773e-fec630675d75",
+          "createdAt": "2004-06-23T04:15:14.876Z",
+          "updatedAt": "1967-08-12T17:55:33.135Z"
+        }
+      }
+    $type: |-
+      {
+        "description": "Success",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "title": "UserProfileDTO",
+            "description": "Public user profile data, without sensitive information",
+            "properties": {
+              "username": {
+                "type": "string",
+                "example": "random_user123",
+                "description": "username of user"
+              },
+              "photo": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "profile photo of the user"
+                  },
+                  {}
+                ]
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "Profile description of user",
+                    "example": "Hi, i'm random_user123!"
+                  },
+                  {}
+                ]
+              },
+              "userId": {
+                "type": "string",
+                "example": "1y9889192bfb987",
+                "description": "user ID (randomly given)",
+                "format": "uuid"
+              },
+              "createdAt": {
+                "type": "string",
+                "description": "The date and time when the profile was created",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "description": "The date and time when the profile was last updated",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "username",
+              "photo",
+              "description",
+              "userId",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

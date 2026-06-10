@@ -1,0 +1,42 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/users/:username/friends/:friendUsername"
+  method: DELETE
+  headers:
+    Accept: "*/*"
+  pathVariables:
+    username: string
+    friendUsername: string
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": ""
+      }
+    $type: |-
+      {
+        "description": "Removed",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

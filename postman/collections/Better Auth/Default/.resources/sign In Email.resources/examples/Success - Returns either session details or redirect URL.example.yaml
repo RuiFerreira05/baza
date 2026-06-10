@@ -1,0 +1,100 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/sign-in/email"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: json
+    content: |-
+      {
+        "email": "string",
+        "password": "string",
+        "callbackURL": null,
+        "rememberMe": true
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "redirect": false,
+        "token": "string",
+        "user": {
+          "name": "string",
+          "email": "string",
+          "createdAt": "Generated at runtime",
+          "updatedAt": "Generated at runtime",
+          "id": "string",
+          "emailVerified": false,
+          "image": "string"
+        },
+        "url": "string"
+      }
+    $type: |-
+      {
+        "description": "Session response when idToken is provided",
+        "type": "object",
+        "properties": {
+          "redirect": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          },
+          "token": {
+            "type": "string",
+            "description": "Session token"
+          },
+          "url": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "image": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "name",
+              "email",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "redirect",
+          "token",
+          "user"
+        ]
+      }
+order: 1000

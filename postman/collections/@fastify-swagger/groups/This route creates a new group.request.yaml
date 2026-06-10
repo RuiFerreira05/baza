@@ -1,0 +1,28 @@
+$kind: http-request
+description: This route creates a new group
+url: "{{baseUrl}}/v1/restricted/groups/"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+body:
+  type: json
+  content: |-
+    {
+      "groupName": "string"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "groupName": {
+          "type": "string",
+          "description": "The name of the group being created"
+        }
+      },
+      "required": [
+        "groupName"
+      ]
+    }
+examples: ./.resources/This route creates a new group.resources/examples
+order: 4000

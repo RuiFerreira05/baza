@@ -1,0 +1,44 @@
+$kind: http-request
+description: Confirm group member attendance for a group event
+url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent/confirmations"
+method: POST
+headers:
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    description: Group UUID
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: idevent
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    description: Event UUID
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/Confirm group member attendance for a group event.resources/examples
+order: 1000

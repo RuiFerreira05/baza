@@ -1,0 +1,35 @@
+$kind: http-request
+description: Send a verification email to the user
+url: "{{baseUrl}}/send-verification-email"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "user@example.com",
+      "callbackURL": "https://example.com/callback"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "example": "user@example.com",
+          "description": "The email to send the verification email to"
+        },
+        "callbackURL": {
+          "type": "string",
+          "example": "https://example.com/callback",
+          "description": "The URL to use for email verification callback"
+        }
+      },
+      "required": [
+        "email"
+      ]
+    }
+examples: ./.resources/send Verification Email.resources/examples
+order: 12000

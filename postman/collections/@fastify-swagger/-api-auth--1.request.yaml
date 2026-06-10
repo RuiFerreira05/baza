@@ -1,0 +1,11 @@
+$kind: http-request
+name: /api/auth/:*
+url: "{{baseUrl}}/api/auth/:*"
+method: POST
+pathVariables:
+  "*": string
+body:
+  type: text
+  content: ""
+examples: ./.resources/-api-auth--1.resources/examples
+order: 2000

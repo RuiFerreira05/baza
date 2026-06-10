@@ -1,0 +1,65 @@
+$kind: http-request
+name: This route responds to (accepts/declines) a pending friend request.
+description: This route responds to (accepts/declines) a pending friend request.
+url: "{{baseUrl}}/v1/restricted/users/:username/friends/requests/:senderUsername"
+method: PATCH
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: senderUsername
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "status": "accepted"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "status": {
+          "description": "Accept or decline the friend request.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status"
+      ]
+    }
+examples: ./.resources/This route responds to (accepts-declines) a pending friend reque.resources/examples
+order: 20000

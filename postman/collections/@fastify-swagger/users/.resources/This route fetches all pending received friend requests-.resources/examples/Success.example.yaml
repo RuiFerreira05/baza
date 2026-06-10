@@ -1,0 +1,135 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/users/:username/friends/requests"
+  method: GET
+  headers:
+    Accept: "*/*"
+  pathVariables:
+    username: string
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": [
+          {
+            "sender": {
+              "username": "random_user123",
+              "photo": "string",
+              "description": "Hi, i'm random_user123!",
+              "userId": "3d4873f6-ebad-7df8-67c3-f90970416083",
+              "createdAt": "2011-09-11T21:54:52.380Z",
+              "updatedAt": "1955-01-24T12:06:24.646Z"
+            },
+            "requestSentAt": "2022-03-15T08:00:44.543Z"
+          },
+          {
+            "sender": {
+              "username": "random_user123",
+              "photo": "string",
+              "description": "Hi, i'm random_user123!",
+              "userId": "9e5b7afe-db94-7ce4-7f3a-a6d83bc07d8e",
+              "createdAt": "1995-01-08T08:34:18.753Z",
+              "updatedAt": "1973-02-06T13:52:09.490Z"
+            },
+            "requestSentAt": "1962-12-19T12:02:11.033Z"
+          }
+        ]
+      }
+    $type: |-
+      {
+        "description": "Success",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sender": {
+                  "type": "object",
+                  "title": "UserProfileDTO",
+                  "description": "Public user profile data, without sensitive information",
+                  "properties": {
+                    "username": {
+                      "type": "string",
+                      "example": "random_user123",
+                      "description": "username of user"
+                    },
+                    "photo": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "description": "profile photo of the user"
+                        },
+                        {}
+                      ]
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "description": "Profile description of user",
+                          "example": "Hi, i'm random_user123!"
+                        },
+                        {}
+                      ]
+                    },
+                    "userId": {
+                      "type": "string",
+                      "example": "1y9889192bfb987",
+                      "description": "user ID (randomly given)",
+                      "format": "uuid"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "description": "The date and time when the profile was created",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "description": "The date and time when the profile was last updated",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "username",
+                    "photo",
+                    "description",
+                    "userId",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "requestSentAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "sender",
+                "requestSentAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

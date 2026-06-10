@@ -1,0 +1,125 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/get-session"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: json
+    content: "{}"
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "session": {
+          "expiresAt": "1961-08-08T19:17:17.128Z",
+          "token": "string",
+          "createdAt": "Generated at runtime",
+          "updatedAt": "1960-07-28T01:05:56.773Z",
+          "userId": "string",
+          "id": "string",
+          "ipAddress": "string",
+          "userAgent": "string"
+        },
+        "user": {
+          "name": "string",
+          "email": "string",
+          "createdAt": "Generated at runtime",
+          "updatedAt": "Generated at runtime",
+          "id": "string",
+          "emailVerified": false,
+          "image": "string"
+        }
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "session": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "expiresAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "token": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "ipAddress": {
+                "type": "string"
+              },
+              "userAgent": {
+                "type": "string"
+              },
+              "userId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "expiresAt",
+              "token",
+              "createdAt",
+              "updatedAt",
+              "userId"
+            ]
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "image": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "name",
+              "email",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "session",
+          "user"
+        ]
+      }
+order: 1000

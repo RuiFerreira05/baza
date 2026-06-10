@@ -1,0 +1,57 @@
+$kind: http-request
+name: Retrieve specific group member availability preference (hides private options of other users)
+description: Retrieve specific group member availability preference (hides private options of other users)
+url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent/preferences/:username"
+method: GET
+headers:
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: idevent
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/Retrieve specific group member availability preference (hides pr.resources/examples
+order: 4000

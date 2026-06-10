@@ -1,0 +1,13 @@
+$kind: http-request
+name: /callback/:id
+url: "{{baseUrl}}/callback/:id"
+method: GET
+headers:
+  Accept: application/json
+pathVariables:
+  id: ""
+body:
+  type: text
+  content: ""
+examples: ./.resources/-callback-id.resources/examples
+order: 2000

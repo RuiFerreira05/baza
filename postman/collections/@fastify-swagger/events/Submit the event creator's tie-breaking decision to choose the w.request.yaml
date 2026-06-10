@@ -1,0 +1,62 @@
+$kind: http-request
+name: Submit the event creator's tie-breaking decision to choose the winning plan
+description: Submit the event creator's tie-breaking decision to choose the winning plan
+url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent/resolve-tie"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    description: Group UUID
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: idevent
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    description: Event UUID
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "planId": "e6c55728-1f94-dfcb-6c02-f7d3c6f11cbb"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "planId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "planId"
+      ]
+    }
+examples: ./.resources/Submit the event creator's tie-breaking decision to choose the w.resources/examples
+order: 5000

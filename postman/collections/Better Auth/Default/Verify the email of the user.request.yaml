@@ -1,0 +1,31 @@
+$kind: http-request
+description: Verify the email of the user
+url: "{{baseUrl}}/verify-email?token=string&callbackURL=string"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: token
+    value: string
+    description: The token to verify the email
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: callbackURL
+    value: string
+    description: The URL to redirect to after email verification
+    $type: string
+body:
+  type: text
+  content: ""
+examples: ./.resources/Verify the email of the user.resources/examples
+order: 11000

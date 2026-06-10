@@ -1,0 +1,83 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent/preferences/:username"
+  method: GET
+  headers:
+    Accept: "*/*"
+  pathVariables:
+    id: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    idevent: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    username: string
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": {
+          "groupEventId": "a36151b6-24d8-a836-b596-89816f8166bf",
+          "username": "string",
+          "preference": "",
+          "private": true,
+          "createdAt": "2007-07-09T17:43:28.006Z",
+          "updatedAt": "2005-11-05T19:34:24.399Z"
+        }
+      }
+    $type: |-
+      {
+        "description": "Preference data retrieved successfully",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "title": "PreferenceDTO",
+            "description": "User preference for a group event.",
+            "properties": {
+              "groupEventId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "username": {
+                "type": "string"
+              },
+              "private": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "groupEventId",
+              "username",
+              "preference",
+              "private",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

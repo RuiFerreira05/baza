@@ -1,0 +1,71 @@
+$kind: http-example
+name: if no personal events from the user with the provided username was found
+request:
+  url: "{{baseUrl}}/v1/restricted/users/:username/events?startDate=1962-03-27&endDate=1962-03-27"
+  method: GET
+  headers:
+    Accept: "*/*"
+  queryParams:
+    - key: startDate
+      value: 1962-03-27
+      description: Starting from this date, the user events will be returned.
+    - key: endDate
+      value: 1962-03-27
+      description: Until this date, the user events will be returned.
+  pathVariables:
+    username: string
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 404
+  statusText: Not Found
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "ERROR",
+        "error": {
+          "type": "UnknownUsernameError",
+          "message": "string"
+        }
+      }
+    $type: |-
+      {
+        "description": "if no personal events from the user with the provided username was found",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ERROR"
+            ]
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "UnknownUsernameError"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "description": "A human readable error message"
+              }
+            },
+            "required": [
+              "type",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "error"
+        ]
+      }
+order: 2000

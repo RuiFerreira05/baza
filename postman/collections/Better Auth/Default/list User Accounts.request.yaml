@@ -1,0 +1,11 @@
+$kind: http-request
+description: List all accounts linked to the user
+url: "{{baseUrl}}/list-accounts"
+method: GET
+headers:
+  Accept: application/json
+body:
+  type: text
+  content: ""
+examples: ./.resources/list User Accounts.resources/examples
+order: 25000

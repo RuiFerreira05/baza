@@ -1,0 +1,84 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/groups/:id"
+  method: DELETE
+  headers:
+    Accept: "*/*"
+  pathVariables:
+    id: 535610ed-fcb7-e4e0-9c74-008a555da58a
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": {
+          "id": "f2c87806-068d-bd7b-f4f0-eeb3da58f28a",
+          "groupname": "string",
+          "description": "string",
+          "photo": "string"
+        }
+      }
+    $type: |-
+      {
+        "description": "if the group was successfully deleted",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Group UUID",
+                "format": "uuid"
+              },
+              "groupname": {
+                "type": "string",
+                "description": "The name of the group"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "A short description of the group"
+                  },
+                  {}
+                ]
+              },
+              "photo": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "A URL to the group's photo"
+                  },
+                  {}
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "groupname",
+              "description",
+              "photo"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

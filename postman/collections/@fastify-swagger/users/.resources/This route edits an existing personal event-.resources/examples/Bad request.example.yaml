@@ -1,0 +1,75 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/users/:username/events/:idEvent"
+  method: PATCH
+  headers:
+    Content-Type: application/json
+    Accept: "*/*"
+  pathVariables:
+    username: string
+    idEvent: 535610ed-fcb7-e4e0-9c74-008a555da58a
+  body:
+    type: json
+    content: |-
+      {
+        "title": "strin",
+        "description": "string",
+        "date": "1961-01-19",
+        "location": "string",
+        "startTime": "1954-01-22T17:26:20.231Z",
+        "endTime": "1977-09-12T23:48:29.239Z",
+        "repeat": "day",
+        "public": false
+      }
+response:
+  statusCode: 400
+  statusText: Bad Request
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "ERROR",
+        "error": {
+          "type": "MalformedRequestError",
+          "message": "string"
+        }
+      }
+    $type: |-
+      {
+        "description": "Bad request",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ERROR"
+            ]
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "MalformedRequestError"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "description": "A human readable error message"
+              }
+            },
+            "required": [
+              "type",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "error"
+        ]
+      }
+order: 2000

@@ -1,0 +1,265 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent"
+  method: GET
+  headers:
+    Accept: "*/*"
+  pathVariables:
+    - key: id
+      value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+      description: Group UUID
+    - key: idevent
+      value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+      description: Event UUID
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": {
+          "id": "d978cd31-7392-039a-dc2f-e893be37747b",
+          "groupId": "80a95340-f94c-09de-01d6-d7b5816f227a",
+          "title": "string",
+          "description": "string",
+          "startDate": "2015-12-21",
+          "endDate": "1967-01-10",
+          "state": "finished",
+          "votingEndTime": "2000-02-19T22:12:15.843Z",
+          "createdBy": "string",
+          "createdAt": "2023-12-05T10:06:14.267Z",
+          "updatedAt": "1992-09-18T06:40:09.918Z",
+          "winningPlan": {
+            "id": "2457d966-ccc8-f842-84af-9041a5a5499b",
+            "groupEventId": "9066baed-90f0-44c4-409d-d81652aa300d",
+            "username": "string",
+            "title": "string",
+            "date": "1991-11-01",
+            "startTime": "09:17:58.907Z",
+            "endTime": "09:58:02.869Z",
+            "activity": "string",
+            "location": "string",
+            "minBudget": 495,
+            "maxBudget": 2346,
+            "createdAt": "2004-06-09T17:03:25.326Z",
+            "updatedAt": "1994-11-25T09:01:58.003Z",
+            "votesCount": 9042
+          }
+        }
+      }
+    $type: |-
+      {
+        "description": "Event details retrieved successfully",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "title": "GroupEventDTO",
+            "description": "Group event data.",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Event UUID",
+                "format": "uuid"
+              },
+              "groupId": {
+                "type": "string",
+                "description": "Group UUID",
+                "format": "uuid"
+              },
+              "title": {
+                "type": "string",
+                "description": "Event title"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "Event description"
+                  },
+                  {}
+                ]
+              },
+              "startDate": {
+                "type": "string",
+                "description": "Start date YYYY-MM-DD",
+                "format": "date"
+              },
+              "endDate": {
+                "type": "string",
+                "description": "End date YYYY-MM-DD",
+                "format": "date"
+              },
+              "state": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "votingEndTime": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "Voting end time",
+                    "format": "date-time"
+                  },
+                  {}
+                ]
+              },
+              "createdBy": {
+                "type": "string",
+                "description": "Creator username"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "winningPlan": {
+                "anyOf": [
+                  {
+                    "description": "Group proposed plan data.",
+                    "title": "PlanDTO",
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "Plan UUID",
+                        "format": "uuid"
+                      },
+                      "groupEventId": {
+                        "type": "string",
+                        "description": "Parent group event UUID",
+                        "format": "uuid"
+                      },
+                      "username": {
+                        "type": "string",
+                        "description": "Username of the plan proposer"
+                      },
+                      "title": {
+                        "type": "string",
+                        "description": "Title of the proposed plan"
+                      },
+                      "date": {
+                        "type": "string",
+                        "description": "Proposed date (YYYY-MM-DD)",
+                        "format": "date"
+                      },
+                      "startTime": {
+                        "type": "string",
+                        "description": "Proposed start time",
+                        "format": "time"
+                      },
+                      "endTime": {
+                        "type": "string",
+                        "description": "Proposed end time",
+                        "format": "time"
+                      },
+                      "activity": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "description": "Proposed activity detail"
+                          },
+                          {}
+                        ]
+                      },
+                      "location": {
+                        "type": "string",
+                        "description": "Proposed location"
+                      },
+                      "minBudget": {
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "description": "Minimum budget estimation"
+                          },
+                          {}
+                        ]
+                      },
+                      "maxBudget": {
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "description": "Maximum budget estimation"
+                          },
+                          {}
+                        ]
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "votesCount": {
+                        "type": "integer",
+                        "description": "Total votes casted for this plan"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "groupEventId",
+                      "username",
+                      "title",
+                      "date",
+                      "startTime",
+                      "endTime",
+                      "activity",
+                      "location",
+                      "minBudget",
+                      "maxBudget",
+                      "createdAt",
+                      "updatedAt"
+                    ]
+                  },
+                  {}
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "groupId",
+              "title",
+              "description",
+              "startDate",
+              "endDate",
+              "state",
+              "votingEndTime",
+              "createdBy",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

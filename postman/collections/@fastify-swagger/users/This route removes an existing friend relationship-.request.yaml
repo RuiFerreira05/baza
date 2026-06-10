@@ -1,0 +1,41 @@
+$kind: http-request
+name: This route removes an existing friend relationship.
+description: This route removes an existing friend relationship.
+url: "{{baseUrl}}/v1/restricted/users/:username/friends/:friendUsername"
+method: DELETE
+headers:
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: friendUsername
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/This route removes an existing friend relationship-.resources/examples
+order: 14000

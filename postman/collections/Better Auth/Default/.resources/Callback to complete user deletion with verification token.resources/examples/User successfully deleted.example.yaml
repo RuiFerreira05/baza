@@ -1,0 +1,50 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/delete-user/callback?token=string&callbackURL="
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  queryParams:
+    token: string
+    callbackURL: ""
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "message": "User deleted"
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Indicates if the deletion was successful"
+          },
+          "message": {
+            "type": "string",
+            "enum": [
+              "User deleted"
+            ],
+            "description": "Confirmation message"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+order: 1000

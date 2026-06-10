@@ -1,0 +1,28 @@
+$kind: http-request
+name: This route fetches all members of a group (including members who have been banned or have not accepted their invite yet)
+description: This route fetches all members of a group (including members who have been banned or have not accepted their invite yet)
+url: "{{baseUrl}}/v1/restricted/groups/:id/group-members"
+method: GET
+headers:
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/This route fetches all members of a group (including members who.resources/examples
+order: 8000

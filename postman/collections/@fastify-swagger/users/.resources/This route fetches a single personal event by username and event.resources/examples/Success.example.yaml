@@ -1,0 +1,144 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/users/:username/events/:idEvent"
+  method: GET
+  headers:
+    Accept: "*/*"
+  pathVariables:
+    username: string
+    idEvent: 535610ed-fcb7-e4e0-9c74-008a555da58a
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": {
+          "id": "1y9889192bfb987",
+          "username": "random_user123",
+          "title": "Doctor Appointment",
+          "description": "Annual checkup",
+          "date": "1955-07-11",
+          "location": "My house",
+          "startTime": "1996-07-29T00:21:22.149Z",
+          "endTime": "1946-08-28T14:24:55.355Z",
+          "repeat": "string",
+          "public": true,
+          "createdAt": "2014-06-04T18:29:16.310Z",
+          "updatedAt": "1983-07-01T23:36:11.755Z"
+        }
+      }
+    $type: |-
+      {
+        "description": "Success",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "title": "PersonalEventDTO",
+            "description": "Personal event data.",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "1y9889192bfb987",
+                "description": "event ID (randomly given)"
+              },
+              "username": {
+                "type": "string",
+                "example": "random_user123",
+                "description": "username of user who this event belongs to"
+              },
+              "title": {
+                "type": "string",
+                "example": "Doctor Appointment",
+                "description": "event title"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "event description",
+                    "example": "Annual checkup"
+                  },
+                  {}
+                ]
+              },
+              "date": {
+                "type": "string",
+                "description": "The date of the event ",
+                "format": "date"
+              },
+              "location": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "location where the event is going to take place",
+                    "example": "My house"
+                  },
+                  {}
+                ]
+              },
+              "startTime": {
+                "type": "string",
+                "description": "start time of the event",
+                "format": "date-time"
+              },
+              "endTime": {
+                "type": "string",
+                "description": "end time of the event",
+                "format": "date-time"
+              },
+              "repeat": {
+                "type": "string",
+                "description": "frequency which an event should be repeated in the calendar. Can only be on of these: day, week, month, year, never"
+              },
+              "public": {
+                "type": "boolean",
+                "description": "expresses if an event should be public to the user's friends"
+              },
+              "createdAt": {
+                "type": "string",
+                "description": "The date and time when the event was created",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "description": "The date and time when the event was last updated",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "id",
+              "username",
+              "title",
+              "description",
+              "date",
+              "location",
+              "startTime",
+              "endTime",
+              "repeat",
+              "public",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

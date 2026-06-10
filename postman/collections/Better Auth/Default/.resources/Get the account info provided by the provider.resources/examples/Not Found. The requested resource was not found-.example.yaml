@@ -1,0 +1,35 @@
+$kind: http-example
+name: Not Found. The requested resource was not found.
+request:
+  url: "{{baseUrl}}/account-info"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 404
+  statusText: Not Found
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "message": "string"
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+order: 5000

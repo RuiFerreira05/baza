@@ -1,0 +1,64 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/users/:username/blocks/:blockedUsername"
+  method: DELETE
+  headers:
+    Accept: "*/*"
+  pathVariables:
+    username: string
+    blockedUsername: string
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 404
+  statusText: Not Found
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "ERROR",
+        "error": {
+          "type": "UnknownUsernameError",
+          "message": "string"
+        }
+      }
+    $type: |-
+      {
+        "description": "Not found",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ERROR"
+            ]
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "UnknownUsernameError"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "description": "A human readable error message"
+              }
+            },
+            "required": [
+              "type",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "error"
+        ]
+      }
+order: 2000

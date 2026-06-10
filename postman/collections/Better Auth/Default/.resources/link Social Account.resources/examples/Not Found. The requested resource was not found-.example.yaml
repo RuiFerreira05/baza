@@ -1,0 +1,53 @@
+$kind: http-example
+name: Not Found. The requested resource was not found.
+request:
+  url: "{{baseUrl}}/link-social"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: json
+    content: |-
+      {
+        "provider": "string",
+        "callbackURL": null,
+        "idToken": {
+          "token": "string",
+          "nonce": null,
+          "accessToken": "string",
+          "refreshToken": null,
+          "scopes": null
+        },
+        "requestSignUp": null,
+        "scopes": null,
+        "errorCallbackURL": null,
+        "disableRedirect": false,
+        "additionalData": null
+      }
+response:
+  statusCode: 404
+  statusText: Not Found
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "message": "string"
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+order: 5000

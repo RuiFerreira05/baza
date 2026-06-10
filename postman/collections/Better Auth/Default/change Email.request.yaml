@@ -1,0 +1,35 @@
+$kind: http-request
+url: "{{baseUrl}}/change-email"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "newEmail": "string",
+      "callbackURL": null
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "newEmail": {
+          "type": "string",
+          "description": "The new email address to set must be a valid email address"
+        },
+        "callbackURL": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The URL to redirect to after email verification"
+        }
+      },
+      "required": [
+        "newEmail"
+      ]
+    }
+examples: ./.resources/change Email.resources/examples
+order: 13000

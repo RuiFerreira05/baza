@@ -1,0 +1,65 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/link-social"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: json
+    content: |-
+      {
+        "provider": "string",
+        "callbackURL": null,
+        "idToken": {
+          "token": "string",
+          "nonce": null,
+          "accessToken": "string",
+          "refreshToken": null,
+          "scopes": null
+        },
+        "requestSignUp": null,
+        "scopes": null,
+        "errorCallbackURL": null,
+        "disableRedirect": false,
+        "additionalData": null
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "redirect": true,
+        "url": "string",
+        "status": true
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The authorization URL to redirect the user to"
+          },
+          "redirect": {
+            "type": "boolean",
+            "description": "Indicates if the user should be redirected to the authorization URL"
+          },
+          "status": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "redirect"
+        ]
+      }
+order: 1000

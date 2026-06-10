@@ -1,0 +1,41 @@
+$kind: http-request
+name: This route fetches a specific friend's profile details.
+description: This route fetches a specific friend's profile details.
+url: "{{baseUrl}}/v1/restricted/users/:username/friends/:friendUsername"
+method: GET
+headers:
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: friendUsername
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/This route fetches a specific friend's profile details-.resources/examples
+order: 13000

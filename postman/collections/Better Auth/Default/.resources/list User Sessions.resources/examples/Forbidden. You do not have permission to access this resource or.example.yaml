@@ -1,0 +1,35 @@
+$kind: http-example
+name: Forbidden. You do not have permission to access this resource or to perform this action.
+request:
+  url: "{{baseUrl}}/list-sessions"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 403
+  statusText: Forbidden
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "message": "string"
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+order: 4000

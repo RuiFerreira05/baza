@@ -1,0 +1,26 @@
+$kind: http-request
+description: This route fetches profile information from a user of the app
+url: "{{baseUrl}}/v1/restricted/users/:username"
+method: GET
+headers:
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/This route fetches profile information from a user of the app.resources/examples
+order: 1000

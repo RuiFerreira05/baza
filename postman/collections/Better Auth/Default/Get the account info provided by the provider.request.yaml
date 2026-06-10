@@ -1,0 +1,11 @@
+$kind: http-request
+description: Get the account info provided by the provider
+url: "{{baseUrl}}/account-info"
+method: GET
+headers:
+  Accept: application/json
+body:
+  type: text
+  content: ""
+examples: ./.resources/Get the account info provided by the provider.resources/examples
+order: 30000

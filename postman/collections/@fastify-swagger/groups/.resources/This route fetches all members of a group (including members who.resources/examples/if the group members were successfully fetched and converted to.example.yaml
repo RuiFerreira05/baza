@@ -1,0 +1,93 @@
+$kind: http-example
+name: if the group members were successfully fetched and converted to the expected format before sending the response
+request:
+  url: "{{baseUrl}}/v1/restricted/groups/:id/group-members"
+  method: GET
+  headers:
+    Accept: "*/*"
+  pathVariables:
+    id: 535610ed-fcb7-e4e0-9c74-008a555da58a
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": [
+          {
+            "username": "string",
+            "groupId": "efc6cc8a-2b63-0e32-4b63-0c247202ed54",
+            "admin": false,
+            "banned": true,
+            "acceptedInvite": false
+          },
+          {
+            "username": "string",
+            "groupId": "4ba18572-23a9-c260-7b3e-497e57e61af4",
+            "admin": false,
+            "banned": false,
+            "acceptedInvite": true
+          }
+        ]
+      }
+    $type: |-
+      {
+        "description": "if the group members were successfully fetched and converted to the expected format before sending the response",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "description": "The username of the group member"
+                },
+                "groupId": {
+                  "type": "string",
+                  "description": "The UUID of the group",
+                  "format": "uuid"
+                },
+                "admin": {
+                  "type": "boolean",
+                  "description": "Whether the group member is an admin of the group"
+                },
+                "banned": {
+                  "type": "boolean",
+                  "description": "Whether the group member is banned from the group"
+                },
+                "acceptedInvite": {
+                  "type": "boolean",
+                  "description": "Whether the group member has accepted their invite to the group"
+                }
+              },
+              "required": [
+                "username",
+                "groupId",
+                "admin",
+                "banned",
+                "acceptedInvite"
+              ]
+            }
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

@@ -1,0 +1,42 @@
+$kind: http-request
+name: This route fetches a single personal event by username and event ID.
+description: This route fetches a single personal event by username and event ID.
+url: "{{baseUrl}}/v1/restricted/users/:username/events/:idEvent"
+method: GET
+headers:
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: idEvent
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/This route fetches a single personal event by username and event.resources/examples
+order: 7000

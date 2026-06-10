@@ -1,0 +1,41 @@
+$kind: http-example
+name: Unauthorized. Due to missing or invalid authentication.
+request:
+  url: "{{baseUrl}}/delete-user/callback?token=string&callbackURL="
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  queryParams:
+    token: string
+    callbackURL: ""
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 401
+  statusText: Unauthorized
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "message": "string"
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+order: 3000

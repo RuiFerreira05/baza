@@ -1,0 +1,41 @@
+$kind: http-request
+name: This route unblocks a user.
+description: This route unblocks a user.
+url: "{{baseUrl}}/v1/restricted/users/:username/blocks/:blockedUsername"
+method: DELETE
+headers:
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: blockedUsername
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/This route unblocks a user-.resources/examples
+order: 16000

@@ -1,0 +1,76 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent/plans/:idplan"
+  method: PATCH
+  headers:
+    Content-Type: application/json
+    Accept: "*/*"
+  pathVariables:
+    id: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    idevent: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    idplan: 535610ed-fcb7-e4e0-9c74-008a555da58a
+  body:
+    type: json
+    content: |-
+      {
+        "title": "string",
+        "date": "1956-10-28",
+        "startTime": "23:01:02.324Z",
+        "endTime": "09:17:55.523Z",
+        "activity": "string",
+        "location": "string",
+        "minBudget": 603,
+        "maxBudget": 9955
+      }
+response:
+  statusCode: 404
+  statusText: Not Found
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "ERROR",
+        "error": {
+          "type": "UnknownIdError",
+          "message": "string"
+        }
+      }
+    $type: |-
+      {
+        "description": "Plan not found",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ERROR"
+            ]
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "UnknownIdError"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "description": "A human readable error message"
+              }
+            },
+            "required": [
+              "type",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "error"
+        ]
+      }
+order: 3000

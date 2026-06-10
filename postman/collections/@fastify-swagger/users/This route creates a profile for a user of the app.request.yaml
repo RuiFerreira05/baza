@@ -1,0 +1,35 @@
+$kind: http-request
+description: This route creates a profile for a user of the app
+url: "{{baseUrl}}/v1/restricted/users/"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+body:
+  type: json
+  content: |-
+    {
+      "username": "string",
+      "userId": "e8b53dea-18f6-8e0d-43b1-aed540ccf914"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "The username of the user who is the owner of the profile being created."
+        },
+        "userId": {
+          "type": "string",
+          "description": "ID of the user creating this profile.",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "username",
+        "userId"
+      ]
+    }
+examples: ./.resources/This route creates a profile for a user of the app.resources/examples
+order: 4000

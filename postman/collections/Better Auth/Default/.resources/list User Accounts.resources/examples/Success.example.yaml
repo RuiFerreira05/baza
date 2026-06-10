@@ -1,0 +1,92 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/list-accounts"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      [
+        {
+          "id": "string",
+          "providerId": "string",
+          "createdAt": "2025-11-03T05:37:19.460Z",
+          "updatedAt": "1947-05-30T00:35:16.861Z",
+          "accountId": "string",
+          "userId": "string",
+          "scopes": [
+            "string",
+            "string"
+          ]
+        },
+        {
+          "id": "string",
+          "providerId": "string",
+          "createdAt": "1972-05-08T13:16:34.341Z",
+          "updatedAt": "1981-10-01T10:20:37.709Z",
+          "accountId": "string",
+          "userId": "string",
+          "scopes": [
+            "string",
+            "string"
+          ]
+        }
+      ]
+    $type: |-
+      {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "providerId": {
+              "type": "string"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "accountId": {
+              "type": "string"
+            },
+            "userId": {
+              "type": "string"
+            },
+            "scopes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "id",
+            "providerId",
+            "createdAt",
+            "updatedAt",
+            "accountId",
+            "userId",
+            "scopes"
+          ]
+        }
+      }
+order: 1000

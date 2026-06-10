@@ -1,0 +1,27 @@
+$kind: http-request
+description: This route allows editing a group's photo
+url: "{{baseUrl}}/v1/restricted/groups/:id/photo"
+method: PATCH
+headers:
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/This route allows editing a group's photo.resources/examples
+order: 5000

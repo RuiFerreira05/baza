@@ -1,0 +1,17 @@
+$kind: http-request
+description: Revoke all other sessions for the user except the current one
+url: "{{baseUrl}}/revoke-other-sessions"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: "{}"
+  $type: |-
+    {
+      "type": "object",
+      "properties": {}
+    }
+examples: ./.resources/Revoke all other sessions for the user except the current one.resources/examples
+order: 23000

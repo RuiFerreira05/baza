@@ -1,0 +1,111 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/sign-in/social"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: json
+    content: |-
+      {
+        "provider": "string",
+        "callbackURL": "string",
+        "newUserCallbackURL": null,
+        "errorCallbackURL": "string",
+        "disableRedirect": true,
+        "idToken": {
+          "token": "string",
+          "nonce": "string",
+          "accessToken": null,
+          "refreshToken": null,
+          "expiresAt": 5033.192215529226,
+          "user": null
+        },
+        "requestSignUp": null,
+        "loginHint": "string",
+        "additionalData": "string"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "redirect": false,
+        "token": "string",
+        "user": {
+          "name": "string",
+          "email": "string",
+          "createdAt": "Generated at runtime",
+          "updatedAt": "Generated at runtime",
+          "id": "string",
+          "emailVerified": false,
+          "image": "string"
+        },
+        "url": "string"
+      }
+    $type: |-
+      {
+        "description": "Session response when idToken is provided",
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "image": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "name",
+              "email",
+              "createdAt",
+              "updatedAt"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "redirect": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          }
+        },
+        "required": [
+          "redirect",
+          "token",
+          "user"
+        ]
+      }
+order: 1000

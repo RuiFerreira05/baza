@@ -1,0 +1,46 @@
+$kind: http-request
+description: This route allows editing a group's information (except photo)
+url: "{{baseUrl}}/v1/restricted/groups/:id"
+method: PATCH
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "groupName": "string",
+      "description": "string"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "groupName": {
+          "type": "string",
+          "description": "The new name of the group. If not provided, the group name will not be changed"
+        },
+        "description": {
+          "type": "string",
+          "description": "The new description of the group. If not provided, the group description will not be changed"
+        }
+      }
+    }
+examples: ./.resources/This route allows editing a group's information (except photo).resources/examples
+order: 3000

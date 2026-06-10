@@ -1,0 +1,34 @@
+$kind: http-request
+description: Unlink an account
+url: "{{baseUrl}}/unlink-account"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "providerId": "string",
+      "accountId": null
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "providerId": {
+          "type": "string"
+        },
+        "accountId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "providerId"
+      ]
+    }
+examples: ./.resources/Unlink an account.resources/examples
+order: 27000

@@ -1,0 +1,137 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/users/:username/friends/requests/sent"
+  method: GET
+  headers:
+    Accept: "*/*"
+  pathVariables:
+    username: string
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": [
+          {
+            "recipient": {
+              "username": "random_user123",
+              "photo": "string",
+              "description": "Hi, i'm random_user123!",
+              "userId": "69546005-cdd1-533f-df4a-f1466b5518fd",
+              "createdAt": "1975-12-11T03:11:28.582Z",
+              "updatedAt": "1947-03-20T16:48:57.515Z"
+            },
+            "requestSentAt": "1952-11-25T13:45:42.704Z"
+          },
+          {
+            "recipient": {
+              "username": "random_user123",
+              "photo": "string",
+              "description": "Hi, i'm random_user123!",
+              "userId": "b3f933af-f582-7133-0cf0-e009b08958ee",
+              "createdAt": "1975-04-01T23:38:23.237Z",
+              "updatedAt": "1957-12-30T08:00:28.829Z"
+            },
+            "requestSentAt": "1947-05-27T22:05:22.931Z"
+          }
+        ]
+      }
+    $type: |-
+      {
+        "description": "Success",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "description": "Pending sent friend request details",
+              "title": "SentFriendRequestDTO",
+              "type": "object",
+              "properties": {
+                "recipient": {
+                  "type": "object",
+                  "title": "UserProfileDTO",
+                  "description": "Public user profile data, without sensitive information",
+                  "properties": {
+                    "username": {
+                      "type": "string",
+                      "example": "random_user123",
+                      "description": "username of user"
+                    },
+                    "photo": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "description": "profile photo of the user"
+                        },
+                        {}
+                      ]
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "description": "Profile description of user",
+                          "example": "Hi, i'm random_user123!"
+                        },
+                        {}
+                      ]
+                    },
+                    "userId": {
+                      "type": "string",
+                      "example": "1y9889192bfb987",
+                      "description": "user ID (randomly given)",
+                      "format": "uuid"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "description": "The date and time when the profile was created",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "description": "The date and time when the profile was last updated",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "username",
+                    "photo",
+                    "description",
+                    "userId",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "requestSentAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "recipient",
+                "requestSentAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

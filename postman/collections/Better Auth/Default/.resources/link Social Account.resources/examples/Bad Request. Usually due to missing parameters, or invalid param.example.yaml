@@ -1,0 +1,56 @@
+$kind: http-example
+name: Bad Request. Usually due to missing parameters, or invalid parameters.
+request:
+  url: "{{baseUrl}}/link-social"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: json
+    content: |-
+      {
+        "provider": "string",
+        "callbackURL": null,
+        "idToken": {
+          "token": "string",
+          "nonce": null,
+          "accessToken": "string",
+          "refreshToken": null,
+          "scopes": null
+        },
+        "requestSignUp": null,
+        "scopes": null,
+        "errorCallbackURL": null,
+        "disableRedirect": false,
+        "additionalData": null
+      }
+response:
+  statusCode: 400
+  statusText: Bad Request
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "message": "string"
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+order: 2000

@@ -1,0 +1,28 @@
+$kind: http-request
+name: This route updates user profile settings.
+description: This route updates user profile settings.
+url: "{{baseUrl}}/v1/restricted/users/:username/settings"
+method: PATCH
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: ""
+examples: ./.resources/This route updates user profile settings-.resources/examples
+order: 22000

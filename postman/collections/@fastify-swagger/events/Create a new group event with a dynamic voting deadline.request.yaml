@@ -1,0 +1,67 @@
+$kind: http-request
+description: Create a new group event with a dynamic voting deadline
+url: "{{baseUrl}}/v1/restricted/groups/:id/events"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "title": "string",
+      "startDate": "2017-06-16",
+      "endDate": "1956-02-14",
+      "votingEndTime": "1949-05-03T00:39:41.663Z",
+      "description": "string"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "description": {
+          "type": "string"
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "endDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "votingEndTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "title",
+        "startDate",
+        "endDate",
+        "votingEndTime"
+      ]
+    }
+examples: ./.resources/Create a new group event with a dynamic voting deadline.resources/examples
+order: 1000

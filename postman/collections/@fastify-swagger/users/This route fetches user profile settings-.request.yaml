@@ -1,0 +1,27 @@
+$kind: http-request
+name: This route fetches user profile settings.
+description: This route fetches user profile settings.
+url: "{{baseUrl}}/v1/restricted/users/:username/settings"
+method: GET
+headers:
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/This route fetches user profile settings-.resources/examples
+order: 21000

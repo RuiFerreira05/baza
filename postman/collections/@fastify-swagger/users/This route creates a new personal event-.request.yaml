@@ -1,0 +1,97 @@
+$kind: http-request
+name: This route creates a new personal event.
+description: This route creates a new personal event.
+url: "{{baseUrl}}/v1/restricted/users/:username/events"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "title": "string",
+      "date": "2008-09-10",
+      "startTime": "1971-09-25T12:36:13.188Z",
+      "endTime": "1974-04-08T09:47:45.548Z",
+      "repeat": "day",
+      "public": true,
+      "description": "string",
+      "location": "string"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "description": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "location": {
+          "type": "string"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "repeat": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "public": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "title",
+        "date",
+        "startTime",
+        "endTime",
+        "repeat",
+        "public"
+      ]
+    }
+examples: ./.resources/This route creates a new personal event-.resources/examples
+order: 6000

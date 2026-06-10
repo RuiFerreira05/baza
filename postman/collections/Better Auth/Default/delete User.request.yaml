@@ -1,0 +1,35 @@
+$kind: http-request
+description: Delete the user
+url: "{{baseUrl}}/delete-user"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "callbackURL": "string",
+      "password": "string",
+      "token": "string"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "callbackURL": {
+          "type": "string",
+          "description": "The callback URL to redirect to after the user is deleted"
+        },
+        "password": {
+          "type": "string",
+          "description": "The user's password. Required if session is not fresh"
+        },
+        "token": {
+          "type": "string",
+          "description": "The deletion verification token"
+        }
+      }
+    }
+examples: ./.resources/delete User.resources/examples
+order: 17000

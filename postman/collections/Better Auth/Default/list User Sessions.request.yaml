@@ -1,0 +1,11 @@
+$kind: http-request
+description: List all active sessions for the user
+url: "{{baseUrl}}/list-sessions"
+method: GET
+headers:
+  Accept: application/json
+body:
+  type: text
+  content: ""
+examples: ./.resources/list User Sessions.resources/examples
+order: 20000

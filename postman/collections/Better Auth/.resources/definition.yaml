@@ -1,0 +1,13 @@
+$kind: collection
+name: Better Auth
+description: API Reference for your Better Auth Instance
+variables:
+  baseUrl: http://127.0.0.1:8080/api/auth
+auth:
+  - id: 37500986-3919-4083-b591-0ea1344ab2c8
+    type: apikey
+    name: apikey auth
+    credentials:
+      key: apiKeyCookie
+      value: "{{apiKey}}"
+      in: header

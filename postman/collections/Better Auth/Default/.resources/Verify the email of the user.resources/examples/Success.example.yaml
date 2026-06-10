@@ -1,0 +1,86 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/verify-email?token=string&callbackURL=string"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  queryParams:
+    - key: token
+      value: string
+      description: The token to verify the email
+    - key: callbackURL
+      value: string
+      description: The URL to redirect to after email verification
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "user": {
+          "name": "string",
+          "email": "string",
+          "createdAt": "Generated at runtime",
+          "updatedAt": "Generated at runtime",
+          "id": "string",
+          "emailVerified": false,
+          "image": "string"
+        },
+        "status": true
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "image": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "name",
+              "email",
+              "createdAt",
+              "updatedAt"
+            ]
+          },
+          "status": {
+            "type": "boolean",
+            "description": "Indicates if the email was verified successfully"
+          }
+        },
+        "required": [
+          "user",
+          "status"
+        ]
+      }
+order: 1000

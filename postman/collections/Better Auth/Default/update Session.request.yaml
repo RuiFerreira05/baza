@@ -1,0 +1,17 @@
+$kind: http-request
+description: Update the current session
+url: "{{baseUrl}}/update-session"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: "{}"
+  $type: |-
+    {
+      "type": "object",
+      "properties": {}
+    }
+examples: ./.resources/update Session.resources/examples
+order: 15000

@@ -1,0 +1,30 @@
+$kind: http-request
+description: Update the current user
+url: "{{baseUrl}}/update-user"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "string",
+      "image": "string"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the user"
+        },
+        "image": {
+          "type": "string",
+          "description": "The image of the user"
+        }
+      }
+    }
+examples: ./.resources/update User.resources/examples
+order: 16000

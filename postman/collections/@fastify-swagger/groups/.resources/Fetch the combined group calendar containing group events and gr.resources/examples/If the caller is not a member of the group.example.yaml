@@ -1,0 +1,66 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/groups/:id/calendar?startDate=1962-03-27&endDate=1962-03-27"
+  method: GET
+  headers:
+    Accept: "*/*"
+  queryParams:
+    startDate: 1962-03-27
+    endDate: 1962-03-27
+  pathVariables:
+    id: 535610ed-fcb7-e4e0-9c74-008a555da58a
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 403
+  statusText: Forbidden
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "ERROR",
+        "error": {
+          "type": "UnauthorizedError",
+          "message": "string"
+        }
+      }
+    $type: |-
+      {
+        "description": "If the caller is not a member of the group",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ERROR"
+            ]
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "UnauthorizedError"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "description": "A human readable error message"
+              }
+            },
+            "required": [
+              "type",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "error"
+        ]
+      }
+order: 2000

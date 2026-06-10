@@ -1,0 +1,44 @@
+$kind: http-request
+description: Get all attendance confirmations for a group event
+url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent/confirmations"
+method: GET
+headers:
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    description: Group UUID
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: idevent
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    description: Event UUID
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/Get all attendance confirmations for a group event.resources/examples
+order: 3000

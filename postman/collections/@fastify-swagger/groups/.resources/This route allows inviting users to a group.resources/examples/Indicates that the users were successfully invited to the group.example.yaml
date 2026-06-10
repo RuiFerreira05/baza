@@ -1,0 +1,84 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/groups/:id/group-members"
+  method: POST
+  headers:
+    Content-Type: application/json
+    Accept: "*/*"
+  pathVariables:
+    id: 535610ed-fcb7-e4e0-9c74-008a555da58a
+  body:
+    type: json
+    content: |-
+      {
+        "username": "string"
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": {
+          "username": "string",
+          "groupId": "34374016-9fa6-22c9-e045-943e3624db48",
+          "admin": true,
+          "banned": false,
+          "acceptedInvite": true
+        }
+      }
+    $type: |-
+      {
+        "description": "Indicates that the users were successfully invited to the group",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "username": {
+                "type": "string",
+                "description": "The username of the group member"
+              },
+              "groupId": {
+                "type": "string",
+                "description": "The UUID of the group",
+                "format": "uuid"
+              },
+              "admin": {
+                "type": "boolean",
+                "description": "Whether the group member is an admin of the group"
+              },
+              "banned": {
+                "type": "boolean",
+                "description": "Whether the group member is banned from the group"
+              },
+              "acceptedInvite": {
+                "type": "boolean",
+                "description": "Whether the group member has accepted their invite to the group"
+              }
+            },
+            "required": [
+              "username",
+              "groupId",
+              "admin",
+              "banned",
+              "acceptedInvite"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

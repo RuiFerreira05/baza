@@ -1,0 +1,60 @@
+$kind: http-request
+description: Create or update user planning preferences for a group event
+url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent/preferences"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: idevent
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "preference": "",
+      "private": true
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "private": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "preference",
+        "private"
+      ]
+    }
+examples: ./.resources/Create or update user planning preferences for a group event.resources/examples
+order: 1000

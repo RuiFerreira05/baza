@@ -1,0 +1,120 @@
+$kind: http-request
+name: Edit proposed plan coordinates (restricted to the original plan proposer)
+description: Edit proposed plan coordinates (restricted to the original plan proposer)
+url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent/plans/:idplan"
+method: PATCH
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: idevent
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: idplan
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "title": "string",
+      "date": "1956-10-28",
+      "startTime": "23:01:02.324Z",
+      "endTime": "09:17:55.523Z",
+      "activity": "string",
+      "location": "string",
+      "minBudget": 603,
+      "maxBudget": 9955
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "time"
+        },
+        "activity": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {}
+          ]
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minBudget": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {}
+          ]
+        },
+        "maxBudget": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {}
+          ]
+        }
+      }
+    }
+examples: ./.resources/Edit proposed plan coordinates (restricted to the original plan.resources/examples
+order: 4000

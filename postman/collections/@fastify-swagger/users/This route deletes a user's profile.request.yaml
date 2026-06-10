@@ -1,0 +1,26 @@
+$kind: http-request
+description: This route deletes a user's profile
+url: "{{baseUrl}}/v1/restricted/users/:username"
+method: DELETE
+headers:
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/This route deletes a user's profile.resources/examples
+order: 2000

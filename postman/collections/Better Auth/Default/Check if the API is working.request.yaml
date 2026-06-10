@@ -1,0 +1,11 @@
+$kind: http-request
+description: Check if the API is working
+url: "{{baseUrl}}/ok"
+method: GET
+headers:
+  Accept: application/json
+body:
+  type: text
+  content: ""
+examples: ./.resources/Check if the API is working.resources/examples
+order: 31000

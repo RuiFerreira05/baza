@@ -1,0 +1,18 @@
+$kind: http-request
+name: /expo-authorization-proxy
+url: "{{baseUrl}}/expo-authorization-proxy?authorizationURL=string&oauthState="
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: authorizationURL
+    value: string
+    $type: string
+  - key: oauthState
+    value: ""
+    $type: string
+body:
+  type: text
+  content: ""
+examples: ./.resources/-expo-authorization-proxy.resources/examples
+order: 1000

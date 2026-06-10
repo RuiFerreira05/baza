@@ -1,0 +1,102 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/sign-up/email"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: json
+    content: |-
+      {
+        "name": "string",
+        "email": "string",
+        "password": "string",
+        "image": "string",
+        "callbackURL": "string",
+        "rememberMe": true
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "user": {
+          "id": "string",
+          "email": "TbHuTybX@uzEYqwYhYqslMGGKfArzmn.hg",
+          "name": "string",
+          "emailVerified": false,
+          "createdAt": "1983-09-25T03:05:11.295Z",
+          "updatedAt": "2007-02-13T22:55:30.679Z",
+          "image": "http://CnWAjfXGCujJLIDjpC.wwmwBXrpNKZLg,OKImifEGe9MYLX,JkUoIR9N0klAS0"
+        },
+        "token": "string"
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Authentication token for the session"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The unique identifier of the user"
+              },
+              "email": {
+                "type": "string",
+                "description": "The email address of the user",
+                "format": "email"
+              },
+              "name": {
+                "type": "string",
+                "description": "The name of the user"
+              },
+              "image": {
+                "type": "string",
+                "description": "The profile image URL of the user",
+                "format": "uri"
+              },
+              "emailVerified": {
+                "type": "boolean",
+                "description": "Whether the email has been verified"
+              },
+              "createdAt": {
+                "type": "string",
+                "description": "When the user was created",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "description": "When the user was last updated",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "name",
+              "emailVerified",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "user"
+        ]
+      }
+order: 1000

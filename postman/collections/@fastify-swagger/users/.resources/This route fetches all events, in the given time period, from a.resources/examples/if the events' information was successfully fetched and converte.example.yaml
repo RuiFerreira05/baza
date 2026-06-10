@@ -1,0 +1,170 @@
+$kind: http-example
+name: if the events' information was successfully fetched and converted to the expected format before sending the response
+request:
+  url: "{{baseUrl}}/v1/restricted/users/:username/events?startDate=1962-03-27&endDate=1962-03-27"
+  method: GET
+  headers:
+    Accept: "*/*"
+  queryParams:
+    - key: startDate
+      value: 1962-03-27
+      description: Starting from this date, the user events will be returned.
+    - key: endDate
+      value: 1962-03-27
+      description: Until this date, the user events will be returned.
+  pathVariables:
+    username: string
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": [
+          {
+            "id": "1y9889192bfb987",
+            "username": "random_user123",
+            "title": "Doctor Appointment",
+            "description": "Annual checkup",
+            "date": "1985-06-28",
+            "location": "My house",
+            "startTime": "1969-08-31T13:41:56.365Z",
+            "endTime": "1952-07-20T17:59:31.156Z",
+            "repeat": "string",
+            "public": false,
+            "createdAt": "1953-11-26T22:58:39.695Z",
+            "updatedAt": "1986-06-22T13:51:56.722Z"
+          },
+          {
+            "id": "1y9889192bfb987",
+            "username": "random_user123",
+            "title": "Doctor Appointment",
+            "description": "Annual checkup",
+            "date": "2012-11-15",
+            "location": "My house",
+            "startTime": "2010-01-12T09:10:00.901Z",
+            "endTime": "1971-06-15T16:33:57.162Z",
+            "repeat": "string",
+            "public": false,
+            "createdAt": "1975-12-20T12:13:39.068Z",
+            "updatedAt": "2010-04-28T18:06:52.156Z"
+          }
+        ]
+      }
+    $type: |-
+      {
+        "description": "if the events' information was successfully fetched and converted to the expected format before sending the response",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "description": "Personal event data.",
+              "title": "PersonalEventDTO",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "1y9889192bfb987",
+                  "description": "event ID (randomly given)"
+                },
+                "username": {
+                  "type": "string",
+                  "example": "random_user123",
+                  "description": "username of user who this event belongs to"
+                },
+                "title": {
+                  "type": "string",
+                  "example": "Doctor Appointment",
+                  "description": "event title"
+                },
+                "description": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "description": "event description",
+                      "example": "Annual checkup"
+                    },
+                    {}
+                  ]
+                },
+                "date": {
+                  "type": "string",
+                  "description": "The date of the event ",
+                  "format": "date"
+                },
+                "location": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "description": "location where the event is going to take place",
+                      "example": "My house"
+                    },
+                    {}
+                  ]
+                },
+                "startTime": {
+                  "type": "string",
+                  "description": "start time of the event",
+                  "format": "date-time"
+                },
+                "endTime": {
+                  "type": "string",
+                  "description": "end time of the event",
+                  "format": "date-time"
+                },
+                "repeat": {
+                  "type": "string",
+                  "description": "frequency which an event should be repeated in the calendar. Can only be on of these: day, week, month, year, never"
+                },
+                "public": {
+                  "type": "boolean",
+                  "description": "expresses if an event should be public to the user's friends"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "description": "The date and time when the event was created",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "description": "The date and time when the event was last updated",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "username",
+                "title",
+                "description",
+                "date",
+                "location",
+                "startTime",
+                "endTime",
+                "repeat",
+                "public",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

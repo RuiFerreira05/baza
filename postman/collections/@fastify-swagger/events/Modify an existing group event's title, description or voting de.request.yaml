@@ -1,0 +1,69 @@
+$kind: http-request
+name: Modify an existing group event's title, description or voting deadline
+description: Modify an existing group event's title, description or voting deadline
+url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent"
+method: PATCH
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    description: Group UUID
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: idevent
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    description: Event UUID
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "title": "string",
+      "description": "string",
+      "votingEndTime": "1962-12-30T23:28:39.180Z"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "description": {
+          "type": "string"
+        },
+        "votingEndTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+examples: ./.resources/Modify an existing group event's title, description or voting de.resources/examples
+order: 4000

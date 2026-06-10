@@ -1,0 +1,167 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent/plans/:idplan"
+  method: PATCH
+  headers:
+    Content-Type: application/json
+    Accept: "*/*"
+  pathVariables:
+    id: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    idevent: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    idplan: 535610ed-fcb7-e4e0-9c74-008a555da58a
+  body:
+    type: json
+    content: |-
+      {
+        "title": "string",
+        "date": "1956-10-28",
+        "startTime": "23:01:02.324Z",
+        "endTime": "09:17:55.523Z",
+        "activity": "string",
+        "location": "string",
+        "minBudget": 603,
+        "maxBudget": 9955
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": {
+          "id": "a9962ad6-5067-ad4e-811d-fc5c224b1055",
+          "groupEventId": "5a3f2894-f483-b96e-19e6-e60af1a10573",
+          "username": "string",
+          "title": "string",
+          "date": "2018-02-11",
+          "startTime": "21:47:44.440Z",
+          "endTime": "21:26:35.392Z",
+          "activity": "string",
+          "location": "string",
+          "minBudget": 7266,
+          "maxBudget": 8816,
+          "createdAt": "1996-06-17T06:19:39.921Z",
+          "updatedAt": "2015-12-06T02:17:24.569Z",
+          "votesCount": 8191
+        }
+      }
+    $type: |-
+      {
+        "description": "Plan updated successfully",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "title": "PlanDTO",
+            "description": "Group proposed plan data.",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Plan UUID",
+                "format": "uuid"
+              },
+              "groupEventId": {
+                "type": "string",
+                "description": "Parent group event UUID",
+                "format": "uuid"
+              },
+              "username": {
+                "type": "string",
+                "description": "Username of the plan proposer"
+              },
+              "title": {
+                "type": "string",
+                "description": "Title of the proposed plan"
+              },
+              "date": {
+                "type": "string",
+                "description": "Proposed date (YYYY-MM-DD)",
+                "format": "date"
+              },
+              "startTime": {
+                "type": "string",
+                "description": "Proposed start time",
+                "format": "time"
+              },
+              "endTime": {
+                "type": "string",
+                "description": "Proposed end time",
+                "format": "time"
+              },
+              "activity": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "Proposed activity detail"
+                  },
+                  {}
+                ]
+              },
+              "location": {
+                "type": "string",
+                "description": "Proposed location"
+              },
+              "minBudget": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "description": "Minimum budget estimation"
+                  },
+                  {}
+                ]
+              },
+              "maxBudget": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "description": "Maximum budget estimation"
+                  },
+                  {}
+                ]
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "votesCount": {
+                "type": "integer",
+                "description": "Total votes casted for this plan"
+              }
+            },
+            "required": [
+              "id",
+              "groupEventId",
+              "username",
+              "title",
+              "date",
+              "startTime",
+              "endTime",
+              "activity",
+              "location",
+              "minBudget",
+              "maxBudget",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

@@ -1,0 +1,46 @@
+$kind: http-request
+name: This route edits a user's profile information (except photo and settings)
+description: This route edits a user's profile information (except photo and settings)
+url: "{{baseUrl}}/v1/restricted/users/:username"
+method: PATCH
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "newUsername": "string",
+      "newDescription": "string"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "newUsername": {
+          "type": "string",
+          "description": "The new username of the user who's the owner of this profile. If not provided, the username will not be changed"
+        },
+        "newDescription": {
+          "type": "string",
+          "description": "The new description of the user's profile. If not provided, the profile description will not be changed"
+        }
+      }
+    }
+examples: ./.resources/This route edits a user's profile information (except photo and.resources/examples
+order: 3000

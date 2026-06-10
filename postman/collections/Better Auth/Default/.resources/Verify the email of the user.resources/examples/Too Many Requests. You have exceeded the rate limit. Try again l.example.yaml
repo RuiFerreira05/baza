@@ -1,0 +1,42 @@
+$kind: http-example
+name: Too Many Requests. You have exceeded the rate limit. Try again later.
+request:
+  url: "{{baseUrl}}/verify-email?token=string&callbackURL=string"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  queryParams:
+    - key: token
+      value: string
+      description: The token to verify the email
+    - key: callbackURL
+      value: string
+      description: The URL to redirect to after email verification
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 429
+  statusText: Too Many Requests
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "message": "string"
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+order: 6000

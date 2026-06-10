@@ -1,0 +1,95 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/users/:username/groups"
+  method: GET
+  headers:
+    Accept: "*/*"
+  pathVariables:
+    username: string
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": [
+          {
+            "id": "7389b9ef-4fd5-dbc4-4051-ff63af2ec38f",
+            "groupname": "string",
+            "description": "string",
+            "photo": "string"
+          },
+          {
+            "id": "51030683-dc43-e522-51e6-16610def36dd",
+            "groupname": "string",
+            "description": "string",
+            "photo": "string"
+          }
+        ]
+      }
+    $type: |-
+      {
+        "description": "Success",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Group UUID",
+                  "format": "uuid"
+                },
+                "groupname": {
+                  "type": "string",
+                  "description": "The name of the group"
+                },
+                "description": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "description": "A short description of the group"
+                    },
+                    {}
+                  ]
+                },
+                "photo": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "description": "A URL to the group's photo"
+                    },
+                    {}
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "groupname",
+                "description",
+                "photo"
+              ]
+            }
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

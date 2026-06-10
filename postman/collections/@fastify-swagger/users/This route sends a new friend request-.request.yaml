@@ -1,0 +1,44 @@
+$kind: http-request
+name: This route sends a new friend request.
+description: This route sends a new friend request.
+url: "{{baseUrl}}/v1/restricted/users/:username/friends/requests"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "recipientUsername": "string"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "recipientUsername": {
+          "type": "string",
+          "description": "The username of the user to send the friend request to."
+        }
+      },
+      "required": [
+        "recipientUsername"
+      ]
+    }
+examples: ./.resources/This route sends a new friend request-.resources/examples
+order: 17000

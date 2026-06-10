@@ -1,0 +1,104 @@
+$kind: http-request
+name: This route edits an existing personal event.
+description: This route edits an existing personal event.
+url: "{{baseUrl}}/v1/restricted/users/:username/events/:idEvent"
+method: PATCH
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: idEvent
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "title": "strin",
+      "description": "string",
+      "date": "1961-01-19",
+      "location": "string",
+      "startTime": "1954-01-22T17:26:20.231Z",
+      "endTime": "1977-09-12T23:48:29.239Z",
+      "repeat": "day",
+      "public": false
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "description": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "location": {
+          "type": "string"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "repeat": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "public": {
+          "type": "boolean"
+        }
+      }
+    }
+examples: ./.resources/This route edits an existing personal event-.resources/examples
+order: 8000

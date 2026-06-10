@@ -1,0 +1,44 @@
+$kind: http-request
+name: This route blocks a user.
+description: This route blocks a user.
+url: "{{baseUrl}}/v1/restricted/users/:username/blocks"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "blockedUsername": "string"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "blockedUsername": {
+          "type": "string",
+          "description": "The username of the user to block."
+        }
+      },
+      "required": [
+        "blockedUsername"
+      ]
+    }
+examples: ./.resources/This route blocks a user-.resources/examples
+order: 15000

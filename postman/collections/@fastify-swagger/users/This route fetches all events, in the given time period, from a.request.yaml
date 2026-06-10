@@ -1,0 +1,60 @@
+$kind: http-request
+name: This route fetches all events, in the given time period, from a user calendar.
+description: This route fetches all events, in the given time period, from a user calendar.
+url: "{{baseUrl}}/v1/restricted/users/:username/events?startDate=1962-03-27&endDate=1962-03-27"
+method: GET
+headers:
+  Accept: "*/*"
+queryParams:
+  - key: startDate
+    value: 1962-03-27
+    description: Starting from this date, the user events will be returned.
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: endDate
+    value: 1962-03-27
+    description: Until this date, the user events will be returned.
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/This route fetches all events, in the given time period, from a.resources/examples
+order: 5000

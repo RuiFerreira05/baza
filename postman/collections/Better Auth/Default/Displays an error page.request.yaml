@@ -1,0 +1,11 @@
+$kind: http-request
+description: Displays an error page
+url: "{{baseUrl}}/error"
+method: GET
+headers:
+  Accept: text/html
+body:
+  type: text
+  content: ""
+examples: ./.resources/Displays an error page.resources/examples
+order: 32000

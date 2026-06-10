@@ -1,0 +1,11 @@
+$kind: http-request
+description: Get the current session
+url: "{{baseUrl}}/get-session"
+method: GET
+headers:
+  Accept: application/json
+body:
+  type: text
+  content: ""
+examples: ./.resources/get Session.resources/examples
+order: 4000

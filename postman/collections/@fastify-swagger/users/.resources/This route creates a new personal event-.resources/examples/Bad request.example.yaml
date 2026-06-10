@@ -1,0 +1,74 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/users/:username/events"
+  method: POST
+  headers:
+    Content-Type: application/json
+    Accept: "*/*"
+  pathVariables:
+    username: string
+  body:
+    type: json
+    content: |-
+      {
+        "title": "string",
+        "date": "2008-09-10",
+        "startTime": "1971-09-25T12:36:13.188Z",
+        "endTime": "1974-04-08T09:47:45.548Z",
+        "repeat": "day",
+        "public": true,
+        "description": "string",
+        "location": "string"
+      }
+response:
+  statusCode: 400
+  statusText: Bad Request
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "ERROR",
+        "error": {
+          "type": "MalformedRequestError",
+          "message": "string"
+        }
+      }
+    $type: |-
+      {
+        "description": "Bad request",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ERROR"
+            ]
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "MalformedRequestError"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "description": "A human readable error message"
+              }
+            },
+            "required": [
+              "type",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "error"
+        ]
+      }
+order: 2000

@@ -1,0 +1,66 @@
+$kind: http-request
+name: This route responds (accept or decline) to a group invitation.
+description: This route responds (accept or decline) to a group invitation.
+url: "{{baseUrl}}/v1/restricted/users/:username/groups/invites/:groupId"
+method: PATCH
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: groupId
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "status": "accepted"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "status": {
+          "description": "Accept or decline the group invite.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status"
+      ]
+    }
+examples: ./.resources/This route responds (accept or decline) to a group invitation-.resources/examples
+order: 11000

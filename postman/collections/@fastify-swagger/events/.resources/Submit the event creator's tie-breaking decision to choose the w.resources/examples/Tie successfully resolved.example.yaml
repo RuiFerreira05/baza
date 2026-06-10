@@ -1,0 +1,63 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent/resolve-tie"
+  method: POST
+  headers:
+    Content-Type: application/json
+    Accept: "*/*"
+  pathVariables:
+    - key: id
+      value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+      description: Group UUID
+    - key: idevent
+      value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+      description: Event UUID
+  body:
+    type: json
+    content: |-
+      {
+        "planId": "e6c55728-1f94-dfcb-6c02-f7d3c6f11cbb"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "OK",
+        "data": {
+          "message": "string"
+        }
+      }
+    $type: |-
+      {
+        "description": "Tie successfully resolved",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      }
+order: 1000

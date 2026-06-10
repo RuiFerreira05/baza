@@ -1,0 +1,36 @@
+$kind: http-request
+description: Callback to complete user deletion with verification token
+url: "{{baseUrl}}/delete-user/callback?token=string&callbackURL="
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: token
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "description": "The token to verify the deletion request",
+            "type": "string"
+          }
+        }
+      }
+  - key: callbackURL
+    value: ""
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "description": "The URL to redirect to after deletion",
+            "type": "string"
+          }
+        }
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/Callback to complete user deletion with verification token.resources/examples
+order: 26000

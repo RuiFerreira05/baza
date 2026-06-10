@@ -1,0 +1,72 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent/resolve-tie"
+  method: POST
+  headers:
+    Content-Type: application/json
+    Accept: "*/*"
+  pathVariables:
+    - key: id
+      value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+      description: Group UUID
+    - key: idevent
+      value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+      description: Event UUID
+  body:
+    type: json
+    content: |-
+      {
+        "planId": "e6c55728-1f94-dfcb-6c02-f7d3c6f11cbb"
+      }
+response:
+  statusCode: 404
+  statusText: Not Found
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "status": "ERROR",
+        "error": {
+          "type": "UnknownIdError",
+          "message": "string"
+        }
+      }
+    $type: |-
+      {
+        "description": "Event or plan not found, or not in tie-breaker state",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ERROR"
+            ]
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "UnknownIdError"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "description": "A human readable error message"
+              }
+            },
+            "required": [
+              "type",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "error"
+        ]
+      }
+order: 3000

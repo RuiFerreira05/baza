@@ -1,0 +1,97 @@
+$kind: http-request
+name: Propose a new plan coordinate/option for a group event
+description: Propose a new plan coordinate/option for a group event
+url: "{{baseUrl}}/v1/restricted/groups/:id/events/:idevent/plans"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: idevent
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "title": "string",
+      "date": "1959-03-13",
+      "startTime": "05:20:07.246Z",
+      "endTime": "14:33:49.546Z",
+      "location": "string",
+      "activity": "string",
+      "minBudget": 7086,
+      "maxBudget": 6293
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "time"
+        },
+        "activity": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minBudget": {
+          "type": "integer"
+        },
+        "maxBudget": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "title",
+        "date",
+        "startTime",
+        "endTime",
+        "location"
+      ]
+    }
+examples: ./.resources/Propose a new plan coordinate-option for a group event.resources/examples
+order: 2000

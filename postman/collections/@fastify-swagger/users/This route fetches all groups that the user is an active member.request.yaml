@@ -1,0 +1,27 @@
+$kind: http-request
+name: This route fetches all groups that the user is an active member of.
+description: This route fetches all groups that the user is an active member of.
+url: "{{baseUrl}}/v1/restricted/users/:username/groups"
+method: GET
+headers:
+  Accept: "*/*"
+pathVariables:
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/This route fetches all groups that the user is an active member.resources/examples
+order: 9000

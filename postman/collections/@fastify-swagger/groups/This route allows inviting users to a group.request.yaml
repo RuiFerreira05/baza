@@ -1,0 +1,44 @@
+$kind: http-request
+description: This route allows inviting users to a group
+url: "{{baseUrl}}/v1/restricted/groups/:id/group-members"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "username": "string"
+    }
+  $type: |-
+    {
+      "description": "The username of the user being invited to the group",
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "username"
+      ]
+    }
+examples: ./.resources/This route allows inviting users to a group.resources/examples
+order: 7000

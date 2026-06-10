@@ -1,0 +1,53 @@
+$kind: http-request
+name: Fetch the combined group calendar containing group events and group members' personal events.
+description: Fetch the combined group calendar containing group events and group members' personal events.
+url: "{{baseUrl}}/v1/restricted/groups/:id/calendar?startDate=1962-03-27&endDate=1962-03-27"
+method: GET
+headers:
+  Accept: "*/*"
+queryParams:
+  - key: startDate
+    value: 1962-03-27
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+  - key: endDate
+    value: 1962-03-27
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+examples: ./.resources/Fetch the combined group calendar containing group events and gr.resources/examples
+order: 11000

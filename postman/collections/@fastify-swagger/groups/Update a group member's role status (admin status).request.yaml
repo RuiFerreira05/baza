@@ -1,0 +1,58 @@
+$kind: http-request
+description: Update a group member's role status (admin status)
+url: "{{baseUrl}}/v1/restricted/groups/:id/group-members/:username"
+method: PATCH
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  - key: id
+    value: 535610ed-fcb7-e4e0-9c74-008a555da58a
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+  - key: username
+    value: string
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "admin": false
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "admin": {
+          "type": "boolean",
+          "description": "Whether the member should be promoted to admin (true) or dismissed (false)."
+        }
+      },
+      "required": [
+        "admin"
+      ]
+    }
+examples: ./.resources/Update a group member's role status (admin status).resources/examples
+order: 10000

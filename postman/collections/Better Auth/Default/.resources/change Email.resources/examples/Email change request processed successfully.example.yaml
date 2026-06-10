@@ -1,0 +1,93 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/change-email"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: apiKeyCookie
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: json
+    content: |-
+      {
+        "newEmail": "string",
+        "callbackURL": null
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "status": false,
+        "user": {
+          "name": "string",
+          "email": "string",
+          "createdAt": "Generated at runtime",
+          "updatedAt": "Generated at runtime",
+          "id": "string",
+          "emailVerified": false,
+          "image": "string"
+        },
+        "message": "Verification email sent"
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "image": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "name",
+              "email",
+              "createdAt",
+              "updatedAt"
+            ]
+          },
+          "status": {
+            "type": "boolean",
+            "description": "Indicates if the request was successful"
+          },
+          "message": {
+            "type": "string",
+            "enum": [
+              "Email updated",
+              "Verification email sent"
+            ],
+            "description": "Status message of the email change process"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      }
+order: 1000

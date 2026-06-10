@@ -1,0 +1,15 @@
+workspace:
+  id: bde331c4-3b1c-4972-9f52-651cfbcfd94c
+localResources:
+  specs:
+    - ..\postman\specs\@fastify\swagger\index.json
+    - ..\postman\specs\Better Auth\index.json
+cloudResources:
+  collections:
+    ../postman/collections/@fastify-swagger: 54350133-8707124a-c45a-4e94-9e06-41ab5020e61e
+    ../postman/collections/Better Auth: 54350133-3c357021-3338-44e7-8f53-c17814b56068
+  specs:
+    ../postman/specs/@fastify/swagger/index.json: 978291ee-73b2-454e-90ca-852c90a7d4ea
+    ../postman/specs/Better Auth/index.json: 6e25a7bd-8bf0-40c3-8cef-9b1412af4eb7
+  environments:
+    ../postman/environments/Local dev.environment.yaml: 54350133-93c85d8c-63a4-40e4-99a3-9163086141ce

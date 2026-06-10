@@ -1,0 +1,28 @@
+$kind: http-request
+description: Revoke a single session
+url: "{{baseUrl}}/revoke-session"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "token": "string"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string",
+          "description": "The token to revoke"
+        }
+      },
+      "required": [
+        "token"
+      ]
+    }
+examples: ./.resources/Revoke a single session.resources/examples
+order: 21000

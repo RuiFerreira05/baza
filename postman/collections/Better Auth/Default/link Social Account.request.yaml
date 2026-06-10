@@ -1,0 +1,86 @@
+$kind: http-request
+description: Link a social account to the user
+url: "{{baseUrl}}/link-social"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "provider": "string",
+      "callbackURL": null,
+      "idToken": {
+        "token": "string",
+        "nonce": null,
+        "accessToken": "string",
+        "refreshToken": null,
+        "scopes": null
+      },
+      "requestSignUp": null,
+      "scopes": null,
+      "errorCallbackURL": null,
+      "disableRedirect": false,
+      "additionalData": null
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "callbackURL": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The URL to redirect to after the user has signed in"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "idToken": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "requestSignUp": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "scopes": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "description": "Additional scopes to request from the provider"
+        },
+        "errorCallbackURL": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The URL to redirect to if there is an error during the link process"
+        },
+        "disableRedirect": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Disable automatic redirection to the provider. Useful for handling the redirection yourself"
+        },
+        "additionalData": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "provider"
+      ]
+    }
+examples: ./.resources/link Social Account.resources/examples
+order: 24000

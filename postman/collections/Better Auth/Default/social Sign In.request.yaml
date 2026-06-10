@@ -1,0 +1,102 @@
+$kind: http-request
+description: Sign in with a social provider
+url: "{{baseUrl}}/sign-in/social"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "provider": "string",
+      "callbackURL": "string",
+      "newUserCallbackURL": null,
+      "errorCallbackURL": "string",
+      "disableRedirect": true,
+      "idToken": {
+        "token": "string",
+        "nonce": "string",
+        "accessToken": null,
+        "refreshToken": null,
+        "expiresAt": 5033.192215529226,
+        "user": null
+      },
+      "requestSignUp": null,
+      "loginHint": "string",
+      "additionalData": "string"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "callbackURL": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Callback URL to redirect to after the user has signed in"
+        },
+        "newUserCallbackURL": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "errorCallbackURL": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Callback URL to redirect to if an error happens"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "disableRedirect": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Disable automatic redirection to the provider. Useful for handling the redirection yourself"
+        },
+        "idToken": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "scopes": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "description": "Array of scopes to request from the provider. This will override the default scopes passed."
+        },
+        "requestSignUp": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Explicitly request sign-up. Useful when disableImplicitSignUp is true for this provider"
+        },
+        "loginHint": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The login hint to use for the authorization code request"
+        },
+        "additionalData": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "provider"
+      ]
+    }
+examples: ./.resources/social Sign In.resources/examples
+order: 1000
