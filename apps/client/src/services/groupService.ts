@@ -5,56 +5,66 @@ import {
   GroupMemberDTO,
   RespondGroupInviteBody,
   UpdateMemberRoleBody,
+  Result,
+  StatusError,
 } from "@baza/shared-types";
-import { apiClient } from "./apiClient";
+import { apiClient, unwrapResult } from "./apiClient";
 
 export const groupService = {
   // GET /v1/restricted/groups/:id
-  getGroup: (id: string) => apiClient<GroupDTO>(`/v1/restricted/groups/${id}`),
+  getGroup: (id: string): Promise<Result<GroupDTO, StatusError>> =>
+    apiClient(`/v1/restricted/groups/${id}`).then(unwrapResult<GroupDTO>),
 
   // POST /v1/restricted/groups
-  createGroup: (body: CreateGroupBody) =>
-    apiClient<GroupDTO>("/v1/restricted/groups", {
+  createGroup: (
+    body: CreateGroupBody,
+  ): Promise<Result<GroupDTO, StatusError>> =>
+    apiClient("/v1/restricted/groups", {
       method: "POST",
       json: body,
-    }),
+    }).then(unwrapResult<GroupDTO>),
 
   // DELETE /v1/restricted/groups/:id
-  deleteGroup: (id: string) =>
-    apiClient<GroupDTO>(`/v1/restricted/groups/${id}`, {
+  deleteGroup: (id: string): Promise<Result<GroupDTO, StatusError>> =>
+    apiClient(`/v1/restricted/groups/${id}`, {
       method: "DELETE",
-    }),
+    }).then(unwrapResult<GroupDTO>),
 
   // PATCH /v1/restricted/groups/:id
-  editGroup: (id: string, body: EditGroupBody) =>
-    apiClient<GroupDTO>(`/v1/restricted/groups/${id}`, {
+  editGroup: (
+    id: string,
+    body: EditGroupBody,
+  ): Promise<Result<GroupDTO, StatusError>> =>
+    apiClient(`/v1/restricted/groups/${id}`, {
       method: "PATCH",
       json: body,
-    }),
+    }).then(unwrapResult<GroupDTO>),
 
   // POST /v1/restricted/groups/:id/group-members
-  inviteUser: (groupId: string, username: string) =>
-    apiClient<GroupMemberDTO>(
-      `/v1/restricted/groups/${groupId}/group-members`,
-      {
-        method: "POST",
-        json: { username },
-      },
-    ),
+  inviteUser: (
+    groupId: string,
+    username: string,
+  ): Promise<Result<GroupMemberDTO, StatusError>> =>
+    apiClient(`/v1/restricted/groups/${groupId}/group-members`, {
+      method: "POST",
+      json: { username },
+    }).then(unwrapResult<GroupMemberDTO>),
 
   // DELETE /v1/restricted/groups/:id/group-members/:username
-  removeUser: (groupId: string, username: string) =>
-    apiClient<GroupMemberDTO>(
-      `/v1/restricted/groups/${groupId}/group-members/${username}`,
-      {
-        method: "DELETE",
-      },
-    ),
+  removeUser: (
+    groupId: string,
+    username: string,
+  ): Promise<Result<GroupMemberDTO, StatusError>> =>
+    apiClient(`/v1/restricted/groups/${groupId}/group-members/${username}`, {
+      method: "DELETE",
+    }).then(unwrapResult<GroupMemberDTO>),
 
   // GET /v1/restricted/groups/:id/group-members
-  listMembers: (groupId: string) =>
-    apiClient<GroupMemberDTO[]>(
-      `/v1/restricted/groups/${groupId}/group-members`,
+  listMembers: (
+    groupId: string,
+  ): Promise<Result<GroupMemberDTO[], StatusError>> =>
+    apiClient(`/v1/restricted/groups/${groupId}/group-members`).then(
+      unwrapResult<GroupMemberDTO[]>,
     ),
 
   // PATCH /v1/restricted/groups/:id/group-members/:username
@@ -62,34 +72,34 @@ export const groupService = {
     groupId: string,
     username: string,
     body: UpdateMemberRoleBody,
-  ) =>
-    apiClient<GroupMemberDTO>(
-      `/v1/restricted/groups/${groupId}/group-members/${username}`,
-      {
-        method: "PATCH",
-        json: body,
-      },
-    ),
+  ): Promise<Result<GroupMemberDTO, StatusError>> =>
+    apiClient(`/v1/restricted/groups/${groupId}/group-members/${username}`, {
+      method: "PATCH",
+      json: body,
+    }).then(unwrapResult<GroupMemberDTO>),
 
   // GET /v1/restricted/users/:username/groups
-  getUserGroups: (username: string) =>
-    apiClient<GroupDTO[]>(`/v1/restricted/users/${username}/groups`),
+  getUserGroups: (username: string): Promise<Result<GroupDTO[], StatusError>> =>
+    apiClient(`/v1/restricted/users/${username}/groups`).then(
+      unwrapResult<GroupDTO[]>,
+    ),
 
   // GET /v1/restricted/users/:username/groups/invites
-  getUserGroupInvites: (username: string) =>
-    apiClient<GroupDTO[]>(`/v1/restricted/users/${username}/groups/invites`),
+  getUserGroupInvites: (
+    username: string,
+  ): Promise<Result<GroupDTO[], StatusError>> =>
+    apiClient(`/v1/restricted/users/${username}/groups/invites`).then(
+      unwrapResult<GroupDTO[]>,
+    ),
 
   // PATCH /v1/restricted/users/:username/groups/invites/:groupId
   respondGroupInvite: (
     username: string,
     groupId: string,
     body: RespondGroupInviteBody,
-  ) =>
-    apiClient<GroupMemberDTO | null>(
-      `/v1/restricted/users/${username}/groups/invites/${groupId}`,
-      {
-        method: "PATCH",
-        json: body,
-      },
-    ),
+  ): Promise<Result<GroupMemberDTO | null, StatusError>> =>
+    apiClient(`/v1/restricted/users/${username}/groups/invites/${groupId}`, {
+      method: "PATCH",
+      json: body,
+    }).then(unwrapResult<GroupMemberDTO | null>),
 };

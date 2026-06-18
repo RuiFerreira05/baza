@@ -1,17 +1,19 @@
-import { preferences, groupEvents, groupMembers } from "@baza/db/schemas";
-import { db } from "../lib/db";
-import { eq, and } from "drizzle-orm";
+import { groupEvents, groupMembers, preferences } from "@baza/db/schemas";
 import {
+  Err,
   ErrorTypes,
-  preferenceDTO,
   groupPreferenceReportDTO,
-  type PreferenceDTO,
+  Ok,
+  preferenceDTO,
   type CreatePreferenceBody,
   type GroupPreferenceReportDTO,
+  type PreferenceDTO,
+  type Result,
 } from "@baza/shared-types";
-import { Value } from "typebox/value";
+import { and, eq } from "drizzle-orm";
 import { Type } from "typebox";
-import { Err, Ok, type Result } from "../lib/types";
+import { Value } from "typebox/value";
+import { db } from "../lib/db";
 import { app } from "../setup";
 
 export const createOrEditEventPreference = async (

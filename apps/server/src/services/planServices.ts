@@ -1,16 +1,18 @@
-import { plans, votes, groupEvents, groupMembers } from "@baza/db/schemas";
-import { db } from "../lib/db";
-import { eq, and, sql } from "drizzle-orm";
+import { groupEvents, groupMembers, plans, votes } from "@baza/db/schemas";
 import {
-  ErrorTypes,
-  planDTO,
-  type PlanDTO,
   type CreatePlanBody,
   type EditPlanBody,
+  Err,
+  ErrorTypes,
+  Ok,
+  planDTO,
+  type PlanDTO,
+  type Result,
 } from "@baza/shared-types";
-import { Value } from "typebox/value";
+import { and, eq, sql } from "drizzle-orm";
 import { Type } from "typebox";
-import { Err, Ok, type Result } from "../lib/types";
+import { Value } from "typebox/value";
+import { db } from "../lib/db";
 import { app } from "../setup";
 
 export const createEventPlan = async (

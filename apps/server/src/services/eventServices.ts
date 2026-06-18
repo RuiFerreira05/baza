@@ -1,33 +1,35 @@
 import {
+  eventConfirmations,
   events,
   groupEvents,
-  personalEvents,
+  groupEventsFinal,
   groupMembers,
   groups,
-  groupEventsFinal,
+  personalEvents,
   plans,
-  eventConfirmations,
 } from "@baza/db/schemas";
-import { db } from "../lib/db";
-import { eq, and, lte, gte, inArray } from "drizzle-orm";
 import {
-  ErrorTypes,
-  groupEventDTO,
-  personalEventDTO,
-  groupCalendarDTO,
-  type PersonalEventDTO,
-  type GroupCalendarDTO,
-  type GroupEventDTO,
   type CreateEventBody,
-  type EditEventBody,
   type CreatePersonalEventBody,
+  type EditEventBody,
   type EditPersonalEventBody,
+  Err,
+  ErrorTypes,
   eventConfirmationDTO,
   type EventConfirmationDTO,
+  groupCalendarDTO,
+  type GroupCalendarDTO,
+  groupEventDTO,
+  type GroupEventDTO,
+  Ok,
+  personalEventDTO,
+  type PersonalEventDTO,
+  type Result,
 } from "@baza/shared-types";
-import { Value } from "typebox/value";
+import { and, eq, gte, inArray, lte } from "drizzle-orm";
 import { Type } from "typebox";
-import { Err, Ok, type Result } from "../lib/types";
+import { Value } from "typebox/value";
+import { db } from "../lib/db";
 import { app } from "../setup";
 import { finalizeEvent } from "./finalizationService";
 

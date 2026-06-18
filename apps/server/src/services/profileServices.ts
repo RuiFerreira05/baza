@@ -1,28 +1,29 @@
 import {
+  friends,
+  groupMembers,
+  groups,
   profiles,
   users,
-  friends,
-  groups,
-  groupMembers,
 } from "@baza/db/schemas";
-import { db } from "../lib/db";
-import { eq, and, sql } from "drizzle-orm";
 import {
+  Err,
   ErrorTypes,
-  profileDTO,
+  FriendRequestDTO,
   groupDTO,
   groupMemberDTO,
-  FriendRequestDTO,
+  Ok,
+  profileDTO,
   SentFriendRequestDTO,
   type CreateProfileBody,
-  type PersonalEventDTO,
-  type ProfileDTO,
   type GroupDTO,
   type GroupMemberDTO,
+  type ProfileDTO,
+  type Result,
 } from "@baza/shared-types";
-import { Value } from "typebox/value";
+import { and, eq, sql } from "drizzle-orm";
 import { Type } from "typebox";
-import { Err, Ok, type Result } from "../lib/types";
+import { Value } from "typebox/value";
+import { db } from "../lib/db";
 import { app } from "../setup";
 
 /**

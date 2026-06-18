@@ -1,9 +1,8 @@
-import { db } from "../lib/db";
 import { groupEvents, groupEventsFinal, plans, votes } from "@baza/db/schemas";
-import { eq, and, sql, asc, lte } from "drizzle-orm";
+import { Err, ErrorTypes, Ok, type Result } from "@baza/shared-types";
+import { and, asc, eq, lte, sql } from "drizzle-orm";
+import { db } from "../lib/db";
 import { app } from "../setup";
-import { ErrorTypes } from "@baza/shared-types";
-import { Err, Ok, type Result } from "../lib/types";
 
 export const finalizeExpiredEvents = async () => {
   app.log.info("Running automated group event finalization engine...");

@@ -45,6 +45,13 @@ export enum ErrorTypes {
   UnauthorizedError = "UnauthorizedError",
 }
 
+export type Result<T, E> = Ok<T> | Err<E>;
+export type Ok<T> = { ok: true; value: T };
+export type Err<E> = { ok: false; error: E };
+
+export const Ok = <T>(value: T): Ok<T> => ({ ok: true, value });
+export const Err = <E>(error: E): Err<E> => ({ ok: false, error });
+
 /**
  * Creates a schema for a successful "OK" response.
  *
@@ -69,9 +76,10 @@ export const StatusOK = <T extends Type.TSchema>(
 /**
  * Type representing an "OK" response with a specific data schema.
  */
-export type StatusOK<T extends Type.TSchema> = Type.Static<
-  ReturnType<typeof StatusOK<T>>
->;
+export type StatusOK<T> = {
+  status: "OK";
+  data: T;
+};
 
 /**
  * Creates a schema for an "ERROR" response.
@@ -138,6 +146,23 @@ export const createStatusError = (type: ErrorTypes, message: string) => ({
   status: "ERROR" as const,
   error: { type, message },
 });
+
+/**
+ * This type represents an operation that may return some data of type T
+ */
+export type Maybe<T> = T | undefined;
+
+/**
+ * Represents an operation that can fail but doesn't return a value on success.
+ */
+export type Failable<E> = Result<void, E>;
+
+/**
+ * Creates a successful Failable result.
+ *
+ * @returns A successful result with no value
+ */
+export const FailableOk = () => Ok(undefined);
 
 /**
  * Makes a schema nullable by creating a union with Type.Null().

@@ -1,18 +1,22 @@
 import { groupMembers, groups } from "@baza/db/schemas";
 import {
+  Err,
   ErrorTypes,
+  FailableOk,
   groupDTO,
   groupMemberDTO,
+  Ok,
+  type Failable,
   type GroupDTO,
   type GroupMemberDTO,
+  type Result,
 } from "@baza/shared-types";
 import type { MultipartFile } from "@fastify/multipart";
 import { and, eq } from "drizzle-orm";
+import Type from "typebox";
 import { Value } from "typebox/value";
 import { db } from "../lib/db";
-import { Err, FailableOk, Ok, type Failable, type Result } from "../lib/types";
 import { app, fileUploadService } from "../setup";
-import Type from "typebox";
 
 /**
  * This method fetches a group from the database by its id, converts it to a groupDTO, and returns

@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { Err, Ok, Result, StatusError, StatusOK } from "@baza/shared-types";
 import * as SecureStore from "expo-secure-store";
 
 interface FetchOptions extends RequestInit {
@@ -6,16 +7,17 @@ interface FetchOptions extends RequestInit {
 }
 
 /**
- * A type-safe API client wrapper that prefixes URLs with the base server URL,
+ * An API client wrapper that prefixes URLs with the base server URL,
  * handles default headers, and parses JSON responses.
  *
  * @param path The relative path to the API endpoint (e.g. "/v1/restricted/users/username")
  * @param options Standard RequestInit options plus an optional `json` body parameter
+ * @throws If the fetch call fails due to network issues or CORS errors
  */
-export async function apiClient<T>(
+export async function apiClient(
   path: string,
   options: FetchOptions = {},
-): Promise<T> {
+): Promise<Result<StatusOK<unknown>, StatusError>> {
   const url = `${env.EXPO_PUBLIC_SERVER_URL}${path}`;
   const headers = new Headers(options.headers);
 
@@ -31,25 +33,30 @@ export async function apiClient<T>(
     options.body = JSON.stringify(options.json);
   }
 
+  // If fetch throws a native exception (e.g. network/CORS error), let it propagate
   const response = await fetch(url, {
     ...options,
     headers,
   });
 
-  // Handle empty responses (like 204 No Content)
-  if (response.status === 204) {
-    return {} as T;
-  }
-
-  const data = await response.json().catch(() => null);
+  const data = await response.json();
 
   if (!response.ok) {
-    throw {
-      status: response.status,
-      message: data?.message || "An unexpected network error occurred",
-      errorType: data?.errorType,
-    };
+    return Err(data as StatusError);
   }
 
-  return data as T;
+  return Ok(data as StatusOK<unknown>);
+}
+
+/**
+ * Maps the generic Result<StatusOK<unknown>, StatusError> to Result<T, StatusError>
+ * by unwrapping the data envelope.
+ */
+export function unwrapResult<T>(
+  result: Result<StatusOK<unknown>, StatusError>,
+): Result<T, StatusError> {
+  if (!result.ok) {
+    return result;
+  }
+  return Ok(result.value.data as T);
 }

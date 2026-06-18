@@ -1,4 +1,10 @@
-import { ErrorTypes } from "@baza/shared-types";
+import {
+  Err,
+  ErrorTypes,
+  Ok,
+  type Failable,
+  type Result,
+} from "@baza/shared-types";
 import type { MultipartFile } from "@fastify/multipart";
 import fs from "fs";
 import { randomUUID, type UUID } from "node:crypto";
@@ -8,13 +14,9 @@ import { app } from "../setup";
 import { db } from "./db";
 import { env } from "./env";
 import {
-  Err,
-  Ok,
   SetupError,
-  type Failable,
   type FileUploadInterface,
   type GetImageResult,
-  type Result,
 } from "./types";
 
 export class FSUploadService implements FileUploadInterface {
