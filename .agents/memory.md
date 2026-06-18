@@ -118,6 +118,7 @@ A modern mobile application built with **React Native** and **Expo (SDK 55)**.
 ### Tech Stack & Configuration
 * **Router**: Uses **Expo Router** with standard Stack navigation (NativeTabs removed).
 * **State & Fetching**: Integrates **Better-Auth Client** (`better-auth/react` with `@better-auth/expo/client` plugin).
+* **API Client & Services**: Custom `apiClient` in `src/services/apiClient.ts` that handles session tokens asynchronously from SecureStore, processes query parameters dynamically, and standardizes error formats. Views/ViewModels consume flat endpoints in `src/services/` (e.g. `userService`, `eventService`) which leverage `unwrapResult` to return clean `Result<T, StatusError>` structures.
 * **Storage**: Session persistence uses `expo-secure-store`.
 * **Aesthetics & Styling**: Simplified CSS-free layouts using a basic centering container (`GlobalStyles.container` in `global.ts`) with no colors or borders. Custom buttons replaced with built-in React Native `Button` components.
 * **Deep Linking**: Defined scheme `"baza"`.

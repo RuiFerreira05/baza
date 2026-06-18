@@ -26,15 +26,10 @@ export const eventService = {
   getPersonalEvents: (
     username: string,
     query?: GetPersonalEventsParams,
-  ): Promise<Result<PersonalEventDTO[], StatusError>> => {
-    const params = new URLSearchParams();
-    if (query?.startDate) params.set("startDate", query.startDate);
-    if (query?.endDate) params.set("endDate", query.endDate);
-    const queryString = params.toString();
-    return apiClient(
-      `/v1/restricted/users/${username}/events${queryString ? `?${queryString}` : ""}`,
-    ).then(unwrapResult<PersonalEventDTO[]>);
-  },
+  ): Promise<Result<PersonalEventDTO[], StatusError>> =>
+    apiClient(`/v1/restricted/users/${username}/events`, {
+      params: query,
+    }).then(unwrapResult<PersonalEventDTO[]>),
 
   // GET /v1/restricted/users/:username/events/:idEvent
   getPersonalEvent: (
@@ -84,29 +79,19 @@ export const eventService = {
   listGroupEvents: (
     groupId: string,
     query?: { startDate?: string; endDate?: string },
-  ): Promise<Result<GroupEventDTO[], StatusError>> => {
-    const params = new URLSearchParams();
-    if (query?.startDate) params.set("startDate", query.startDate);
-    if (query?.endDate) params.set("endDate", query.endDate);
-    const queryString = params.toString();
-    return apiClient(
-      `/v1/restricted/groups/${groupId}/events${queryString ? `?${queryString}` : ""}`,
-    ).then(unwrapResult<GroupEventDTO[]>);
-  },
+  ): Promise<Result<GroupEventDTO[], StatusError>> =>
+    apiClient(`/v1/restricted/groups/${groupId}/events`, {
+      params: query,
+    }).then(unwrapResult<GroupEventDTO[]>),
 
   // GET /v1/restricted/groups/:id/calendar
   getGroupCalendar: (
     groupId: string,
     query?: { startDate?: string; endDate?: string },
-  ): Promise<Result<GroupCalendarDTO, StatusError>> => {
-    const params = new URLSearchParams();
-    if (query?.startDate) params.set("startDate", query.startDate);
-    if (query?.endDate) params.set("endDate", query.endDate);
-    const queryString = params.toString();
-    return apiClient(
-      `/v1/restricted/groups/${groupId}/calendar${queryString ? `?${queryString}` : ""}`,
-    ).then(unwrapResult<GroupCalendarDTO>);
-  },
+  ): Promise<Result<GroupCalendarDTO, StatusError>> =>
+    apiClient(`/v1/restricted/groups/${groupId}/calendar`, {
+      params: query,
+    }).then(unwrapResult<GroupCalendarDTO>),
 
   // GET /v1/restricted/groups/:id/events/:idevent
   getGroupEvent: (

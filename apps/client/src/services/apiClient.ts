@@ -1,9 +1,18 @@
 import { env } from "@/lib/env";
-import { Err, Ok, Result, StatusError, StatusOK } from "@baza/shared-types";
+import {
+  createStatusError,
+  Err,
+  ErrorTypes,
+  Ok,
+  Result,
+  StatusError,
+  StatusOK,
+} from "@baza/shared-types";
 import * as SecureStore from "expo-secure-store";
 
 interface FetchOptions extends RequestInit {
   json?: Record<string, any>;
+  params?: Record<string, string | number | boolean | undefined>;
 }
 
 /**
@@ -12,13 +21,26 @@ interface FetchOptions extends RequestInit {
  *
  * @param path The relative path to the API endpoint (e.g. "/v1/restricted/users/username")
  * @param options Standard RequestInit options plus an optional `json` body parameter
- * @throws If the fetch call fails due to network issues or CORS errors
  */
 export async function apiClient(
   path: string,
   options: FetchOptions = {},
 ): Promise<Result<StatusOK<unknown>, StatusError>> {
-  const url = `${env.EXPO_PUBLIC_SERVER_URL}${path}`;
+  let url = `${env.EXPO_PUBLIC_SERVER_URL}${path}`;
+
+  if (options.params) {
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(options.params)) {
+      if (value !== undefined && value !== null) {
+        searchParams.set(key, String(value));
+      }
+    }
+    const queryString = searchParams.toString();
+    if (queryString) {
+      url += (url.includes("?") ? "&" : "?") + queryString;
+    }
+  }
+
   const headers = new Headers(options.headers);
 
   // Read the active session token from SecureStore and inject as Bearer token
@@ -33,19 +55,42 @@ export async function apiClient(
     options.body = JSON.stringify(options.json);
   }
 
-  // If fetch throws a native exception (e.g. network/CORS error), let it propagate
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
 
-  const data = await response.json();
+    // Handle empty responses (like 204 No Content)
+    if (response.status === 204) {
+      return Ok({ status: "OK", data: null as unknown });
+    }
 
-  if (!response.ok) {
-    return Err(data as StatusError);
+    const contentType = response.headers.get("content-type");
+    let data: any;
+    if (contentType && contentType.includes("application/json")) {
+      data = await response.json();
+    } else {
+      data = createStatusError(
+        ErrorTypes.ConnectionError,
+        `Server returned status ${response.status}: ${response.statusText}`,
+      );
+    }
+
+    if (!response.ok) {
+      return Err(data as StatusError);
+    }
+
+    return Ok(data as StatusOK<unknown>);
+  } catch (error: any) {
+    console.error(`API request failed [${path}]:`, error);
+    return Err(
+      createStatusError(
+        ErrorTypes.ConnectionError,
+        "Failed to connect to the server",
+      ),
+    );
   }
-
-  return Ok(data as StatusOK<unknown>);
 }
 
 /**

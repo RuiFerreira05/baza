@@ -43,6 +43,11 @@ export enum ErrorTypes {
    * Indicates that the user is not authenticated or authorized to perform the action.
    */
   UnauthorizedError = "UnauthorizedError",
+  /**
+   * Indicates that an error occurred while trying to establish a connection with the server
+   * (CLIENT SIDE).
+   */
+  ConnectionError = "ConnectionError",
 }
 
 export type Result<T, E> = Ok<T> | Err<E>;
