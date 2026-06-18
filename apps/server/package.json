@@ -9,7 +9,8 @@
     "build": "tsup",
     "start": "node dist/server.js",
     "generate-auth-schema": "pnpm dlx auth@latest generate --output ../../packages/db/src/schemas/auth.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@baza/db": "workspace:*",
@@ -27,8 +28,10 @@
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
+    "eslint": "^9.39.4",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
+    "typescript-eslint": "^8.61.1",
     "vitest": "^4.1.8"
   }
 }

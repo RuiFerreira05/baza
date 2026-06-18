@@ -22,9 +22,9 @@ export class FSUploadService implements FileUploadInterface {
 
     const extension = path.extname(photo.filename);
 
-    var fileId;
-    var fileName;
-    var filePath;
+    let fileId;
+    let fileName;
+    let filePath;
 
     do {
       fileId = randomUUID();
@@ -92,7 +92,7 @@ export class FSUploadService implements FileUploadInterface {
   setup(): Failable<SetupError> {
     if (!fs.existsSync(FSUploadService.groupPhotoDir)) {
       app.log.info(`Group photos upload directory not found, creating at ${FSUploadService.groupPhotoDir}`);
-      fs.mkdirSync(FSUploadService.groupPhotoDir, { recursive: true })
+      fs.mkdirSync(FSUploadService.groupPhotoDir, { recursive: true });
     }
     return Ok(undefined);
   }

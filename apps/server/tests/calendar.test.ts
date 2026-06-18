@@ -31,7 +31,7 @@ describe("Calendar Routes", () => {
   it("GET /v1/restricted/groups/:id/calendar should return 404 for unknown group", async () => {
     const response = await app.inject({
       method: "GET",
-      url: `/v1/restricted/groups/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/calendar`,
+      url: "/v1/restricted/groups/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/calendar",
     });
 
     expect(response.statusCode).toBe(404);

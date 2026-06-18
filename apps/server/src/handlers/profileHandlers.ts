@@ -8,64 +8,64 @@ export const getUserByUsernameHandler = async (req: FastifyRequest, res: Fastify
   app.log.info("Recieved get user's profile by username request");
   const { username } = req.params as SimpleUsernameParam;
 
-  app.log.info(`Fetching profile from user with username: ${username}`)
-  const data = await getUserByUsername(username)
+  app.log.info(`Fetching profile from user with username: ${username}`);
+  const data = await getUserByUsername(username);
 
   if(!data.ok){
     switch(data.error){
       case ErrorTypes.UnknownUsernameError:
-        app.log.warn(`User's profile not found`);
+        app.log.warn("User's profile not found");
         return res.status(404).send(
           createStatusError( 
             ErrorTypes.UnknownUsernameError,
-            `The profile from a user with the username provided was not found`,
+            "The profile from a user with the username provided was not found",
         ));
       
       case ErrorTypes.ConversionError:
-        app.log.error(`Failed to convert profile`);
+        app.log.error("Failed to convert profile");
         return res.status(500).send( createStatusError(
           ErrorTypes.ConversionError,
-          `An error occurred while converting the profile data`,
+          "An error occurred while converting the profile data",
         ));
     }
   }
   else{
     return res.send(createStatusOK(data.value));
   }
-}
+};
 
 // POST /users
 export const createUserProfileHandler = async (req: FastifyRequest, res: FastifyReply) => {
-  app.log.info("Received create user's profile request")
+  app.log.info("Received create user's profile request");
   const body = req.body as CreateProfileBody;
-  const result = await createUserProfile(body)
+  const result = await createUserProfile(body);
 
   if(!result.ok){
     switch(result.error){
       case ErrorTypes.ConversionError:
-        app.log.error(`Failed to convert created profile`);
+        app.log.error("Failed to convert created profile");
         return res.status(500).send(createStatusError(
           ErrorTypes.ConversionError,
-          `An error occurred while converting the created profile data`,
+          "An error occurred while converting the created profile data",
         ));
       case ErrorTypes.ResourceCreationError:
-        app.log.error(`Failed to create profile`);
+        app.log.error("Failed to create profile");
         return res.status(500).send(createStatusError(
           ErrorTypes.ResourceCreationError,
-          `An error occurred while creating the profile`,
+          "An error occurred while creating the profile",
         ));
       case ErrorTypes.UnknownIdError:
-        app.log.warn(`User not found`);
+        app.log.warn("User not found");
         return res.status(404).send(createStatusError(
           ErrorTypes.UnknownIdError,
-          `A user with the provided id was not found`,
+          "A user with the provided id was not found",
         ));
     }
   }
   else{
     return res.send(createStatusOK(result.value));
   }
-}
+};
 
 // POST /users/:username/delete
 export const deleteUserProfileHandler = async (req: FastifyRequest, res: FastifyReply) => {
@@ -76,7 +76,7 @@ export const deleteUserProfileHandler = async (req: FastifyRequest, res: Fastify
   if(!result.ok){
     switch(result.error){
       case ErrorTypes.UnknownUsernameError:
-        app.log.error(`User not found`);
+        app.log.error("User not found");
         return res.status(404).send(createStatusError(
           ErrorTypes.UnknownUsernameError,
           "A user with the provided username was not found",
@@ -92,7 +92,7 @@ export const deleteUserProfileHandler = async (req: FastifyRequest, res: Fastify
   else{
     return res.send(createStatusOK(result.value));
   }
-}
+};
 
 // PATCH /users/:username/edit
 export const editUserProfileHandler = async (req: FastifyRequest, res: FastifyReply) => {
@@ -104,13 +104,13 @@ export const editUserProfileHandler = async (req: FastifyRequest, res: FastifyRe
   if (!result.ok) {
     switch (result.error) {
       case ErrorTypes.UnknownUsernameError:
-        app.log.warn(`User not found`);
+        app.log.warn("User not found");
         return res.status(404).send(createStatusError(
           ErrorTypes.UnknownUsernameError,
           "A user with the provided username was not found",
         ));
       case ErrorTypes.ConversionError:
-        app.log.error(`Failed to convert updated profile data`);
+        app.log.error("Failed to convert updated profile data");
         return res.status(500).send(createStatusError(
           ErrorTypes.ConversionError,
           "An error occurred while converting the updated profile data",
@@ -126,4 +126,4 @@ export const editUserProfileHandler = async (req: FastifyRequest, res: FastifyRe
   else {
     return res.send(createStatusOK(result.value));
   }
-}
+};

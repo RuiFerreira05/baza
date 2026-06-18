@@ -109,7 +109,7 @@ export const getGroupEvents = async (
       conditions.push(lte(groupEvents.endDate, endDate));
     }
 
-    let query = db.select({
+    const query = db.select({
       id: groupEvents.id,
       groupId: groupEvents.groupId,
       title: events.title,
@@ -579,7 +579,7 @@ Promise<Result<PersonalEventDTO[], ErrorTypes.ConversionError | ErrorTypes.Unkno
   });
 
   if(personalEvents){
-    const sanitizedEvents = []
+    const sanitizedEvents = [];
     for(const personalEvent of personalEvents){
       const {events, ...rest} = personalEvent;
       
@@ -596,9 +596,9 @@ Promise<Result<PersonalEventDTO[], ErrorTypes.ConversionError | ErrorTypes.Unkno
           endTime: rest.endTime.toISOString()
         };
 
-        app.log.info(`DATE: ${rest.date}`)
-        app.log.info(`START TIME: ${rest.startTime}`)
-        app.log.info(`END TIME: ${rest.endTime}`)
+        app.log.info(`DATE: ${rest.date}`);
+        app.log.info(`START TIME: ${rest.startTime}`);
+        app.log.info(`END TIME: ${rest.endTime}`);
         sanitizedEvents.push(sanitizedEvent);
       }
     }

@@ -93,7 +93,7 @@ if (env.FILE_UPLOAD_SERVICE === "fs") {
   app.register(fastifyStatic, {
     root: path.resolve(env.UPLOAD_DIR)
     // no prefix cause we handle sending files manually
-  })
+  });
 }
 
 // ####### FUNCTIONS #######

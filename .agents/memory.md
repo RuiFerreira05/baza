@@ -92,6 +92,7 @@ An API server powered by **Fastify**, using **Typebox** for payload validation, 
 * **API Documentation**: Uses `@fastify/swagger` and `@fastify/swagger-ui` serving Interactive documentation under `/v1/docs`.
 * **File Uploads**: Supports multipart parsing via `@fastify/multipart` with localized file system storage (`FSUploadService`).
 * **Workspaces Integration**: Direct dependencies on local workspaces `@baza/db` and `@baza/shared-types`.
+* **Linting & Code Quality**: Managed locally via [eslint.config.js](file:///c:/Users/rui/local-projects/baza/apps/server/eslint.config.js) using `typescript-eslint` and [tsconfig.eslint.json](file:///c:/Users/rui/local-projects/baza/apps/server/tsconfig.eslint.json) to cover source, tests, and config files.
 
 ### Route Registrations (`apps/server/src/routes/`)
 * **[profileRoutes.ts](file:///c:/Users/rui/local-projects/baza/apps/server/src/routes/profileRoutes.ts)** (`/v1/restricted/users`):
@@ -114,20 +115,26 @@ An API server powered by **Fastify**, using **Typebox** for payload validation, 
 A modern mobile application built with **React Native** and **Expo (SDK 55)**.
 
 ### Tech Stack & Configuration
-* **Router**: Uses **Expo Router** with new `NativeTabs` (`expo-router/unstable-native-tabs`).
+* **Router**: Uses **Expo Router** with standard Stack navigation (NativeTabs removed).
 * **State & Fetching**: Integrates **Better-Auth Client** (`better-auth/react` with `@better-auth/expo/client` plugin).
 * **Storage**: Session persistence uses `expo-secure-store`.
-* **Aesthetics & Styling**: Responsive, dynamic themes via `Color` components provided by `expo-router` (e.g., `Color.android.dynamic.background`). Highly animated with `react-native-reanimated`.
+* **Aesthetics & Styling**: Simplified CSS-free layouts using a basic centering container (`GlobalStyles.container` in `global.ts`) with no colors or borders. Custom buttons replaced with built-in React Native `Button` components.
 * **Deep Linking**: Defined scheme `"baza"`.
+* **Authentication Guard**: Centralized in root [_layout.tsx](file:///c:/Users/rui/local-projects/baza/apps/client/src/app/_layout.tsx) using `useSegments()` and `authClient.useSession()`. Controlled by `EXPO_PUBLIC_BYPASS_AUTH` and strictly guarded by `__DEV__` to prevent accidental production leaks.
+* **Architecural Pattern**: Hook-based MVVM model.
+  * Presentational Views: `src/app/`
+  * ViewModels (Controllers): `src/viewmodels/` named with the suffix `ViewModel` (e.g. `useCalendarViewModel`).
 
 ### Route Structure (`apps/client/src/app/`)
-* **`auth/`**: Public signup and signin routes.
-  * `login.tsx`: Email/Password signin screen utilizing `authClient.signIn.email`.
-  * `signUp.tsx`: User registration form.
-* **`(protected)/`**: Auth-guarded navigation routing requiring active session.
-  * `_layout.tsx`: Checks `session` and redirects to `/auth/login` if missing.
-  * `index.tsx`: Main home feed screen.
-  * `me.tsx`: Current user details and profile logout controller.
+* **`auth/`**: Public signup and signin routes (Stack navigation).
+  * `login.tsx`: Placeholder login screen.
+  * `register.tsx`: Placeholder registration screen.
+* **`(protected)/`**: Navigation routing requiring active session.
+  * `_layout.tsx`: Renders protected Stack layout; actual session check is deferred to the root layout guard.
+  * `index.tsx`: Redirects automatically to `/(protected)/calendar`.
+  * `calendar.tsx`: Calendar entry-point/dashboard screen.
+  * `profile.tsx`: Profile details screen.
+  * `groups.tsx`: Groups list screen.
 
 ---
 

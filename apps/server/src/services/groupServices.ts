@@ -286,7 +286,7 @@ export const inviteUserToGroup = async (
     .returning();
 
   if (!groupMember) {
-    app.log.warn(`Group or user not found`);
+    app.log.warn("Group or user not found");
     return Err(ErrorTypes.UnknownIdError);
   }
 
@@ -365,7 +365,7 @@ export const removeUserFromGroup = async (
     .returning();
 
   if (!groupMember) {
-    app.log.warn(`Group or user not found`);
+    app.log.warn("Group or user not found");
     return Err(ErrorTypes.UnknownIdError);
   }
 

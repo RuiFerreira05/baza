@@ -142,7 +142,7 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     deleteGroupHandler,
-  )
+  );
 
   // PATCH /groups/:id/photo
   app.patch(
@@ -294,7 +294,7 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     removeUserFromGroupHandler,
-  )
+  );
 
   // GET /groups/:id/group-members
   app.get(

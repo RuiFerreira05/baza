@@ -44,10 +44,12 @@ const serverEnvSchema = Type.Object({
 
 export type ServerEnv = Type.Static<typeof serverEnvSchema>;
 
-var env: ServerEnv;
+let env: ServerEnv;
 
 try {
-  env = Value.Parse(serverEnvSchema, process.env);
+  const rawEnv = { ...process.env };
+  Value.Default(serverEnvSchema, rawEnv);
+  env = Value.Parse(serverEnvSchema, rawEnv);
 } catch (err) {
   console.error(
     "Environment variable validation error:\n",

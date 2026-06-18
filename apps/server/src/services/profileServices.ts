@@ -1,6 +1,6 @@
 import { profiles, users, friends, groups, groupMembers } from "@baza/db/schemas";
 import { db } from "../lib/db";
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql } from "drizzle-orm";
 import { ErrorTypes, profileDTO, groupDTO, groupMemberDTO, FriendRequestDTO, SentFriendRequestDTO, type CreateProfileBody, type PersonalEventDTO, type ProfileDTO, type GroupDTO, type GroupMemberDTO } from "@baza/shared-types";
 import { Value } from "typebox/value";
 import { Type } from "typebox";
@@ -34,9 +34,9 @@ export const getUserByUsername = async (username: string):
         ...profile,
         createdAt: profile.createdAt.toISOString(),
         updatedAt: profile.updatedAt.toISOString(),
-    }
+    };
 
-    const converted = Value.Convert(profileDTO, sanitizedProfile)
+    const converted = Value.Convert(profileDTO, sanitizedProfile);
     if(Value.Check(profileDTO, converted)){
       return Ok(converted);
     }
@@ -48,7 +48,7 @@ export const getUserByUsername = async (username: string):
   else{
     return Err(ErrorTypes.UnknownUsernameError);
   }
-}
+};
 
 /**
  * This method creates a new profile for an existing user in the database with the provided username and id.
@@ -78,7 +78,7 @@ Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreat
         ...newProfile,
         createdAt: newProfile?.createdAt.toISOString(),
         updatedAt: newProfile?.updatedAt.toISOString(),
-      }
+      };
 
       const converted = Value.Convert(profileDTO, sanitizedProfile);
       if(Value.Check(profileDTO, converted)){
@@ -96,7 +96,7 @@ Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreat
   else{
     return Err(ErrorTypes.UnknownIdError);
   }
-}
+};
 
 /**
  * This method deletes a user's profile from the database by the provided username.
@@ -123,7 +123,7 @@ Promise<Result<ProfileDTO, ErrorTypes.DeleteError | ErrorTypes.UnknownUsernameEr
         ...profile,
         createdAt: profile?.createdAt.toISOString(),
         updatedAt: profile?.updatedAt.toISOString(),
-      }
+      };
 
       const converted = Value.Convert(profileDTO, sanitizedProfile);
       if(Value.Check(profileDTO, converted)){
@@ -136,7 +136,7 @@ Promise<Result<ProfileDTO, ErrorTypes.DeleteError | ErrorTypes.UnknownUsernameEr
     });
 
     if(deletedProfile){
-      return Ok(deletedProfile)
+      return Ok(deletedProfile);
     }
     else{
       return Err(ErrorTypes.UnknownUsernameError);
@@ -145,7 +145,7 @@ Promise<Result<ProfileDTO, ErrorTypes.DeleteError | ErrorTypes.UnknownUsernameEr
     app.log.error(`Failed to delete profile from user with username ${username}: ${(error as Error).message}`);
     return Err(ErrorTypes.DeleteError);
   }
-}
+};
 
 /**
  * This method updates the username and/or description of an existing user profile. If successful, it
@@ -165,7 +165,7 @@ Promise<Result<ProfileDTO, ErrorTypes.UnknownUsernameError | ErrorTypes.Conversi
     where: {
       username: newUserName,
     },
-  })
+  });
 
   if(!usernameCheck || newUserName == undefined){
     const [profile] = await db.update(profiles).set({
@@ -179,7 +179,7 @@ Promise<Result<ProfileDTO, ErrorTypes.UnknownUsernameError | ErrorTypes.Conversi
           ...profile,
           createdAt: profile?.createdAt.toISOString(),
           updatedAt: profile?.updatedAt.toISOString(),
-        }
+        };
 
         const converted = Value.Convert(profileDTO, sanitizedProfile);
         if(Value.Check(profileDTO, converted)){
@@ -199,7 +199,7 @@ Promise<Result<ProfileDTO, ErrorTypes.UnknownUsernameError | ErrorTypes.Conversi
     app.log.warn(`User with name ${newUserName} already exists`);
     return Err(ErrorTypes.ExistingResourceError);
   }
-}
+};
 
 /**
  * Gets user settings.

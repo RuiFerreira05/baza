@@ -231,7 +231,7 @@ export const getPersonalEventsHandler = async (req: FastifyRequest, res: Fastify
   if(!result.ok){
     switch (result.error) {
       case ErrorTypes.UnknownUsernameError:
-        app.log.warn(`User not found`);
+        app.log.warn("User not found");
         return res.status(404).send(
           createStatusError(
             ErrorTypes.UnknownUsernameError,
@@ -240,17 +240,17 @@ export const getPersonalEventsHandler = async (req: FastifyRequest, res: Fastify
         );
       
       case ErrorTypes.ConversionError:
-        app.log.error(`Failed to convert events' data`);
+        app.log.error("Failed to convert events' data");
         return res.status(500).send(
           createStatusError(
             ErrorTypes.ConversionError,
             "An error occurred while converting the events' data"
           )
-        )
+        );
     }
   }
   else{
-    return res.status(200).send(createStatusOK(result.value))
+    return res.status(200).send(createStatusOK(result.value));
   }
 };
 
@@ -265,7 +265,7 @@ export const getPersonalEventByIdHandler = async (req: FastifyRequest, res: Fast
   if (!result.ok) {
     switch (result.error) {
       case ErrorTypes.UnknownIdError:
-        app.log.warn(`Personal event not found`);
+        app.log.warn("Personal event not found");
         return res.status(404).send(
           createStatusError(
             ErrorTypes.UnknownIdError,
@@ -274,7 +274,7 @@ export const getPersonalEventByIdHandler = async (req: FastifyRequest, res: Fast
         );
       case ErrorTypes.ConversionError:
       default:
-        app.log.error(`Failed to convert event data`);
+        app.log.error("Failed to convert event data");
         return res.status(500).send(
           createStatusError(
             ErrorTypes.ConversionError,
@@ -298,7 +298,7 @@ export const createPersonalEventHandler = async (req: FastifyRequest, res: Fasti
   if (!result.ok) {
     switch (result.error) {
       case ErrorTypes.MalformedRequestError:
-        app.log.warn(`Create personal event validation failed`);
+        app.log.warn("Create personal event validation failed");
         return res.status(400).send(
           createStatusError(
             ErrorTypes.MalformedRequestError,
@@ -306,7 +306,7 @@ export const createPersonalEventHandler = async (req: FastifyRequest, res: Fasti
           )
         );
       case ErrorTypes.ConversionError:
-        app.log.error(`Failed to convert created event data`);
+        app.log.error("Failed to convert created event data");
         return res.status(500).send(
           createStatusError(
             ErrorTypes.ConversionError,
@@ -315,7 +315,7 @@ export const createPersonalEventHandler = async (req: FastifyRequest, res: Fasti
         );
       case ErrorTypes.ResourceCreationError:
       default:
-        app.log.error(`Failed to create personal event`);
+        app.log.error("Failed to create personal event");
         return res.status(500).send(
           createStatusError(
             ErrorTypes.ResourceCreationError,
@@ -340,7 +340,7 @@ export const editPersonalEventHandler = async (req: FastifyRequest, res: Fastify
   if (!result.ok) {
     switch (result.error) {
       case ErrorTypes.UnknownIdError:
-        app.log.warn(`Personal event not found for edit`);
+        app.log.warn("Personal event not found for edit");
         return res.status(404).send(
           createStatusError(
             ErrorTypes.UnknownIdError,
@@ -348,7 +348,7 @@ export const editPersonalEventHandler = async (req: FastifyRequest, res: Fastify
           )
         );
       case ErrorTypes.MalformedRequestError:
-        app.log.warn(`Edit personal event validation failed`);
+        app.log.warn("Edit personal event validation failed");
         return res.status(400).send(
           createStatusError(
             ErrorTypes.MalformedRequestError,
@@ -356,7 +356,7 @@ export const editPersonalEventHandler = async (req: FastifyRequest, res: Fastify
           )
         );
       case ErrorTypes.ConversionError:
-        app.log.error(`Failed to convert edited event data`);
+        app.log.error("Failed to convert edited event data");
         return res.status(500).send(
           createStatusError(
             ErrorTypes.ConversionError,
@@ -365,7 +365,7 @@ export const editPersonalEventHandler = async (req: FastifyRequest, res: Fastify
         );
       case ErrorTypes.UpdateError:
       default:
-        app.log.error(`Failed to edit personal event`);
+        app.log.error("Failed to edit personal event");
         return res.status(500).send(
           createStatusError(
             ErrorTypes.UpdateError,

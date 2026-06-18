@@ -14,7 +14,7 @@ export const finalizeExpiredEvents = async () => {
       .from(groupEvents)
       .where(
         and(
-          eq(groupEvents.state, 'unfinished'),
+          eq(groupEvents.state, "unfinished"),
           lte(groupEvents.votingEndTime, now)
         )
       );
@@ -39,7 +39,7 @@ export const checkAndApplyFallbacks = async () => {
         startDate: groupEvents.startDate,
       })
       .from(groupEvents)
-      .where(eq(groupEvents.state, 'needs_tiebreaker'));
+      .where(eq(groupEvents.state, "needs_tiebreaker"));
 
     const now = new Date();
     const toResolve = [];
@@ -85,7 +85,7 @@ export const finalizeEvent = async (eventId: string): Promise<void> => {
       .where(eq(groupEvents.id, eventId))
       .limit(1);
 
-    if (!event || event.state !== 'unfinished') return;
+    if (!event || event.state !== "unfinished") return;
 
     const plansWithVotes = await db
       .select({
@@ -112,7 +112,7 @@ export const finalizeEvent = async (eventId: string): Promise<void> => {
 
     if (plansWithVotes.length === 0) {
       await db.update(groupEvents)
-        .set({ state: 'finished' })
+        .set({ state: "finished" })
         .where(eq(groupEvents.id, eventId));
       app.log.info(`Event ${eventId} finalized with no plan proposed.`);
       return;
@@ -130,13 +130,13 @@ export const finalizeEvent = async (eventId: string): Promise<void> => {
           planId: winner.id
         });
         await tx.update(groupEvents)
-          .set({ state: 'finished' })
+          .set({ state: "finished" })
           .where(eq(groupEvents.id, eventId));
       });
       app.log.info(`Event ${eventId} finalized automatically. Winner: ${winner.id} with ${maxVotes} votes.`);
     } else {
       await db.update(groupEvents)
-        .set({ state: 'needs_tiebreaker' })
+        .set({ state: "needs_tiebreaker" })
         .where(eq(groupEvents.id, eventId));
       app.log.info(`Event ${eventId} entered needs_tiebreaker state (tie between ${tiedPlans.length} plans).`);
     }
@@ -153,7 +153,7 @@ const applyFallbackResolution = async (eventId: string): Promise<void> => {
       .where(eq(groupEvents.id, eventId))
       .limit(1);
 
-    if (!event || event.state !== 'needs_tiebreaker') return;
+    if (!event || event.state !== "needs_tiebreaker") return;
 
     const plansWithVotes = await db
       .select({
@@ -178,13 +178,13 @@ const applyFallbackResolution = async (eventId: string): Promise<void> => {
           planId: earliestTiedPlan.id
         });
         await tx.update(groupEvents)
-          .set({ state: 'finished' })
+          .set({ state: "finished" })
           .where(eq(groupEvents.id, eventId));
       });
       app.log.info(`Event ${eventId} tie-breaker resolved automatically via fallback (earliest proposal). Winner: ${earliestTiedPlan.id}`);
     } else {
       await db.update(groupEvents)
-        .set({ state: 'finished' })
+        .set({ state: "finished" })
         .where(eq(groupEvents.id, eventId));
       app.log.info(`Event ${eventId} tie-breaker closed automatically via fallback with no proposals.`);
     }
@@ -206,7 +206,7 @@ export const resolveTie = async (
       .where(and(eq(groupEvents.id, eventId), eq(groupEvents.groupId, groupId)))
       .limit(1);
 
-    if (!event || event.state !== 'needs_tiebreaker') {
+    if (!event || event.state !== "needs_tiebreaker") {
       return Err(ErrorTypes.UnknownIdError);
     }
 
@@ -243,7 +243,7 @@ export const resolveTie = async (
         planId: planId
       });
       await tx.update(groupEvents)
-        .set({ state: 'finished' })
+        .set({ state: "finished" })
         .where(eq(groupEvents.id, eventId));
     });
 

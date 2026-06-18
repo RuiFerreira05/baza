@@ -4,8 +4,8 @@
     "version, its global dependencies, and some scripts we are gonna be using. Every package in the",
     "monorepo will have its own package.json file with more specific dependencies and scripts but this",
     "one kinda ties everything together. It is important to mention that dependencies defined here are not",
-    "automatically available to all packages, they are just installed at the root level and can be", 
-    "then consumed by the packages that need them. Meaning we have a single source of truth for our", 
+    "automatically available to all packages, they are just installed at the root level and can be",
+    "then consumed by the packages that need them. Meaning we have a single source of truth for our",
     "dependencies versions.",
     "And yes, this is how comments are done here, it sucks, and therefore i won't be adding more ",
     "comments to the other package.json files in the project. They can get pretty complex tho, so ",
@@ -20,7 +20,8 @@
     "db:studio": "pnpm --filter @baza/db db:studio",
     "db:generate": "pnpm --filter @baza/db db:generate",
     "db:migrate": "pnpm --filter @baza/db db:migrate",
-    "db:seed": "tsx packages/db/src/seed.ts"
+    "db:seed": "tsx packages/db/src/seed.ts",
+    "lint": "pnpm -r lint"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",

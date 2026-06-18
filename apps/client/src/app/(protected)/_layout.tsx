@@ -1,34 +1,72 @@
-import { authClient } from "@/lib/auth";
-import { styles } from "@/styles/styles";
-import { Redirect } from "expo-router";
-import { NativeTabs } from "expo-router/unstable-native-tabs";
-import { Text, View } from "react-native";
+import { Tabs } from "expo-router";
+import { Ionicons } from "@expo/vector-icons"; // Standard vector icons bundled with Expo
 
 export default function ProtectedLayout() {
-  const { data: session, isPending } = authClient.useSession();
-
-  if (isPending) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Loading...</Text>
-      </View>
-    );
-  }
-  
-  if (!session) {
-    return <Redirect href="/auth/login" />;
-  }
+  // Authentication guarding is handled centrally in the root _layout.tsx.
 
   return (
-    <NativeTabs>
-      <NativeTabs.Trigger name="me">
-        <NativeTabs.Trigger.Label>Me</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon md="person" />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon md="home" />
-      </NativeTabs.Trigger>
-    </NativeTabs>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        // tabBarActiveTintColor: "#2f95dc", // Customize the active tab color
+        // tabBarInactiveTintColor: "#8e8e93", // Customize the inactive tab color
+        // tabBarStyle: {
+        //   borderTopWidth: 1,
+        //   borderTopColor: "#e5e5ea",
+        //   height: 50 + insets.bottom,
+        //   paddingBottom: insets.bottom > 0 ? insets.bottom : 6,
+        //   paddingTop: 6,
+        // },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "person" : "person-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="calendar"
+        options={{
+          title: "Calendar",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "calendar" : "calendar-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="groups"
+        options={{
+          title: "Groups",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "people" : "people-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />
+    </Tabs>
   );
 }

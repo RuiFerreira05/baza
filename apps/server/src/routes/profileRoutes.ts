@@ -518,4 +518,4 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     },
     updateUserSettingsHandler
   );
-}
+};

@@ -1,11 +1,5 @@
-import { styles } from "@/styles/styles";
-import { Color } from "expo-router";
-import { Text, View } from "react-native";
+import { Redirect } from "expo-router";
 
 export default function Index() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Hello world!</Text>
-    </View>
-  );
+  return <Redirect href="/(protected)/calendar" />;
 }

@@ -42,7 +42,7 @@ export const getGroupByIdHandler = async (
   if (!group.ok) {
     switch (group.error) {
       case ErrorTypes.UnknownIdError:
-        app.log.warn(`Group not found`);
+        app.log.warn("Group not found");
         return res
           .status(404)
           .send(
@@ -53,7 +53,7 @@ export const getGroupByIdHandler = async (
           );
 
       case ErrorTypes.ConversionError:
-        app.log.error(`Failed to convert group`);
+        app.log.error("Failed to convert group");
         return res
           .status(500)
           .send(
@@ -80,7 +80,7 @@ export const createGroupHandler = async (
   if (!result.ok) {
     switch (result.error) {
       case ErrorTypes.ConversionError:
-        app.log.error(`Failed to convert created group`);
+        app.log.error("Failed to convert created group");
         return res
           .status(500)
           .send(
@@ -90,7 +90,7 @@ export const createGroupHandler = async (
             ),
           );
       case ErrorTypes.ResourceCreationError:
-        app.log.error(`Failed to create group`);
+        app.log.error("Failed to create group");
         return res
           .status(500)
           .send(
@@ -116,7 +116,7 @@ export const deleteGroupHandler = async (
   if (!result.ok) {
     switch (result.error) {
       case ErrorTypes.UnknownIdError:
-        app.log.warn(`Group not found`);
+        app.log.warn("Group not found");
         return res
           .status(404)
           .send(
@@ -166,7 +166,7 @@ export const editGroupPhotoHandler = async (
   if (!group.ok) {
     switch (group.error) {
       case ErrorTypes.UnknownIdError:
-        app.log.warn(`Group not found`);
+        app.log.warn("Group not found");
         return res
           .status(404)
           .send(
@@ -177,7 +177,7 @@ export const editGroupPhotoHandler = async (
           );
       case ErrorTypes.ResourceCreationError:
         app.log.error(
-          `Failed to save group photo or update group with new photo`,
+          "Failed to save group photo or update group with new photo",
         );
         return res
           .status(500)
@@ -188,7 +188,7 @@ export const editGroupPhotoHandler = async (
             ),
           );
       case ErrorTypes.ConversionError:
-        app.log.error(`Failed to convert updated group data`);
+        app.log.error("Failed to convert updated group data");
         return res
           .status(500)
           .send(
@@ -217,7 +217,7 @@ export const getGroupPhotoHandler = async (
   if (!result.ok) {
     switch (result.error) {
       case ErrorTypes.UnknownIdError:
-        app.log.warn(`Group photo not found`);
+        app.log.warn("Group photo not found");
         return res
           .status(404)
           .send(
@@ -256,7 +256,7 @@ export const editGroupHandler = async (
   if (!result.ok) {
     switch (result.error) {
       case ErrorTypes.UnknownIdError:
-        app.log.warn(`Group not found`);
+        app.log.warn("Group not found");
         return res
           .status(404)
           .send(
@@ -266,7 +266,7 @@ export const editGroupHandler = async (
             ),
           );
       case ErrorTypes.ConversionError:
-        app.log.error(`Failed to convert updated group data`);
+        app.log.error("Failed to convert updated group data");
         return res
           .status(500)
           .send(
@@ -315,7 +315,7 @@ export const inviteUsersToGroupHandler = async (
             ),
           );
       case ErrorTypes.ConversionError:
-        app.log.error(`Failed to convert group invitation data`);
+        app.log.error("Failed to convert group invitation data");
         return res
           .status(500)
           .send(
@@ -325,7 +325,7 @@ export const inviteUsersToGroupHandler = async (
             ),
           );
       case ErrorTypes.ResourceCreationError:
-        app.log.error(`Failed to create group invitation`);
+        app.log.error("Failed to create group invitation");
         return res
           .status(500)
           .send(
@@ -361,7 +361,7 @@ export const getGroupMembersHandler = async (
             ),
           );
       case ErrorTypes.ConversionError:
-        app.log.error(`Failed to convert group members data`);
+        app.log.error("Failed to convert group members data");
         return res
           .status(500)
           .send(
@@ -397,7 +397,7 @@ export const removeUserFromGroupHandler = async (
             ),
           );
       case ErrorTypes.ConversionError:
-        app.log.error(`Failed to convert group member removal result data`);
+        app.log.error("Failed to convert group member removal result data");
         return res
           .status(500)
           .send(
