@@ -3,6 +3,9 @@ import path from "path";
 
 export default defineConfig({
   test: {
+    env: {
+      BYPASS_AUTH: "false",
+    },
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },

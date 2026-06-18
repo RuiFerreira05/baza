@@ -40,6 +40,10 @@ const serverEnvSchema = Type.Object({
     description: "The directory where uploaded files will be stored (used only if FILE_UPLOAD_SERVICE is 'fs')",
     default: "./uploads/",
   }),
+  BYPASS_AUTH: Type.Optional(Type.String({
+    description: "Bypass authentication checks in development/testing mode",
+    default: "false",
+  })),
 });
 
 export type ServerEnv = Type.Static<typeof serverEnvSchema>;

@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { getAuthenticatedUsername, auth } from "../lib/auth";
+import { env } from "../lib/env";
 import { fromNodeHeaders } from "better-auth/node";
 import { createStatusError, ErrorTypes } from "@baza/shared-types";
 import { verifyGroupMembership } from "../services/groupServices";
@@ -8,6 +9,34 @@ import { eq } from "drizzle-orm";
 import { groups } from "@baza/db/schemas";
 
 export const authPreHandler = async (req: FastifyRequest, res: FastifyReply) => {
+  const isBypassed = process.env.NODE_ENV !== "production" && env.BYPASS_AUTH === "true";
+
+  if (isBypassed) {
+    req.username = "test_user";
+    req.session = {
+      session: {
+        id: "mock-session-id",
+        userId: "mock-user-id",
+        token: "mock-token",
+        expiresAt: new Date(Date.now() + 3600000),
+        ipAddress: "127.0.0.1",
+        userAgent: "mock-agent",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      user: {
+        id: "mock-user-id",
+        name: "Test User",
+        email: "test@test.com",
+        emailVerified: true,
+        image: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    };
+    return;
+  }
+
   const isTestEnv = process.env.NODE_ENV === "test";
   const isMock = typeof (getAuthenticatedUsername as any).mock !== "undefined" || (getAuthenticatedUsername as any)._isMockFunction;
 

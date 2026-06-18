@@ -36,13 +36,11 @@ describe("Event Routes", () => {
   });
 
   it("POST /v1/restricted/groups/:id/events/create should create a group event", async () => {
-    await db
-      .insert(users)
-      .values({
-        id: VALID_USER_ID,
-        name: "Creator",
-        email: "creator@example.com",
-      });
+    await db.insert(users).values({
+      id: VALID_USER_ID,
+      name: "Creator",
+      email: "creator@example.com",
+    });
     await db
       .insert(profiles)
       .values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
@@ -80,13 +78,11 @@ describe("Event Routes", () => {
   });
 
   it("GET /v1/restricted/groups/:id/events should list group events", async () => {
-    await db
-      .insert(users)
-      .values({
-        id: VALID_USER_ID,
-        name: "Creator",
-        email: "creator@example.com",
-      });
+    await db.insert(users).values({
+      id: VALID_USER_ID,
+      name: "Creator",
+      email: "creator@example.com",
+    });
     await db
       .insert(profiles)
       .values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
@@ -138,13 +134,11 @@ describe("Event Routes", () => {
   });
 
   it("GET /v1/restricted/groups/:id/events/:idevent should retrieve details", async () => {
-    await db
-      .insert(users)
-      .values({
-        id: VALID_USER_ID,
-        name: "Creator",
-        email: "creator@example.com",
-      });
+    await db.insert(users).values({
+      id: VALID_USER_ID,
+      name: "Creator",
+      email: "creator@example.com",
+    });
     await db
       .insert(profiles)
       .values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
@@ -195,13 +189,11 @@ describe("Event Routes", () => {
   });
 
   it("PATCH /v1/restricted/groups/:id/events/:idevent/edit should modify group event", async () => {
-    await db
-      .insert(users)
-      .values({
-        id: VALID_USER_ID,
-        name: "Creator",
-        email: "creator@example.com",
-      });
+    await db.insert(users).values({
+      id: VALID_USER_ID,
+      name: "Creator",
+      email: "creator@example.com",
+    });
     await db
       .insert(profiles)
       .values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
@@ -256,13 +248,11 @@ describe("Event Routes", () => {
   });
 
   it("POST /v1/restricted/groups/:id/events/:idevent/resolve-tie should break a tie", async () => {
-    await db
-      .insert(users)
-      .values({
-        id: VALID_USER_ID,
-        name: "Creator",
-        email: "creator@example.com",
-      });
+    await db.insert(users).values({
+      id: VALID_USER_ID,
+      name: "Creator",
+      email: "creator@example.com",
+    });
     await db
       .insert(profiles)
       .values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
@@ -354,13 +344,11 @@ describe("Event Routes", () => {
 
   it("should handle event attendance confirmation CRUD operations", async () => {
     // 1. Setup user, profile, group, and member
-    await db
-      .insert(users)
-      .values({
-        id: VALID_USER_ID,
-        name: "Creator",
-        email: "creator@example.com",
-      });
+    await db.insert(users).values({
+      id: VALID_USER_ID,
+      name: "Creator",
+      email: "creator@example.com",
+    });
     await db
       .insert(profiles)
       .values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });

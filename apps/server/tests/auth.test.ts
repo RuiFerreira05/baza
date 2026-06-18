@@ -157,9 +157,18 @@ describe("Authentication & Access Control Middleware", () => {
   it("should block group access if user is not a member of the group", async () => {
     vi.mocked(getAuthenticatedUsername).mockResolvedValue("johndoe");
 
-    await db.insert(users).values({ id: VALID_USER_ID, name: "John Doe", email: "john@example.com" });
-    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "johndoe", settings: {} });
-    const [group] = await db.insert(groups).values({ groupname: "test_group" }).returning();
+    await db.insert(users).values({
+      id: VALID_USER_ID,
+      name: "John Doe",
+      email: "john@example.com",
+    });
+    await db
+      .insert(profiles)
+      .values({ userId: VALID_USER_ID, username: "johndoe", settings: {} });
+    const [group] = await db
+      .insert(groups)
+      .values({ groupname: "test_group" })
+      .returning();
 
     const response = await app.inject({
       method: "GET",
@@ -173,9 +182,18 @@ describe("Authentication & Access Control Middleware", () => {
   it("should allow group access if user is an active member of the group", async () => {
     vi.mocked(getAuthenticatedUsername).mockResolvedValue("johndoe");
 
-    await db.insert(users).values({ id: VALID_USER_ID, name: "John Doe", email: "john@example.com" });
-    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "johndoe", settings: {} });
-    const [group] = await db.insert(groups).values({ groupname: "test_group" }).returning();
+    await db.insert(users).values({
+      id: VALID_USER_ID,
+      name: "John Doe",
+      email: "john@example.com",
+    });
+    await db
+      .insert(profiles)
+      .values({ userId: VALID_USER_ID, username: "johndoe", settings: {} });
+    const [group] = await db
+      .insert(groups)
+      .values({ groupname: "test_group" })
+      .returning();
     await db.insert(groupMembers).values({
       groupId: group.id,
       username: "johndoe",
@@ -198,12 +216,24 @@ describe("Authentication & Access Control Middleware", () => {
   it("should allow viewing another user's profile detail (public view)", async () => {
     vi.mocked(getAuthenticatedUsername).mockResolvedValue("johndoe");
 
-    await db.insert(users).values({ id: VALID_USER_ID, name: "John Doe", email: "john@example.com" });
-    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "johndoe", settings: {} });
+    await db.insert(users).values({
+      id: VALID_USER_ID,
+      name: "John Doe",
+      email: "john@example.com",
+    });
+    await db
+      .insert(profiles)
+      .values({ userId: VALID_USER_ID, username: "johndoe", settings: {} });
 
     const otherUserId = "22222222-2222-2222-2222-222222222222";
-    await db.insert(users).values({ id: otherUserId, name: "Other User", email: "other@example.com" });
-    await db.insert(profiles).values({ userId: otherUserId, username: "otheruser", settings: {} });
+    await db.insert(users).values({
+      id: otherUserId,
+      name: "Other User",
+      email: "other@example.com",
+    });
+    await db
+      .insert(profiles)
+      .values({ userId: otherUserId, username: "otheruser", settings: {} });
 
     const response = await app.inject({
       method: "GET",
@@ -217,12 +247,24 @@ describe("Authentication & Access Control Middleware", () => {
   it("should block accessing another user's settings (private view)", async () => {
     vi.mocked(getAuthenticatedUsername).mockResolvedValue("johndoe");
 
-    await db.insert(users).values({ id: VALID_USER_ID, name: "John Doe", email: "john@example.com" });
-    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "johndoe", settings: {} });
+    await db.insert(users).values({
+      id: VALID_USER_ID,
+      name: "John Doe",
+      email: "john@example.com",
+    });
+    await db
+      .insert(profiles)
+      .values({ userId: VALID_USER_ID, username: "johndoe", settings: {} });
 
     const otherUserId = "22222222-2222-2222-2222-222222222222";
-    await db.insert(users).values({ id: otherUserId, name: "Other User", email: "other@example.com" });
-    await db.insert(profiles).values({ userId: otherUserId, username: "otheruser", settings: {} });
+    await db.insert(users).values({
+      id: otherUserId,
+      name: "Other User",
+      email: "other@example.com",
+    });
+    await db
+      .insert(profiles)
+      .values({ userId: otherUserId, username: "otheruser", settings: {} });
 
     const response = await app.inject({
       method: "GET",
@@ -236,8 +278,16 @@ describe("Authentication & Access Control Middleware", () => {
   it("should allow accessing own settings", async () => {
     vi.mocked(getAuthenticatedUsername).mockResolvedValue("johndoe");
 
-    await db.insert(users).values({ id: VALID_USER_ID, name: "John Doe", email: "john@example.com" });
-    await db.insert(profiles).values({ userId: VALID_USER_ID, username: "johndoe", settings: { theme: "dark" } });
+    await db.insert(users).values({
+      id: VALID_USER_ID,
+      name: "John Doe",
+      email: "john@example.com",
+    });
+    await db.insert(profiles).values({
+      userId: VALID_USER_ID,
+      username: "johndoe",
+      settings: { theme: "dark" },
+    });
 
     const response = await app.inject({
       method: "GET",
@@ -247,5 +297,35 @@ describe("Authentication & Access Control Middleware", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json().status).toBe("OK");
     expect(response.json().data.theme).toBe("dark");
+  });
+
+  it("should bypass authentication and inject mock session when BYPASS_AUTH is true", async () => {
+    const { env } = await import("../src/lib/env");
+    const originalBypass = env.BYPASS_AUTH;
+    (env as any).BYPASS_AUTH = "true";
+
+    try {
+      await db.insert(users).values({
+        id: "mock-user-id",
+        name: "Test User",
+        email: "test@test.com",
+      });
+      await db.insert(profiles).values({
+        userId: "mock-user-id",
+        username: "test_user",
+        settings: { theme: "light" },
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/restricted/users/test_user/settings",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().status).toBe("OK");
+      expect(response.json().data.theme).toBe("light");
+    } finally {
+      (env as any).BYPASS_AUTH = originalBypass;
+    }
   });
 });
