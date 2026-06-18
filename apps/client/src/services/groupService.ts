@@ -10,8 +10,7 @@ import { apiClient } from "./apiClient";
 
 export const groupService = {
   // GET /v1/restricted/groups/:id
-  getGroup: (id: string) =>
-    apiClient<GroupDTO>(`/v1/restricted/groups/${id}`),
+  getGroup: (id: string) => apiClient<GroupDTO>(`/v1/restricted/groups/${id}`),
 
   // POST /v1/restricted/groups
   createGroup: (body: CreateGroupBody) =>
@@ -35,27 +34,42 @@ export const groupService = {
 
   // POST /v1/restricted/groups/:id/group-members
   inviteUser: (groupId: string, username: string) =>
-    apiClient<GroupMemberDTO>(`/v1/restricted/groups/${groupId}/group-members`, {
-      method: "POST",
-      json: { username },
-    }),
+    apiClient<GroupMemberDTO>(
+      `/v1/restricted/groups/${groupId}/group-members`,
+      {
+        method: "POST",
+        json: { username },
+      },
+    ),
 
   // DELETE /v1/restricted/groups/:id/group-members/:username
   removeUser: (groupId: string, username: string) =>
-    apiClient<GroupMemberDTO>(`/v1/restricted/groups/${groupId}/group-members/${username}`, {
-      method: "DELETE",
-    }),
+    apiClient<GroupMemberDTO>(
+      `/v1/restricted/groups/${groupId}/group-members/${username}`,
+      {
+        method: "DELETE",
+      },
+    ),
 
   // GET /v1/restricted/groups/:id/group-members
   listMembers: (groupId: string) =>
-    apiClient<GroupMemberDTO[]>(`/v1/restricted/groups/${groupId}/group-members`),
+    apiClient<GroupMemberDTO[]>(
+      `/v1/restricted/groups/${groupId}/group-members`,
+    ),
 
   // PATCH /v1/restricted/groups/:id/group-members/:username
-  updateMemberRole: (groupId: string, username: string, body: UpdateMemberRoleBody) =>
-    apiClient<GroupMemberDTO>(`/v1/restricted/groups/${groupId}/group-members/${username}`, {
-      method: "PATCH",
-      json: body,
-    }),
+  updateMemberRole: (
+    groupId: string,
+    username: string,
+    body: UpdateMemberRoleBody,
+  ) =>
+    apiClient<GroupMemberDTO>(
+      `/v1/restricted/groups/${groupId}/group-members/${username}`,
+      {
+        method: "PATCH",
+        json: body,
+      },
+    ),
 
   // GET /v1/restricted/users/:username/groups
   getUserGroups: (username: string) =>
@@ -66,9 +80,16 @@ export const groupService = {
     apiClient<GroupDTO[]>(`/v1/restricted/users/${username}/groups/invites`),
 
   // PATCH /v1/restricted/users/:username/groups/invites/:groupId
-  respondGroupInvite: (username: string, groupId: string, body: RespondGroupInviteBody) =>
-    apiClient<GroupMemberDTO | null>(`/v1/restricted/users/${username}/groups/invites/${groupId}`, {
-      method: "PATCH",
-      json: body,
-    }),
+  respondGroupInvite: (
+    username: string,
+    groupId: string,
+    body: RespondGroupInviteBody,
+  ) =>
+    apiClient<GroupMemberDTO | null>(
+      `/v1/restricted/users/${username}/groups/invites/${groupId}`,
+      {
+        method: "PATCH",
+        json: body,
+      },
+    ),
 };

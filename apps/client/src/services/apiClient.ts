@@ -8,11 +8,14 @@ interface FetchOptions extends RequestInit {
 /**
  * A type-safe API client wrapper that prefixes URLs with the base server URL,
  * handles default headers, and parses JSON responses.
- * 
+ *
  * @param path The relative path to the API endpoint (e.g. "/v1/restricted/users/username")
  * @param options Standard RequestInit options plus an optional `json` body parameter
  */
-export async function apiClient<T>(path: string, options: FetchOptions = {}): Promise<T> {
+export async function apiClient<T>(
+  path: string,
+  options: FetchOptions = {},
+): Promise<T> {
   const url = `${env.EXPO_PUBLIC_SERVER_URL}${path}`;
   const headers = new Headers(options.headers);
 

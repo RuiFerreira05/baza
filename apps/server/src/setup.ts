@@ -82,16 +82,19 @@ app.route({
 
 // ##### ROUTES SETUP #####
 
-app.register(async (restrictedApp) => {
-  restrictedApp.addHook("preHandler", authPreHandler);
+app.register(
+  async (restrictedApp) => {
+    restrictedApp.addHook("preHandler", authPreHandler);
 
-  await restrictedApp.register(userRoutes, { prefix: "/users" });
-  await restrictedApp.register(groupRoutes, { prefix: "/groups" });
-}, { prefix: "/v1/restricted" });
+    await restrictedApp.register(userRoutes, { prefix: "/users" });
+    await restrictedApp.register(groupRoutes, { prefix: "/groups" });
+  },
+  { prefix: "/v1/restricted" },
+);
 
 if (env.FILE_UPLOAD_SERVICE === "fs") {
   app.register(fastifyStatic, {
-    root: path.resolve(env.UPLOAD_DIR)
+    root: path.resolve(env.UPLOAD_DIR),
     // no prefix cause we handle sending files manually
   });
 }

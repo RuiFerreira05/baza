@@ -1,7 +1,14 @@
 import { preferences, groupEvents, groupMembers } from "@baza/db/schemas";
 import { db } from "../lib/db";
 import { eq, and } from "drizzle-orm";
-import { ErrorTypes, preferenceDTO, groupPreferenceReportDTO, type PreferenceDTO, type CreatePreferenceBody, type GroupPreferenceReportDTO } from "@baza/shared-types";
+import {
+  ErrorTypes,
+  preferenceDTO,
+  groupPreferenceReportDTO,
+  type PreferenceDTO,
+  type CreatePreferenceBody,
+  type GroupPreferenceReportDTO,
+} from "@baza/shared-types";
 import { Value } from "typebox/value";
 import { Type } from "typebox";
 import { Err, Ok, type Result } from "../lib/types";
@@ -11,8 +18,16 @@ export const createOrEditEventPreference = async (
   groupId: string,
   eventId: string,
   username: string,
-  body: CreatePreferenceBody
-): Promise<Result<PreferenceDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreationError | ErrorTypes.UnknownIdError | ErrorTypes.MalformedRequestError>> => {
+  body: CreatePreferenceBody,
+): Promise<
+  Result<
+    PreferenceDTO,
+    | ErrorTypes.ConversionError
+    | ErrorTypes.ResourceCreationError
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.MalformedRequestError
+  >
+> => {
   try {
     const [event] = await db
       .select()
@@ -21,38 +36,63 @@ export const createOrEditEventPreference = async (
       .limit(1);
     if (!event) return Err(ErrorTypes.UnknownIdError);
 
-    if (event.state !== "unfinished" || (event.votingEndTime && new Date() >= new Date(event.votingEndTime))) {
+    if (
+      event.state !== "unfinished" ||
+      (event.votingEndTime && new Date() >= new Date(event.votingEndTime))
+    ) {
       return Err(ErrorTypes.MalformedRequestError);
     }
 
     const [member] = await db
       .select()
       .from(groupMembers)
-      .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.username, username)))
+      .where(
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.username, username),
+        ),
+      )
       .limit(1);
     if (!member) return Err(ErrorTypes.UnknownIdError);
 
     const [existing] = await db
       .select()
       .from(preferences)
-      .where(and(eq(preferences.groupEventId, eventId), eq(preferences.username, username)))
+      .where(
+        and(
+          eq(preferences.groupEventId, eventId),
+          eq(preferences.username, username),
+        ),
+      )
       .limit(1);
 
     let record;
     if (existing) {
-      const [updated] = await db.update(preferences).set({
-        preference: body.preference,
-        private: body.private,
-        updatedAt: new Date(),
-      }).where(and(eq(preferences.groupEventId, eventId), eq(preferences.username, username))).returning();
+      const [updated] = await db
+        .update(preferences)
+        .set({
+          preference: body.preference,
+          private: body.private,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(preferences.groupEventId, eventId),
+            eq(preferences.username, username),
+          ),
+        )
+        .returning();
       record = updated;
     } else {
-      const [inserted] = await db.insert(preferences).values({
-        groupEventId: eventId,
-        username: username,
-        preference: body.preference,
-        private: body.private,
-      }).returning();
+      const [inserted] = await db
+        .insert(preferences)
+        .values({
+          groupEventId: eventId,
+          username: username,
+          preference: body.preference,
+          private: body.private,
+        })
+        .returning();
       record = inserted;
     }
 
@@ -67,7 +107,10 @@ export const createOrEditEventPreference = async (
         return Ok(conv);
       } else {
         const errorArray = Array.from(Value.Errors(preferenceDTO, conv));
-        app.log.error({ errors: errorArray }, "Conversion check failed for preferenceDTO");
+        app.log.error(
+          { errors: errorArray },
+          "Conversion check failed for preferenceDTO",
+        );
         return Err(ErrorTypes.ConversionError);
       }
     } else {
@@ -83,8 +126,10 @@ export const getEventPreferenceByUsername = async (
   groupId: string,
   eventId: string,
   username: string,
-  requesterUsername: string
-): Promise<Result<PreferenceDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>> => {
+  requesterUsername: string,
+): Promise<
+  Result<PreferenceDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>
+> => {
   try {
     const [event] = await db
       .select()
@@ -96,7 +141,12 @@ export const getEventPreferenceByUsername = async (
     const [record] = await db
       .select()
       .from(preferences)
-      .where(and(eq(preferences.groupEventId, eventId), eq(preferences.username, username)))
+      .where(
+        and(
+          eq(preferences.groupEventId, eventId),
+          eq(preferences.username, username),
+        ),
+      )
       .limit(1);
 
     if (!record) return Err(ErrorTypes.UnknownIdError);
@@ -116,7 +166,10 @@ export const getEventPreferenceByUsername = async (
       return Ok(conv);
     } else {
       const errorArray = Array.from(Value.Errors(preferenceDTO, conv));
-      app.log.error({ errors: errorArray }, "Conversion check failed for preferenceDTO");
+      app.log.error(
+        { errors: errorArray },
+        "Conversion check failed for preferenceDTO",
+      );
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
@@ -128,8 +181,13 @@ export const getEventPreferenceByUsername = async (
 export const getEventPreferences = async (
   groupId: string,
   eventId: string,
-  requesterUsername: string
-): Promise<Result<PreferenceDTO[], ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>> => {
+  requesterUsername: string,
+): Promise<
+  Result<
+    PreferenceDTO[],
+    ErrorTypes.ConversionError | ErrorTypes.UnknownIdError
+  >
+> => {
   try {
     const [event] = await db
       .select()
@@ -143,9 +201,11 @@ export const getEventPreferences = async (
       .from(preferences)
       .where(eq(preferences.groupEventId, eventId));
 
-    const filtered = list.filter(item => !item.private || item.username === requesterUsername);
+    const filtered = list.filter(
+      (item) => !item.private || item.username === requesterUsername,
+    );
 
-    const formatted = filtered.map(record => ({
+    const formatted = filtered.map((record) => ({
       ...record,
       createdAt: record.createdAt.toISOString(),
       updatedAt: record.updatedAt.toISOString(),
@@ -155,8 +215,13 @@ export const getEventPreferences = async (
     if (Value.Check(Type.Array(preferenceDTO), checkSchema)) {
       return Ok(checkSchema as PreferenceDTO[]);
     } else {
-      const errorArray = Array.from(Value.Errors(Type.Array(preferenceDTO), checkSchema));
-      app.log.error({ errors: errorArray }, "Conversion check failed for Array(preferenceDTO)");
+      const errorArray = Array.from(
+        Value.Errors(Type.Array(preferenceDTO), checkSchema),
+      );
+      app.log.error(
+        { errors: errorArray },
+        "Conversion check failed for Array(preferenceDTO)",
+      );
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
@@ -167,8 +232,13 @@ export const getEventPreferences = async (
 
 export const getGroupPreferenceAggregation = async (
   groupId: string,
-  eventId: string
-): Promise<Result<GroupPreferenceReportDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>> => {
+  eventId: string,
+): Promise<
+  Result<
+    GroupPreferenceReportDTO,
+    ErrorTypes.ConversionError | ErrorTypes.UnknownIdError
+  >
+> => {
   try {
     const [event] = await db
       .select()
@@ -185,17 +255,20 @@ export const getGroupPreferenceAggregation = async (
     const totalResponses = list.length;
     const dateAvailability: Record<string, number> = {};
     const preferredActivities: Record<string, number> = {};
-    
+
     let overlappingMinBudget: number | null = null;
     let overlappingMaxBudget: number | null = null;
 
     for (const record of list) {
-      const pref = record.preference as {
-        availableDates?: string[];
-        activities?: string[];
-        minBudget?: number;
-        maxBudget?: number;
-      } | null | undefined;
+      const pref = record.preference as
+        | {
+            availableDates?: string[];
+            activities?: string[];
+            minBudget?: number;
+            maxBudget?: number;
+          }
+        | null
+        | undefined;
       if (!pref) continue;
 
       if (Array.isArray(pref.availableDates)) {
@@ -215,18 +288,28 @@ export const getGroupPreferenceAggregation = async (
       }
 
       if (typeof pref.minBudget === "number") {
-        if (overlappingMinBudget === null || pref.minBudget > overlappingMinBudget) {
+        if (
+          overlappingMinBudget === null ||
+          pref.minBudget > overlappingMinBudget
+        ) {
           overlappingMinBudget = pref.minBudget;
         }
       }
       if (typeof pref.maxBudget === "number") {
-        if (overlappingMaxBudget === null || pref.maxBudget < overlappingMaxBudget) {
+        if (
+          overlappingMaxBudget === null ||
+          pref.maxBudget < overlappingMaxBudget
+        ) {
           overlappingMaxBudget = pref.maxBudget;
         }
       }
     }
 
-    if (overlappingMinBudget !== null && overlappingMaxBudget !== null && overlappingMinBudget > overlappingMaxBudget) {
+    if (
+      overlappingMinBudget !== null &&
+      overlappingMaxBudget !== null &&
+      overlappingMinBudget > overlappingMaxBudget
+    ) {
       overlappingMinBudget = null;
       overlappingMaxBudget = null;
     }
@@ -238,15 +321,20 @@ export const getGroupPreferenceAggregation = async (
       budgetRange: {
         min: overlappingMinBudget,
         max: overlappingMaxBudget,
-      }
+      },
     };
 
     const conv = Value.Convert(groupPreferenceReportDTO, report);
     if (Value.Check(groupPreferenceReportDTO, conv)) {
       return Ok(conv);
     } else {
-      const errorArray = Array.from(Value.Errors(groupPreferenceReportDTO, conv));
-      app.log.error({ errors: errorArray }, "Conversion check failed for groupPreferenceReportDTO");
+      const errorArray = Array.from(
+        Value.Errors(groupPreferenceReportDTO, conv),
+      );
+      app.log.error(
+        { errors: errorArray },
+        "Conversion check failed for groupPreferenceReportDTO",
+      );
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {

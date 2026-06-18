@@ -126,10 +126,7 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         tags: ["groups"],
         params: SimpleIdParam("The UUID of the group being deleted"),
         response: {
-          200: StatusOK(
-            groupDTO,
-            "if the group was successfully deleted",
-          ),
+          200: StatusOK(groupDTO, "if the group was successfully deleted"),
           404: StatusError(
             ErrorTypes.UnknownIdError,
             "if no group with the provided id was found",
@@ -341,9 +338,18 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         }),
         body: UpdateMemberRoleBody,
         response: {
-          200: StatusOK(groupMemberDTO, "If the member's role was successfully updated"),
-          404: StatusError(ErrorTypes.UnknownIdError, "If the group or user was not found"),
-          500: StatusError(ErrorTypes.UpdateError, "If the database update failed"),
+          200: StatusOK(
+            groupMemberDTO,
+            "If the member's role was successfully updated",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "If the group or user was not found",
+          ),
+          500: StatusError(
+            ErrorTypes.UpdateError,
+            "If the database update failed",
+          ),
         },
       },
     },
@@ -363,8 +369,14 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         body: CreateEventBody,
         response: {
           201: StatusOK(groupEventDTO, "Event created successfully"),
-          400: StatusError(ErrorTypes.MalformedRequestError, "Voting end time constraint validation failed"),
-          500: StatusError(ErrorTypes.ResourceCreationError, "Database execution failed"),
+          400: StatusError(
+            ErrorTypes.MalformedRequestError,
+            "Voting end time constraint validation failed",
+          ),
+          500: StatusError(
+            ErrorTypes.ResourceCreationError,
+            "Database execution failed",
+          ),
         },
       },
     },
@@ -376,7 +388,8 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     "/:id/events",
     {
       schema: {
-        description: "Fetch all group events, optionally filtered by overlapping date ranges",
+        description:
+          "Fetch all group events, optionally filtered by overlapping date ranges",
         tags: ["events"],
         params: SimpleIdParam("Group UUID"),
         querystring: Type.Object({
@@ -384,7 +397,10 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
           endDate: Type.Optional(Type.String({ format: "date" })),
         }),
         response: {
-          200: StatusOK(Type.Array(groupEventDTO), "List of group events retrieved successfully"),
+          200: StatusOK(
+            Type.Array(groupEventDTO),
+            "List of group events retrieved successfully",
+          ),
           500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
         },
       },
@@ -397,7 +413,8 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     "/:id/calendar",
     {
       schema: {
-        description: "Fetch the combined group calendar containing group events and group members' personal events.",
+        description:
+          "Fetch the combined group calendar containing group events and group members' personal events.",
         tags: ["groups"],
         params: SimpleIdParam("Group UUID"),
         querystring: Type.Object({
@@ -405,8 +422,14 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
           endDate: Type.Optional(Type.String({ format: "date" })),
         }),
         response: {
-          200: StatusOK(groupCalendarDTO, "Combined group calendar retrieved successfully"),
-          403: StatusError(ErrorTypes.UnauthorizedError, "If the caller is not a member of the group"),
+          200: StatusOK(
+            groupCalendarDTO,
+            "Combined group calendar retrieved successfully",
+          ),
+          403: StatusError(
+            ErrorTypes.UnauthorizedError,
+            "If the caller is not a member of the group",
+          ),
           404: StatusError(ErrorTypes.UnknownIdError, "Group not found"),
           500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
         },
@@ -441,7 +464,8 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     "/:id/events/:idevent",
     {
       schema: {
-        description: "Modify an existing group event's title, description or voting deadline",
+        description:
+          "Modify an existing group event's title, description or voting deadline",
         tags: ["events"],
         params: Type.Object({
           id: Type.String({ format: "uuid", description: "Group UUID" }),
@@ -450,7 +474,10 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         body: EditEventBody,
         response: {
           200: StatusOK(groupEventDTO, "Event updated successfully"),
-          400: StatusError(ErrorTypes.MalformedRequestError, "Voting end time constraint validation failed"),
+          400: StatusError(
+            ErrorTypes.MalformedRequestError,
+            "Voting end time constraint validation failed",
+          ),
           404: StatusError(ErrorTypes.UnknownIdError, "Event not found"),
           500: StatusError(ErrorTypes.UpdateError, "Database execution failed"),
         },
@@ -464,7 +491,8 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     "/:id/events/:idevent/resolve-tie",
     {
       schema: {
-        description: "Submit the event creator's tie-breaking decision to choose the winning plan",
+        description:
+          "Submit the event creator's tie-breaking decision to choose the winning plan",
         tags: ["events"],
         params: Type.Object({
           id: Type.String({ format: "uuid", description: "Group UUID" }),
@@ -472,9 +500,18 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         }),
         body: ResolveTieBody,
         response: {
-          200: StatusOK(Type.Object({ message: Type.String() }), "Tie successfully resolved"),
-          403: StatusError(ErrorTypes.UpdateError, "Action forbidden: Caller is not the creator, or target plan is not tied"),
-          404: StatusError(ErrorTypes.UnknownIdError, "Event or plan not found, or not in tie-breaker state"),
+          200: StatusOK(
+            Type.Object({ message: Type.String() }),
+            "Tie successfully resolved",
+          ),
+          403: StatusError(
+            ErrorTypes.UpdateError,
+            "Action forbidden: Caller is not the creator, or target plan is not tied",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "Event or plan not found, or not in tie-breaker state",
+          ),
         },
       },
     },
@@ -488,7 +525,8 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     "/:id/events/:idevent/preferences",
     {
       schema: {
-        description: "Create or update user planning preferences for a group event",
+        description:
+          "Create or update user planning preferences for a group event",
         tags: ["preferences"],
         params: Type.Object({
           id: Type.String({ format: "uuid" }),
@@ -497,8 +535,14 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         body: CreatePreferenceBody,
         response: {
           200: StatusOK(preferenceDTO, "Preferences saved successfully"),
-          404: StatusError(ErrorTypes.UnknownIdError, "Event not found, or caller not a group member"),
-          500: StatusError(ErrorTypes.ResourceCreationError, "Database execution failed"),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "Event not found, or caller not a group member",
+          ),
+          500: StatusError(
+            ErrorTypes.ResourceCreationError,
+            "Database execution failed",
+          ),
         },
       },
     },
@@ -510,16 +554,23 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     "/:id/events/:idevent/preferences/group",
     {
       schema: {
-        description: "Retrieve anonymously aggregated group preference overlaps summary",
+        description:
+          "Retrieve anonymously aggregated group preference overlaps summary",
         tags: ["preferences"],
         params: Type.Object({
           id: Type.String({ format: "uuid" }),
           idevent: Type.String({ format: "uuid" }),
         }),
         response: {
-          200: StatusOK(groupPreferenceReportDTO, "Group preference overlap report generated successfully"),
+          200: StatusOK(
+            groupPreferenceReportDTO,
+            "Group preference overlap report generated successfully",
+          ),
           404: StatusError(ErrorTypes.UnknownIdError, "Event not found"),
-          500: StatusError(ErrorTypes.ConversionError, "Aggregation/Conversion error"),
+          500: StatusError(
+            ErrorTypes.ConversionError,
+            "Aggregation/Conversion error",
+          ),
         },
       },
     },
@@ -531,14 +582,18 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     "/:id/events/:idevent/preferences",
     {
       schema: {
-        description: "Retrieve all members' preferences (hiding private preferences of other members)",
+        description:
+          "Retrieve all members' preferences (hiding private preferences of other members)",
         tags: ["preferences"],
         params: Type.Object({
           id: Type.String({ format: "uuid" }),
           idevent: Type.String({ format: "uuid" }),
         }),
         response: {
-          200: StatusOK(Type.Array(preferenceDTO), "All visible preferences retrieved successfully"),
+          200: StatusOK(
+            Type.Array(preferenceDTO),
+            "All visible preferences retrieved successfully",
+          ),
           404: StatusError(ErrorTypes.UnknownIdError, "Event not found"),
           500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
         },
@@ -552,7 +607,8 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     "/:id/events/:idevent/preferences/:username",
     {
       schema: {
-        description: "Retrieve specific group member availability preference (hides private options of other users)",
+        description:
+          "Retrieve specific group member availability preference (hides private options of other users)",
         tags: ["preferences"],
         params: Type.Object({
           id: Type.String({ format: "uuid" }),
@@ -560,8 +616,14 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
           username: Type.String(),
         }),
         response: {
-          200: StatusOK(preferenceDTO, "Preference data retrieved successfully"),
-          404: StatusError(ErrorTypes.UnknownIdError, "Preference not found or hidden by privacy controls"),
+          200: StatusOK(
+            preferenceDTO,
+            "Preference data retrieved successfully",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "Preference not found or hidden by privacy controls",
+          ),
           500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
         },
       },
@@ -576,14 +638,18 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     "/:id/events/:idevent/plans",
     {
       schema: {
-        description: "Get all proposed plans for a group event along with vote counts",
+        description:
+          "Get all proposed plans for a group event along with vote counts",
         tags: ["plans"],
         params: Type.Object({
           id: Type.String({ format: "uuid" }),
           idevent: Type.String({ format: "uuid" }),
         }),
         response: {
-          200: StatusOK(Type.Array(planDTO), "List of plans retrieved successfully"),
+          200: StatusOK(
+            Type.Array(planDTO),
+            "List of plans retrieved successfully",
+          ),
           404: StatusError(ErrorTypes.UnknownIdError, "Event not found"),
           500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
         },
@@ -606,8 +672,14 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         body: CreatePlanBody,
         response: {
           201: StatusOK(planDTO, "Plan proposed successfully"),
-          404: StatusError(ErrorTypes.UnknownIdError, "Event not found, or user is not a group member"),
-          500: StatusError(ErrorTypes.ResourceCreationError, "Database execution failed"),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "Event not found, or user is not a group member",
+          ),
+          500: StatusError(
+            ErrorTypes.ResourceCreationError,
+            "Database execution failed",
+          ),
         },
       },
     },
@@ -628,7 +700,10 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         }),
         response: {
           200: StatusOK(planDTO, "Plan details retrieved successfully"),
-          404: StatusError(ErrorTypes.UnknownIdError, "Plan proposal not found"),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "Plan proposal not found",
+          ),
           500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
         },
       },
@@ -641,7 +716,8 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     "/:id/events/:idevent/plans/:idplan",
     {
       schema: {
-        description: "Edit proposed plan coordinates (restricted to the original plan proposer)",
+        description:
+          "Edit proposed plan coordinates (restricted to the original plan proposer)",
         tags: ["plans"],
         params: Type.Object({
           id: Type.String({ format: "uuid" }),
@@ -651,7 +727,10 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         body: EditPlanBody,
         response: {
           200: StatusOK(planDTO, "Plan updated successfully"),
-          403: StatusError(ErrorTypes.UpdateError, "Action forbidden: Proposer mismatch"),
+          403: StatusError(
+            ErrorTypes.UpdateError,
+            "Action forbidden: Proposer mismatch",
+          ),
           404: StatusError(ErrorTypes.UnknownIdError, "Plan not found"),
           500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
         },
@@ -673,8 +752,14 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
           idplan: Type.String({ format: "uuid" }),
         }),
         response: {
-          200: StatusOK(Type.Object({ message: Type.String() }), "Vote successfully casted"),
-          404: StatusError(ErrorTypes.UnknownIdError, "Event or plan not found"),
+          200: StatusOK(
+            Type.Object({ message: Type.String() }),
+            "Vote successfully casted",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "Event or plan not found",
+          ),
         },
       },
     },
@@ -694,8 +779,14 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
           idplan: Type.String({ format: "uuid" }),
         }),
         response: {
-          200: StatusOK(Type.Object({ message: Type.String() }), "Vote successfully removed"),
-          404: StatusError(ErrorTypes.UnknownIdError, "Event or plan not found"),
+          200: StatusOK(
+            Type.Object({ message: Type.String() }),
+            "Vote successfully removed",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "Event or plan not found",
+          ),
         },
       },
     },
@@ -716,7 +807,10 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
           idevent: Type.String({ format: "uuid", description: "Event UUID" }),
         }),
         response: {
-          200: StatusOK(eventConfirmationDTO, "Attendance confirmed successfully"),
+          200: StatusOK(
+            eventConfirmationDTO,
+            "Attendance confirmed successfully",
+          ),
           500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
         },
       },
@@ -736,8 +830,14 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
           idevent: Type.String({ format: "uuid", description: "Event UUID" }),
         }),
         response: {
-          200: StatusOK(Type.Null(), "Attendance confirmation revoked successfully"),
-          404: StatusError(ErrorTypes.UnknownIdError, "Attendance confirmation not found"),
+          200: StatusOK(
+            Type.Null(),
+            "Attendance confirmation revoked successfully",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "Attendance confirmation not found",
+          ),
           500: StatusError(ErrorTypes.DeleteError, "Database execution failed"),
         },
       },
@@ -757,7 +857,10 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
           idevent: Type.String({ format: "uuid", description: "Event UUID" }),
         }),
         response: {
-          200: StatusOK(Type.Array(eventConfirmationDTO), "List of confirmations retrieved successfully"),
+          200: StatusOK(
+            Type.Array(eventConfirmationDTO),
+            "List of confirmations retrieved successfully",
+          ),
           500: StatusError(ErrorTypes.ConversionError, "Conversion error"),
         },
       },

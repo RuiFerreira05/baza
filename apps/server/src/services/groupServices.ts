@@ -517,4 +517,3 @@ export const verifyGroupMembership = async (
     return false;
   }
 };
-

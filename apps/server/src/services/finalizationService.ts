@@ -15,8 +15,8 @@ export const finalizeExpiredEvents = async () => {
       .where(
         and(
           eq(groupEvents.state, "unfinished"),
-          lte(groupEvents.votingEndTime, now)
-        )
+          lte(groupEvents.votingEndTime, now),
+        ),
       );
 
     const batchSize = 50;
@@ -25,12 +25,17 @@ export const finalizeExpiredEvents = async () => {
       await Promise.all(batch.map((event) => finalizeEvent(event.id)));
     }
   } catch (error) {
-    app.log.error(error as any, "Error in finalizeExpiredEvents background task");
+    app.log.error(
+      error as any,
+      "Error in finalizeExpiredEvents background task",
+    );
   }
 };
 
 export const checkAndApplyFallbacks = async () => {
-  app.log.info("Checking for expired tie-breakers (creator decision deadlines)...");
+  app.log.info(
+    "Checking for expired tie-breakers (creator decision deadlines)...",
+  );
   try {
     const tiebreakerEvents = await db
       .select({
@@ -46,15 +51,12 @@ export const checkAndApplyFallbacks = async () => {
 
     for (const event of tiebreakerEvents) {
       if (!event.votingEndTime) continue;
-      
+
       const votingEnd = new Date(event.votingEndTime);
       const start = new Date(event.startDate);
-      
+
       const fallbackDeadline = new Date(
-        Math.min(
-          votingEnd.getTime() + 24 * 60 * 60 * 1000,
-          start.getTime()
-        )
+        Math.min(votingEnd.getTime() + 24 * 60 * 60 * 1000, start.getTime()),
       );
 
       if (now >= fallbackDeadline) {
@@ -67,13 +69,18 @@ export const checkAndApplyFallbacks = async () => {
       const batch = toResolve.slice(i, i + batchSize);
       await Promise.all(
         batch.map(async (id) => {
-          app.log.info(`Event ${id} fallback deadline reached. Applying automated tie-breaker...`);
+          app.log.info(
+            `Event ${id} fallback deadline reached. Applying automated tie-breaker...`,
+          );
           await applyFallbackResolution(id);
-        })
+        }),
       );
     }
   } catch (error) {
-    app.log.error(error as any, "Error in checkAndApplyFallbacks background task");
+    app.log.error(
+      error as any,
+      "Error in checkAndApplyFallbacks background task",
+    );
   }
 };
 
@@ -111,15 +118,16 @@ export const finalizeEvent = async (eventId: string): Promise<void> => {
       .orderBy(asc(plans.createdAt));
 
     if (plansWithVotes.length === 0) {
-      await db.update(groupEvents)
+      await db
+        .update(groupEvents)
         .set({ state: "finished" })
         .where(eq(groupEvents.id, eventId));
       app.log.info(`Event ${eventId} finalized with no plan proposed.`);
       return;
     }
 
-    const maxVotes = Math.max(...plansWithVotes.map(p => p.votesCount));
-    const tiedPlans = plansWithVotes.filter(p => p.votesCount === maxVotes);
+    const maxVotes = Math.max(...plansWithVotes.map((p) => p.votesCount));
+    const tiedPlans = plansWithVotes.filter((p) => p.votesCount === maxVotes);
 
     if (tiedPlans.length === 1) {
       const winner = tiedPlans[0]!;
@@ -127,18 +135,24 @@ export const finalizeEvent = async (eventId: string): Promise<void> => {
         await tx.insert(groupEventsFinal).values({
           id: eventId,
           groupId: event.groupId!,
-          planId: winner.id
+          planId: winner.id,
         });
-        await tx.update(groupEvents)
+        await tx
+          .update(groupEvents)
           .set({ state: "finished" })
           .where(eq(groupEvents.id, eventId));
       });
-      app.log.info(`Event ${eventId} finalized automatically. Winner: ${winner.id} with ${maxVotes} votes.`);
+      app.log.info(
+        `Event ${eventId} finalized automatically. Winner: ${winner.id} with ${maxVotes} votes.`,
+      );
     } else {
-      await db.update(groupEvents)
+      await db
+        .update(groupEvents)
         .set({ state: "needs_tiebreaker" })
         .where(eq(groupEvents.id, eventId));
-      app.log.info(`Event ${eventId} entered needs_tiebreaker state (tie between ${tiedPlans.length} plans).`);
+      app.log.info(
+        `Event ${eventId} entered needs_tiebreaker state (tie between ${tiedPlans.length} plans).`,
+      );
     }
   } catch (error) {
     app.log.error(error as any, `Failed to finalize event ${eventId}`);
@@ -166,8 +180,11 @@ const applyFallbackResolution = async (eventId: string): Promise<void> => {
       .groupBy(plans.id, plans.createdAt)
       .orderBy(asc(plans.createdAt));
 
-    const maxVotes = plansWithVotes.length > 0 ? Math.max(...plansWithVotes.map(p => p.votesCount)) : 0;
-    const tiedPlans = plansWithVotes.filter(p => p.votesCount === maxVotes);
+    const maxVotes =
+      plansWithVotes.length > 0
+        ? Math.max(...plansWithVotes.map((p) => p.votesCount))
+        : 0;
+    const tiedPlans = plansWithVotes.filter((p) => p.votesCount === maxVotes);
 
     if (tiedPlans.length > 0) {
       const earliestTiedPlan = tiedPlans[0]!;
@@ -175,21 +192,30 @@ const applyFallbackResolution = async (eventId: string): Promise<void> => {
         await tx.insert(groupEventsFinal).values({
           id: eventId,
           groupId: event.groupId!,
-          planId: earliestTiedPlan.id
+          planId: earliestTiedPlan.id,
         });
-        await tx.update(groupEvents)
+        await tx
+          .update(groupEvents)
           .set({ state: "finished" })
           .where(eq(groupEvents.id, eventId));
       });
-      app.log.info(`Event ${eventId} tie-breaker resolved automatically via fallback (earliest proposal). Winner: ${earliestTiedPlan.id}`);
+      app.log.info(
+        `Event ${eventId} tie-breaker resolved automatically via fallback (earliest proposal). Winner: ${earliestTiedPlan.id}`,
+      );
     } else {
-      await db.update(groupEvents)
+      await db
+        .update(groupEvents)
         .set({ state: "finished" })
         .where(eq(groupEvents.id, eventId));
-      app.log.info(`Event ${eventId} tie-breaker closed automatically via fallback with no proposals.`);
+      app.log.info(
+        `Event ${eventId} tie-breaker closed automatically via fallback with no proposals.`,
+      );
     }
   } catch (error) {
-    app.log.error(error as any, `Failed fallback tie-breaker for event ${eventId}`);
+    app.log.error(
+      error as any,
+      `Failed fallback tie-breaker for event ${eventId}`,
+    );
   }
 };
 
@@ -197,8 +223,10 @@ export const resolveTie = async (
   groupId: string,
   eventId: string,
   requesterUsername: string,
-  planId: string
-): Promise<Result<null, ErrorTypes.UnknownIdError | ErrorTypes.UpdateError>> => {
+  planId: string,
+): Promise<
+  Result<null, ErrorTypes.UnknownIdError | ErrorTypes.UpdateError>
+> => {
   try {
     const [event] = await db
       .select()
@@ -224,12 +252,12 @@ export const resolveTie = async (
       .where(eq(plans.groupEventId, eventId))
       .groupBy(plans.id);
 
-    const targetPlan = plansWithVotes.find(p => p.id === planId);
+    const targetPlan = plansWithVotes.find((p) => p.id === planId);
     if (!targetPlan) {
       return Err(ErrorTypes.UnknownIdError);
     }
 
-    const maxVotes = Math.max(...plansWithVotes.map(p => p.votesCount));
+    const maxVotes = Math.max(...plansWithVotes.map((p) => p.votesCount));
     const targetPlanVotes = targetPlan.votesCount;
 
     if (targetPlanVotes !== maxVotes) {
@@ -240,14 +268,17 @@ export const resolveTie = async (
       await tx.insert(groupEventsFinal).values({
         id: eventId,
         groupId: event.groupId!,
-        planId: planId
+        planId: planId,
       });
-      await tx.update(groupEvents)
+      await tx
+        .update(groupEvents)
         .set({ state: "finished" })
         .where(eq(groupEvents.id, eventId));
     });
 
-    app.log.info(`Event ${eventId} tie-breaker resolved manually by creator ${requesterUsername}. Winner: ${planId}`);
+    app.log.info(
+      `Event ${eventId} tie-breaker resolved manually by creator ${requesterUsername}. Winner: ${planId}`,
+    );
     return Ok(null);
   } catch (error) {
     app.log.error(error as any, `Failed to resolve tie for event ${eventId}`);

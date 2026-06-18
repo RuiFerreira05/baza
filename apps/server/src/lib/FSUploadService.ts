@@ -7,17 +7,23 @@ import { pipeline } from "node:stream/promises";
 import { app } from "../setup";
 import { db } from "./db";
 import { env } from "./env";
-import { Err, Ok, SetupError, type Failable, type FileUploadInterface, type GetImageResult, type Result } from "./types";
+import {
+  Err,
+  Ok,
+  SetupError,
+  type Failable,
+  type FileUploadInterface,
+  type GetImageResult,
+  type Result,
+} from "./types";
 
 export class FSUploadService implements FileUploadInterface {
-
   static groupPhotoDir: string = path.join(env.UPLOAD_DIR, "group-photos");
 
   async saveGroupPhoto(
     photo: MultipartFile,
     oldPhoto: string | null,
   ): Promise<Result<UUID, ErrorTypes>> {
-
     const uploadDir = FSUploadService.groupPhotoDir;
 
     const extension = path.extname(photo.filename);
@@ -35,7 +41,9 @@ export class FSUploadService implements FileUploadInterface {
     const dirname = path.dirname(filePath);
 
     if (!fs.existsSync(dirname)) {
-      app.log.info(`Group photos upload directory not found, creating at ${dirname}`);
+      app.log.info(
+        `Group photos upload directory not found, creating at ${dirname}`,
+      );
       fs.mkdirSync(dirname, { recursive: true });
     }
 
@@ -43,7 +51,9 @@ export class FSUploadService implements FileUploadInterface {
       await pipeline(photo.file, fs.createWriteStream(filePath));
       if (oldPhoto) {
         app.log.info(`Removing old photo with id ${oldPhoto}`);
-        fs.rmSync(path.join(uploadDir, `${oldPhoto}${extension}`), { force: true });
+        fs.rmSync(path.join(uploadDir, `${oldPhoto}${extension}`), {
+          force: true,
+        });
       }
       return Ok(fileId);
     } catch (error) {
@@ -55,7 +65,6 @@ export class FSUploadService implements FileUploadInterface {
   async getGroupPhoto(
     groupId: string,
   ): Promise<Result<GetImageResult, ErrorTypes>> {
-
     const groupPhotoId = await db.query.groups.findFirst({
       where: {
         id: groupId,
@@ -77,9 +86,13 @@ export class FSUploadService implements FileUploadInterface {
 
     const uploadDir = FSUploadService.groupPhotoDir;
     const files = fs.readdirSync(uploadDir);
-    app.log.debug(`Looking for photo with id ${groupPhotoId.photo} in directory ${uploadDir}`);
+    app.log.debug(
+      `Looking for photo with id ${groupPhotoId.photo} in directory ${uploadDir}`,
+    );
     app.log.debug(`Files in directory: ${files.join(", ")}`);
-    const fileName = files.find(file => path.parse(file).name === groupPhotoId.photo);
+    const fileName = files.find(
+      (file) => path.parse(file).name === groupPhotoId.photo,
+    );
     if (!fileName) {
       return Err(ErrorTypes.UnknownIdError);
     }
@@ -91,7 +104,9 @@ export class FSUploadService implements FileUploadInterface {
 
   setup(): Failable<SetupError> {
     if (!fs.existsSync(FSUploadService.groupPhotoDir)) {
-      app.log.info(`Group photos upload directory not found, creating at ${FSUploadService.groupPhotoDir}`);
+      app.log.info(
+        `Group photos upload directory not found, creating at ${FSUploadService.groupPhotoDir}`,
+      );
       fs.mkdirSync(FSUploadService.groupPhotoDir, { recursive: true });
     }
     return Ok(undefined);

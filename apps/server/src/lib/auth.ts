@@ -14,14 +14,11 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 
 export const auth = betterAuth({
   trustedOrigins: ["baza://", `http://10.0.2.2:${env.SERVER_PORT}`], // 10.0.2.2 is the special IP for localhost in Android emulators
-  plugins: [
-    expo(),
-    openAPI()
-  ],
+  plugins: [expo(), openAPI()],
   database: drizzleAdapter(db, {
     provider: "pg",
     usePlural: true,
-    schema: schema
+    schema: schema,
   }),
   emailAndPassword: {
     enabled: true,
@@ -42,25 +39,28 @@ declare module "fastify" {
 
 export const getAuthenticatedUsername = async (
   req: FastifyRequest,
-  res: FastifyReply
+  res: FastifyReply,
 ): Promise<string | null> => {
   if (req.username) {
     return req.username;
   }
   try {
-    const session = req.session !== undefined
-      ? req.session
-      : await auth.api.getSession({
-          headers: fromNodeHeaders(req.headers),
-        });
+    const session =
+      req.session !== undefined
+        ? req.session
+        : await auth.api.getSession({
+            headers: fromNodeHeaders(req.headers),
+          });
 
     if (!session || !session.user) {
-      res.status(401).send(
-        createStatusError(
-          ErrorTypes.UnauthorizedError,
-          "Unauthorized request. Session not found."
-        )
-      );
+      res
+        .status(401)
+        .send(
+          createStatusError(
+            ErrorTypes.UnauthorizedError,
+            "Unauthorized request. Session not found.",
+          ),
+        );
       return null;
     }
 
@@ -73,12 +73,14 @@ export const getAuthenticatedUsername = async (
       .limit(1);
 
     if (!profile) {
-      res.status(404).send(
-        createStatusError(
-          ErrorTypes.UnknownUsernameError,
-          "User profile not found. Please create a profile first."
-        )
-      );
+      res
+        .status(404)
+        .send(
+          createStatusError(
+            ErrorTypes.UnknownUsernameError,
+            "User profile not found. Please create a profile first.",
+          ),
+        );
       return null;
     }
 
@@ -86,13 +88,14 @@ export const getAuthenticatedUsername = async (
     return profile.username;
   } catch (error) {
     req.log.error(error as any, "Authentication check failed");
-    res.status(500).send(
-      createStatusError(
-        ErrorTypes.UnauthorizedError,
-        "An internal authentication error occurred."
-      )
-    );
+    res
+      .status(500)
+      .send(
+        createStatusError(
+          ErrorTypes.UnauthorizedError,
+          "An internal authentication error occurred.",
+        ),
+      );
     return null;
   }
 };
-

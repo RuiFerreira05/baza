@@ -11,6 +11,6 @@ export default defineConfig({
     },
     setupFiles: ["dotenv/config"],
     fileParallelism: false, // Run test files sequentially
-    maxWorkers: 1,          // Use a single worker thread
+    maxWorkers: 1, // Use a single worker thread
   },
 });

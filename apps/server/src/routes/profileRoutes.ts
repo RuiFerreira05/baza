@@ -21,12 +21,17 @@ import {
 } from "@baza/shared-types";
 import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
-import { getUserByUsernameHandler, createUserProfileHandler, deleteUserProfileHandler, editUserProfileHandler } from "../handlers/profileHandlers";
+import {
+  getUserByUsernameHandler,
+  createUserProfileHandler,
+  deleteUserProfileHandler,
+  editUserProfileHandler,
+} from "../handlers/profileHandlers";
 import {
   getPersonalEventsHandler,
   getPersonalEventByIdHandler,
   createPersonalEventHandler,
-  editPersonalEventHandler
+  editPersonalEventHandler,
 } from "../handlers/eventHandlers";
 import {
   getFriendsHandler,
@@ -41,7 +46,7 @@ import {
 } from "../handlers/friendHandlers";
 import {
   getUserSettingsHandler,
-  updateUserSettingsHandler
+  updateUserSettingsHandler,
 } from "../handlers/settingsHandlers";
 import {
   getUserGroupsHandler,
@@ -59,7 +64,8 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     "/:username",
     {
       schema: {
-        description: "This route fetches profile information from a user of the app",
+        description:
+          "This route fetches profile information from a user of the app",
         tags: ["users"],
         response: {
           200: StatusOK(
@@ -75,10 +81,12 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
             "if there was an error converting the profile data to the expected format before sending the response",
           ),
         },
-        params: SimpleUsernameParam("Username of a user of the aplication whose profile is being fetched"),
+        params: SimpleUsernameParam(
+          "Username of a user of the aplication whose profile is being fetched",
+        ),
       },
     },
-    getUserByUsernameHandler
+    getUserByUsernameHandler,
   );
 
   // POST /users
@@ -101,7 +109,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    createUserProfileHandler
+    createUserProfileHandler,
   );
 
   // DELETE /users/:username
@@ -111,12 +119,11 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
       schema: {
         description: "This route deletes a user's profile",
         tags: ["users"],
-        params: SimpleUsernameParam("The username of the user whose profile is being deleted"),
+        params: SimpleUsernameParam(
+          "The username of the user whose profile is being deleted",
+        ),
         response: {
-          200: StatusOK(
-            profileDTO,
-            "if the profile was successfully deleted",
-          ),
+          200: StatusOK(profileDTO, "if the profile was successfully deleted"),
           404: StatusError(
             ErrorTypes.UnknownIdError,
             "if no user with the provided username was found",
@@ -128,7 +135,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    deleteUserProfileHandler
+    deleteUserProfileHandler,
   );
 
   // PATCH /users/:username
@@ -136,9 +143,12 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     "/:username",
     {
       schema: {
-        description: "This route edits a user's profile information (except photo and settings)",
+        description:
+          "This route edits a user's profile information (except photo and settings)",
         tags: ["users"],
-        params: SimpleUsernameParam("The username of the user whose profile is being edited"),
+        params: SimpleUsernameParam(
+          "The username of the user whose profile is being edited",
+        ),
         body: EditProfileBody,
         response: {
           200: StatusOK(
@@ -156,7 +166,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    editUserProfileHandler
+    editUserProfileHandler,
   );
 
   // GET /users/:username/events?startDate,endDate
@@ -164,9 +174,12 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     "/:username/events",
     {
       schema: {
-        description: "This route fetches all events, in the given time period, from a user calendar.",
+        description:
+          "This route fetches all events, in the given time period, from a user calendar.",
         tags: ["users"],
-        params: SimpleUsernameParam("The username of the user whose events are being fetched"),
+        params: SimpleUsernameParam(
+          "The username of the user whose events are being fetched",
+        ),
         querystring: GetPersonalEventsParams,
         response: {
           200: StatusOK(
@@ -184,7 +197,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    getPersonalEventsHandler
+    getPersonalEventsHandler,
   );
 
   // GET /users/:username/events/:idEvent
@@ -192,7 +205,8 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     "/:username/events/:idEvent",
     {
       schema: {
-        description: "This route fetches a single personal event by username and event ID.",
+        description:
+          "This route fetches a single personal event by username and event ID.",
         tags: ["users"],
         params: Type.Object({
           username: Type.String(),
@@ -205,7 +219,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    getPersonalEventByIdHandler
+    getPersonalEventByIdHandler,
   );
 
   // POST /users/:username/events
@@ -215,7 +229,9 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
       schema: {
         description: "This route creates a new personal event.",
         tags: ["users"],
-        params: SimpleUsernameParam("The username of the user creating the event"),
+        params: SimpleUsernameParam(
+          "The username of the user creating the event",
+        ),
         body: CreatePersonalEventBody,
         response: {
           201: StatusOK(personalEventDTO, "Created"),
@@ -224,7 +240,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    createPersonalEventHandler
+    createPersonalEventHandler,
   );
 
   // PATCH /users/:username/events/:idEvent
@@ -247,7 +263,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    editPersonalEventHandler
+    editPersonalEventHandler,
   );
 
   // GET /users/:username/groups
@@ -255,7 +271,8 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     "/:username/groups",
     {
       schema: {
-        description: "This route fetches all groups that the user is an active member of.",
+        description:
+          "This route fetches all groups that the user is an active member of.",
         tags: ["users"],
         params: SimpleUsernameParam("The username"),
         response: {
@@ -264,7 +281,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    getUserGroupsHandler
+    getUserGroupsHandler,
   );
 
   // GET /users/:username/groups/invites
@@ -281,7 +298,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    getUserGroupInvitesHandler
+    getUserGroupInvitesHandler,
   );
 
   // PATCH /users/:username/groups/invites/:groupId
@@ -289,7 +306,8 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     "/:username/groups/invites/:groupId",
     {
       schema: {
-        description: "This route responds (accept or decline) to a group invitation.",
+        description:
+          "This route responds (accept or decline) to a group invitation.",
         tags: ["users"],
         params: Type.Object({
           username: Type.String(),
@@ -306,7 +324,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    respondGroupInviteHandler
+    respondGroupInviteHandler,
   );
 
   // GET /users/:username/friends
@@ -323,7 +341,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    getFriendsHandler
+    getFriendsHandler,
   );
 
   // GET /users/:username/friends/:friendUsername
@@ -344,7 +362,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    getFriendProfileHandler
+    getFriendProfileHandler,
   );
 
   // DELETE /users/:username/friends/:friendUsername
@@ -365,7 +383,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    removeFriendHandler
+    removeFriendHandler,
   );
 
   // POST /users/:username/blocks
@@ -384,7 +402,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    blockUserHandler
+    blockUserHandler,
   );
 
   // DELETE /users/:username/blocks/:blockedUsername
@@ -405,7 +423,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    unblockUserHandler
+    unblockUserHandler,
   );
 
   // POST /users/:username/friends/requests
@@ -424,7 +442,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    sendFriendRequestHandler
+    sendFriendRequestHandler,
   );
 
   // GET /users/:username/friends/requests
@@ -441,7 +459,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    getPendingFriendRequestsHandler
+    getPendingFriendRequestsHandler,
   );
 
   // GET /users/:username/friends/requests/sent
@@ -449,7 +467,8 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     "/:username/friends/requests/sent",
     {
       schema: {
-        description: "This route fetches all pending outgoing friend requests sent by the user.",
+        description:
+          "This route fetches all pending outgoing friend requests sent by the user.",
         tags: ["users"],
         params: SimpleUsernameParam("The username"),
         response: {
@@ -458,7 +477,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    getPendingSentFriendRequestsHandler
+    getPendingSentFriendRequestsHandler,
   );
 
   // PATCH /users/:username/friends/requests/:senderUsername
@@ -466,7 +485,8 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     "/:username/friends/requests/:senderUsername",
     {
       schema: {
-        description: "This route responds to (accepts/declines) a pending friend request.",
+        description:
+          "This route responds to (accepts/declines) a pending friend request.",
         tags: ["users"],
         params: Type.Object({
           username: Type.String(),
@@ -480,7 +500,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    respondFriendRequestHandler
+    respondFriendRequestHandler,
   );
 
   // GET /users/:username/settings
@@ -497,7 +517,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    getUserSettingsHandler
+    getUserSettingsHandler,
   );
 
   // PATCH /users/:username/settings
@@ -516,6 +536,6 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
         },
       },
     },
-    updateUserSettingsHandler
+    updateUserSettingsHandler,
   );
-};
+};

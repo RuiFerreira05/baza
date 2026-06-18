@@ -17,13 +17,14 @@ const serverEnvSchema = Type.Object({
     default: "0.0.0.0",
   }),
   PUBLIC_SERVER_URL: Type.String({
-    description: "The public URL of the server, used for generating links in emails",
+    description:
+      "The public URL of the server, used for generating links in emails",
     format: "uri",
   }),
   DATABASE_URL: Type.String({
     description:
       "The connection string for the database, in the format postgres://user:password@host:port/database",
-    format: "uri"
+    format: "uri",
   }),
   BETTER_AUTH_SECRET: Type.String({
     description: "A random string used to sign authentication tokens",
@@ -37,13 +38,16 @@ const serverEnvSchema = Type.Object({
     default: "fs",
   }),
   UPLOAD_DIR: Type.String({
-    description: "The directory where uploaded files will be stored (used only if FILE_UPLOAD_SERVICE is 'fs')",
+    description:
+      "The directory where uploaded files will be stored (used only if FILE_UPLOAD_SERVICE is 'fs')",
     default: "./uploads/",
   }),
-  BYPASS_AUTH: Type.Optional(Type.String({
-    description: "Bypass authentication checks in development/testing mode",
-    default: "false",
-  })),
+  BYPASS_AUTH: Type.Optional(
+    Type.String({
+      description: "Bypass authentication checks in development/testing mode",
+      default: "false",
+    }),
+  ),
 });
 
 export type ServerEnv = Type.Static<typeof serverEnvSchema>;

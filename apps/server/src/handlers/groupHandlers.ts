@@ -381,7 +381,10 @@ export const removeUserFromGroupHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
 ) => {
-  const { id: groupId, username } = req.params as { id: string; username: string };
+  const { id: groupId, username } = req.params as {
+    id: string;
+    username: string;
+  };
 
   const result = await removeUserFromGroup(groupId, username);
 
@@ -417,7 +420,10 @@ export const updateUserGroupRoleHandler = async (
   req: FastifyRequest,
   res: FastifyReply,
 ) => {
-  const { id: groupId, username } = req.params as { id: string; username: string };
+  const { id: groupId, username } = req.params as {
+    id: string;
+    username: string;
+  };
   const { admin } = req.body as UpdateMemberRoleBody;
 
   const result = admin

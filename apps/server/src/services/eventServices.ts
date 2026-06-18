@@ -1,7 +1,30 @@
-import { events, groupEvents, personalEvents, groupMembers, groups, groupEventsFinal, plans, eventConfirmations } from "@baza/db/schemas";
+import {
+  events,
+  groupEvents,
+  personalEvents,
+  groupMembers,
+  groups,
+  groupEventsFinal,
+  plans,
+  eventConfirmations,
+} from "@baza/db/schemas";
 import { db } from "../lib/db";
 import { eq, and, lte, gte, inArray } from "drizzle-orm";
-import { ErrorTypes, groupEventDTO, personalEventDTO, groupCalendarDTO, type PersonalEventDTO, type GroupCalendarDTO, type GroupEventDTO, type CreateEventBody, type EditEventBody, type CreatePersonalEventBody, type EditPersonalEventBody, eventConfirmationDTO, type EventConfirmationDTO } from "@baza/shared-types";
+import {
+  ErrorTypes,
+  groupEventDTO,
+  personalEventDTO,
+  groupCalendarDTO,
+  type PersonalEventDTO,
+  type GroupCalendarDTO,
+  type GroupEventDTO,
+  type CreateEventBody,
+  type EditEventBody,
+  type CreatePersonalEventBody,
+  type EditPersonalEventBody,
+  eventConfirmationDTO,
+  type EventConfirmationDTO,
+} from "@baza/shared-types";
 import { Value } from "typebox/value";
 import { Type } from "typebox";
 import { Err, Ok, type Result } from "../lib/types";
@@ -11,7 +34,7 @@ import { finalizeEvent } from "./finalizationService";
 /**
  * Creates a new group event with an associated base event.
  * Validates that the votingEndTime is strictly earlier than the startDate.
- * 
+ *
  * @param groupId the UUID of the group
  * @param creatorUsername the username of the event creator
  * @param body the payload containing the title, description, dates, and voting end time
@@ -20,36 +43,51 @@ import { finalizeEvent } from "./finalizationService";
 export const createGroupEvent = async (
   groupId: string,
   creatorUsername: string,
-  body: CreateEventBody
-): Promise<Result<GroupEventDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreationError | ErrorTypes.MalformedRequestError>> => {
+  body: CreateEventBody,
+): Promise<
+  Result<
+    GroupEventDTO,
+    | ErrorTypes.ConversionError
+    | ErrorTypes.ResourceCreationError
+    | ErrorTypes.MalformedRequestError
+  >
+> => {
   try {
     const startDateVal = new Date(body.startDate);
     const votingEndTimeVal = new Date(body.votingEndTime);
 
     if (votingEndTimeVal >= startDateVal) {
-      app.log.warn(`Create event constraint violated: votingEndTime (${body.votingEndTime}) must be earlier than startDate (${body.startDate})`);
+      app.log.warn(
+        `Create event constraint violated: votingEndTime (${body.votingEndTime}) must be earlier than startDate (${body.startDate})`,
+      );
       return Err(ErrorTypes.MalformedRequestError);
     }
 
     const created = await db.transaction(async (tx) => {
-      const [newEvent] = await tx.insert(events).values({
-        title: body.title,
-        description: body.description,
-      }).returning();
+      const [newEvent] = await tx
+        .insert(events)
+        .values({
+          title: body.title,
+          description: body.description,
+        })
+        .returning();
 
       if (!newEvent) {
         throw new Error("Failed to insert base event");
       }
 
-      const [newGroupEvent] = await tx.insert(groupEvents).values({
-        id: newEvent.id,
-        groupId: groupId,
-        startDate: body.startDate,
-        endDate: body.endDate,
-        state: "unfinished",
-        votingEndTime: new Date(body.votingEndTime),
-        createdBy: creatorUsername,
-      }).returning();
+      const [newGroupEvent] = await tx
+        .insert(groupEvents)
+        .values({
+          id: newEvent.id,
+          groupId: groupId,
+          startDate: body.startDate,
+          endDate: body.endDate,
+          state: "unfinished",
+          votingEndTime: new Date(body.votingEndTime),
+          createdBy: creatorUsername,
+        })
+        .returning();
 
       if (!newGroupEvent) {
         throw new Error("Failed to insert group event");
@@ -89,7 +127,7 @@ export const createGroupEvent = async (
 
 /**
  * Fetches all events associated with a specific group, optionally filtered by date ranges.
- * 
+ *
  * @param groupId the UUID of the group
  * @param startDate optional date window start
  * @param endDate optional date window end
@@ -98,7 +136,7 @@ export const createGroupEvent = async (
 export const getGroupEvents = async (
   groupId: string,
   startDate?: string,
-  endDate?: string
+  endDate?: string,
 ): Promise<Result<GroupEventDTO[], ErrorTypes.ConversionError>> => {
   try {
     const conditions = [eq(groupEvents.groupId, groupId)];
@@ -109,40 +147,41 @@ export const getGroupEvents = async (
       conditions.push(lte(groupEvents.endDate, endDate));
     }
 
-    const query = db.select({
-      id: groupEvents.id,
-      groupId: groupEvents.groupId,
-      title: events.title,
-      description: events.description,
-      startDate: groupEvents.startDate,
-      endDate: groupEvents.endDate,
-      state: groupEvents.state,
-      votingEndTime: groupEvents.votingEndTime,
-      createdBy: groupEvents.createdBy,
-      createdAt: events.createdAt,
-      updatedAt: events.updatedAt,
-      winningPlanId: groupEventsFinal.planId,
-      winningPlan: {
-        id: plans.id,
-        groupEventId: plans.groupEventId,
-        username: plans.username,
-        title: plans.title,
-        date: plans.date,
-        startTime: plans.startTime,
-        endTime: plans.endTime,
-        activity: plans.activity,
-        location: plans.location,
-        minBudget: plans.minBudget,
-        maxBudget: plans.maxBudget,
-        createdAt: plans.createdAt,
-        updatedAt: plans.updatedAt,
-      }
-    })
-    .from(groupEvents)
-    .innerJoin(events, eq(groupEvents.id, events.id))
-    .leftJoin(groupEventsFinal, eq(groupEvents.id, groupEventsFinal.id))
-    .leftJoin(plans, eq(groupEventsFinal.planId, plans.id))
-    .where(and(...conditions));
+    const query = db
+      .select({
+        id: groupEvents.id,
+        groupId: groupEvents.groupId,
+        title: events.title,
+        description: events.description,
+        startDate: groupEvents.startDate,
+        endDate: groupEvents.endDate,
+        state: groupEvents.state,
+        votingEndTime: groupEvents.votingEndTime,
+        createdBy: groupEvents.createdBy,
+        createdAt: events.createdAt,
+        updatedAt: events.updatedAt,
+        winningPlanId: groupEventsFinal.planId,
+        winningPlan: {
+          id: plans.id,
+          groupEventId: plans.groupEventId,
+          username: plans.username,
+          title: plans.title,
+          date: plans.date,
+          startTime: plans.startTime,
+          endTime: plans.endTime,
+          activity: plans.activity,
+          location: plans.location,
+          minBudget: plans.minBudget,
+          maxBudget: plans.maxBudget,
+          createdAt: plans.createdAt,
+          updatedAt: plans.updatedAt,
+        },
+      })
+      .from(groupEvents)
+      .innerJoin(events, eq(groupEvents.id, events.id))
+      .leftJoin(groupEventsFinal, eq(groupEvents.id, groupEventsFinal.id))
+      .leftJoin(plans, eq(groupEventsFinal.planId, plans.id))
+      .where(and(...conditions));
 
     const unfinishedEvents = await db
       .select()
@@ -151,8 +190,8 @@ export const getGroupEvents = async (
         and(
           eq(groupEvents.groupId, groupId),
           eq(groupEvents.state, "unfinished"),
-          lte(groupEvents.votingEndTime, new Date())
-        )
+          lte(groupEvents.votingEndTime, new Date()),
+        ),
       );
 
     for (const ge of unfinishedEvents) {
@@ -161,7 +200,7 @@ export const getGroupEvents = async (
 
     const rows = await query;
 
-    const formatted = rows.map(row => {
+    const formatted = rows.map((row) => {
       let winningPlan: any = null;
       if (row.winningPlanId && row.winningPlan && row.winningPlan.id) {
         winningPlan = {
@@ -203,15 +242,17 @@ export const getGroupEvents = async (
 /**
  * Fetches details of a specific group event by its ID.
  * If the event has reached its votingEndTime and is still unfinished, triggers automated plan finalization.
- * 
+ *
  * @param groupId the UUID of the group
  * @param eventId the UUID of the event
  * @returns a promised result with the GroupEventDTO, or an error
  */
 export const getGroupEventById = async (
   groupId: string,
-  eventId: string
-): Promise<Result<GroupEventDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>> => {
+  eventId: string,
+): Promise<
+  Result<GroupEventDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>
+> => {
   try {
     const [eventRecord] = await db
       .select()
@@ -219,44 +260,52 @@ export const getGroupEventById = async (
       .where(eq(groupEvents.id, eventId))
       .limit(1);
 
-    if (eventRecord && eventRecord.state === "unfinished" && eventRecord.votingEndTime && new Date() >= new Date(eventRecord.votingEndTime)) {
+    if (
+      eventRecord &&
+      eventRecord.state === "unfinished" &&
+      eventRecord.votingEndTime &&
+      new Date() >= new Date(eventRecord.votingEndTime)
+    ) {
       await finalizeEvent(eventId);
     }
 
-    const rows = await db.select({
-      id: groupEvents.id,
-      groupId: groupEvents.groupId,
-      title: events.title,
-      description: events.description,
-      startDate: groupEvents.startDate,
-      endDate: groupEvents.endDate,
-      state: groupEvents.state,
-      votingEndTime: groupEvents.votingEndTime,
-      createdBy: groupEvents.createdBy,
-      createdAt: events.createdAt,
-      updatedAt: events.updatedAt,
-      winningPlanId: groupEventsFinal.planId,
-      winningPlan: {
-        id: plans.id,
-        groupEventId: plans.groupEventId,
-        username: plans.username,
-        title: plans.title,
-        date: plans.date,
-        startTime: plans.startTime,
-        endTime: plans.endTime,
-        activity: plans.activity,
-        location: plans.location,
-        minBudget: plans.minBudget,
-        maxBudget: plans.maxBudget,
-        createdAt: plans.createdAt,
-        updatedAt: plans.updatedAt,
-      }
-    })
-    .from(groupEvents)
-    .innerJoin(events, eq(groupEvents.id, events.id))
-    .leftJoin(groupEventsFinal, eq(groupEvents.id, groupEventsFinal.id))
-    .leftJoin(plans, eq(groupEventsFinal.planId, plans.id))
-    .where(and(eq(groupEvents.groupId, groupId), eq(groupEvents.id, eventId)));
+    const rows = await db
+      .select({
+        id: groupEvents.id,
+        groupId: groupEvents.groupId,
+        title: events.title,
+        description: events.description,
+        startDate: groupEvents.startDate,
+        endDate: groupEvents.endDate,
+        state: groupEvents.state,
+        votingEndTime: groupEvents.votingEndTime,
+        createdBy: groupEvents.createdBy,
+        createdAt: events.createdAt,
+        updatedAt: events.updatedAt,
+        winningPlanId: groupEventsFinal.planId,
+        winningPlan: {
+          id: plans.id,
+          groupEventId: plans.groupEventId,
+          username: plans.username,
+          title: plans.title,
+          date: plans.date,
+          startTime: plans.startTime,
+          endTime: plans.endTime,
+          activity: plans.activity,
+          location: plans.location,
+          minBudget: plans.minBudget,
+          maxBudget: plans.maxBudget,
+          createdAt: plans.createdAt,
+          updatedAt: plans.updatedAt,
+        },
+      })
+      .from(groupEvents)
+      .innerJoin(events, eq(groupEvents.id, events.id))
+      .leftJoin(groupEventsFinal, eq(groupEvents.id, groupEventsFinal.id))
+      .leftJoin(plans, eq(groupEventsFinal.planId, plans.id))
+      .where(
+        and(eq(groupEvents.groupId, groupId), eq(groupEvents.id, eventId)),
+      );
 
     if (rows.length === 1) {
       const row = rows[0]!;
@@ -303,7 +352,7 @@ export const getGroupEventById = async (
 /**
  * Modifies an existing group event's title, description, and voting end time.
  * Validates that the updated votingEndTime is strictly earlier than the event startDate.
- * 
+ *
  * @param groupId the UUID of the group
  * @param eventId the UUID of the event
  * @param body the edit payload
@@ -312,8 +361,16 @@ export const getGroupEventById = async (
 export const editGroupEvent = async (
   groupId: string,
   eventId: string,
-  body: EditEventBody
-): Promise<Result<GroupEventDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError | ErrorTypes.MalformedRequestError | ErrorTypes.UpdateError>> => {
+  body: EditEventBody,
+): Promise<
+  Result<
+    GroupEventDTO,
+    | ErrorTypes.ConversionError
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.MalformedRequestError
+    | ErrorTypes.UpdateError
+  >
+> => {
   try {
     const [eventRecord] = await db
       .select()
@@ -330,24 +387,32 @@ export const editGroupEvent = async (
       const startDate = new Date(eventRecord.startDate);
 
       if (newVotingEnd >= startDate) {
-        app.log.warn(`Edit event constraint violated: votingEndTime (${body.votingEndTime}) must be earlier than startDate (${eventRecord.startDate})`);
+        app.log.warn(
+          `Edit event constraint violated: votingEndTime (${body.votingEndTime}) must be earlier than startDate (${eventRecord.startDate})`,
+        );
         return Err(ErrorTypes.MalformedRequestError);
       }
     }
 
     await db.transaction(async (tx) => {
       if (body.title !== undefined || body.description !== undefined) {
-        await tx.update(events).set({
-          title: body.title,
-          description: body.description,
-          updatedAt: new Date(),
-        }).where(eq(events.id, eventId));
+        await tx
+          .update(events)
+          .set({
+            title: body.title,
+            description: body.description,
+            updatedAt: new Date(),
+          })
+          .where(eq(events.id, eventId));
       }
 
       if (body.votingEndTime !== undefined) {
-        await tx.update(groupEvents).set({
-          votingEndTime: new Date(body.votingEndTime),
-        }).where(eq(groupEvents.id, eventId));
+        await tx
+          .update(groupEvents)
+          .set({
+            votingEndTime: new Date(body.votingEndTime),
+          })
+          .where(eq(groupEvents.id, eventId));
       }
     });
 
@@ -361,7 +426,7 @@ export const editGroupEvent = async (
 /**
  * Retrieves the combined calendar for a group, which includes group events and members' personal events.
  * Private personal events are masked to hide sensitive details if requested by a different user.
- * 
+ *
  * @param groupId the UUID of the group
  * @param requestingUsername the username of the user making the request
  * @param startDate optional start date filter
@@ -372,8 +437,15 @@ export const getGroupCalendar = async (
   groupId: string,
   requestingUsername: string,
   startDate?: string,
-  endDate?: string
-): Promise<Result<GroupCalendarDTO, ErrorTypes.ConversionError | ErrorTypes.UnauthorizedError | ErrorTypes.UnknownIdError>> => {
+  endDate?: string,
+): Promise<
+  Result<
+    GroupCalendarDTO,
+    | ErrorTypes.ConversionError
+    | ErrorTypes.UnauthorizedError
+    | ErrorTypes.UnknownIdError
+  >
+> => {
   try {
     // 1. Verify group exists
     const [groupExists] = await db
@@ -396,13 +468,15 @@ export const getGroupCalendar = async (
           eq(groupMembers.groupId, groupId),
           eq(groupMembers.username, requestingUsername),
           eq(groupMembers.acceptedInvite, true),
-          eq(groupMembers.banned, false)
-        )
+          eq(groupMembers.banned, false),
+        ),
       )
       .limit(1);
 
     if (!requesterMember) {
-      app.log.warn(`GetGroupCalendar: Access denied for user ${requestingUsername} in group ${groupId}`);
+      app.log.warn(
+        `GetGroupCalendar: Access denied for user ${requestingUsername} in group ${groupId}`,
+      );
       return Err(ErrorTypes.UnauthorizedError);
     }
 
@@ -414,8 +488,8 @@ export const getGroupCalendar = async (
         and(
           eq(groupMembers.groupId, groupId),
           eq(groupMembers.acceptedInvite, true),
-          eq(groupMembers.banned, false)
-        )
+          eq(groupMembers.banned, false),
+        ),
       );
 
     const memberUsernames = members.map((m) => m.username);
@@ -429,22 +503,23 @@ export const getGroupCalendar = async (
       groupEventsConditions.push(lte(groupEvents.endDate, endDate));
     }
 
-    const dbGroupEvents = await db.select({
-      id: groupEvents.id,
-      groupId: groupEvents.groupId,
-      title: events.title,
-      description: events.description,
-      startDate: groupEvents.startDate,
-      endDate: groupEvents.endDate,
-      state: groupEvents.state,
-      votingEndTime: groupEvents.votingEndTime,
-      createdBy: groupEvents.createdBy,
-      createdAt: events.createdAt,
-      updatedAt: events.updatedAt,
-    })
-    .from(groupEvents)
-    .innerJoin(events, eq(groupEvents.id, events.id))
-    .where(and(...groupEventsConditions));
+    const dbGroupEvents = await db
+      .select({
+        id: groupEvents.id,
+        groupId: groupEvents.groupId,
+        title: events.title,
+        description: events.description,
+        startDate: groupEvents.startDate,
+        endDate: groupEvents.endDate,
+        state: groupEvents.state,
+        votingEndTime: groupEvents.votingEndTime,
+        createdBy: groupEvents.createdBy,
+        createdAt: events.createdAt,
+        updatedAt: events.updatedAt,
+      })
+      .from(groupEvents)
+      .innerJoin(events, eq(groupEvents.id, events.id))
+      .where(and(...groupEventsConditions));
 
     const formattedGroupEvents = dbGroupEvents.map((row) => ({
       id: row.id,
@@ -463,7 +538,9 @@ export const getGroupCalendar = async (
     // 5. Fetch personal events for group members
     let formattedMemberEvents: any[] = [];
     if (memberUsernames.length > 0) {
-      const personalEventsConditions = [inArray(personalEvents.username, memberUsernames)];
+      const personalEventsConditions = [
+        inArray(personalEvents.username, memberUsernames),
+      ];
       if (startDate) {
         personalEventsConditions.push(gte(personalEvents.date, startDate));
       }
@@ -471,23 +548,24 @@ export const getGroupCalendar = async (
         personalEventsConditions.push(lte(personalEvents.date, endDate));
       }
 
-      const dbPersonalEvents = await db.select({
-        id: personalEvents.id,
-        username: personalEvents.username,
-        date: personalEvents.date,
-        location: personalEvents.location,
-        startTime: personalEvents.startTime,
-        endTime: personalEvents.endTime,
-        repeat: personalEvents.repeat,
-        public: personalEvents.public,
-        title: events.title,
-        description: events.description,
-        createdAt: events.createdAt,
-        updatedAt: events.updatedAt,
-      })
-      .from(personalEvents)
-      .innerJoin(events, eq(personalEvents.id, events.id))
-      .where(and(...personalEventsConditions));
+      const dbPersonalEvents = await db
+        .select({
+          id: personalEvents.id,
+          username: personalEvents.username,
+          date: personalEvents.date,
+          location: personalEvents.location,
+          startTime: personalEvents.startTime,
+          endTime: personalEvents.endTime,
+          repeat: personalEvents.repeat,
+          public: personalEvents.public,
+          title: events.title,
+          description: events.description,
+          createdAt: events.createdAt,
+          updatedAt: events.updatedAt,
+        })
+        .from(personalEvents)
+        .innerJoin(events, eq(personalEvents.id, events.id))
+        .where(and(...personalEventsConditions));
 
       formattedMemberEvents = dbPersonalEvents.map((row) => {
         const isOwner = row.username === requestingUsername;
@@ -552,39 +630,45 @@ export const getGroupCalendar = async (
 };
 
 /**
- * This method fetches the personal events, between the two given dates, of a user 
- * with the provided username. It converts the events to an array of personalEventDTOs 
- * and returns them. If the user is not found, it returns an UnknownUsernameError. If 
- * there is an error converting the events' data, it returns a ConversionError. 
- * 
- * @param username username of the user 
+ * This method fetches the personal events, between the two given dates, of a user
+ * with the provided username. It converts the events to an array of personalEventDTOs
+ * and returns them. If the user is not found, it returns an UnknownUsernameError. If
+ * there is an error converting the events' data, it returns a ConversionError.
+ *
+ * @param username username of the user
  * @param startDate date where the event fecthing starts
  * @param endDate date where the event fecthing ends
  * @returns a promised result with an array of personalEventDTO, or an error
  */
-export const getUserEvents = async( username: string, startDate: string, endDate: string ):
-Promise<Result<PersonalEventDTO[], ErrorTypes.ConversionError | ErrorTypes.UnknownUsernameError>> => {
-
+export const getUserEvents = async (
+  username: string,
+  startDate: string,
+  endDate: string,
+): Promise<
+  Result<
+    PersonalEventDTO[],
+    ErrorTypes.ConversionError | ErrorTypes.UnknownUsernameError
+  >
+> => {
   const personalEvents = await db.query.personalEvents.findMany({
     where: {
       username: username,
       date: {
         gte: startDate,
         lte: endDate,
-      }
+      },
     },
     with: {
       events: true,
-    }
+    },
   });
 
-  if(personalEvents){
+  if (personalEvents) {
     const sanitizedEvents = [];
-    for(const personalEvent of personalEvents){
-      const {events, ...rest} = personalEvent;
-      
-      if(events){
+    for (const personalEvent of personalEvents) {
+      const { events, ...rest } = personalEvent;
 
+      if (events) {
         const sanitizedEvent = {
           ...rest,
           id: events.id,
@@ -593,7 +677,7 @@ Promise<Result<PersonalEventDTO[], ErrorTypes.ConversionError | ErrorTypes.Unkno
           createdAt: events.createdAt.toISOString(),
           updatedAt: events.updatedAt.toISOString(),
           startTime: rest.startTime.toISOString(),
-          endTime: rest.endTime.toISOString()
+          endTime: rest.endTime.toISOString(),
         };
 
         app.log.info(`DATE: ${rest.date}`);
@@ -605,15 +689,13 @@ Promise<Result<PersonalEventDTO[], ErrorTypes.ConversionError | ErrorTypes.Unkno
 
     const check = Type.Array(personalEventDTO);
     const converted = Value.Convert(check, sanitizedEvents);
-    if(Value.Check(check, converted)){
+    if (Value.Check(check, converted)) {
       return Ok(converted);
-    }
-    else{
+    } else {
       app.log.error(Value.Errors(check, converted));
       return Err(ErrorTypes.ConversionError);
     }
-  }
-  else{
+  } else {
     app.log.warn(`User with username ${username} not found`);
     return Err(ErrorTypes.UnknownUsernameError);
   }
@@ -624,8 +706,13 @@ Promise<Result<PersonalEventDTO[], ErrorTypes.ConversionError | ErrorTypes.Unkno
  */
 export const getPersonalEventById = async (
   username: string,
-  eventId: string
-): Promise<Result<PersonalEventDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>> => {
+  eventId: string,
+): Promise<
+  Result<
+    PersonalEventDTO,
+    ErrorTypes.ConversionError | ErrorTypes.UnknownIdError
+  >
+> => {
   try {
     const record = await db.query.personalEvents.findFirst({
       where: { id: eventId, username: username },
@@ -671,37 +758,52 @@ export const getPersonalEventById = async (
  */
 export const createPersonalEvent = async (
   username: string,
-  body: CreatePersonalEventBody
-): Promise<Result<PersonalEventDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreationError | ErrorTypes.MalformedRequestError>> => {
+  body: CreatePersonalEventBody,
+): Promise<
+  Result<
+    PersonalEventDTO,
+    | ErrorTypes.ConversionError
+    | ErrorTypes.ResourceCreationError
+    | ErrorTypes.MalformedRequestError
+  >
+> => {
   try {
     const startTimeVal = new Date(body.startTime);
     const endTimeVal = new Date(body.endTime);
 
     if (startTimeVal >= endTimeVal) {
-      app.log.warn(`Create personal event constraint violated: startTime (${body.startTime}) must be earlier than endTime (${body.endTime})`);
+      app.log.warn(
+        `Create personal event constraint violated: startTime (${body.startTime}) must be earlier than endTime (${body.endTime})`,
+      );
       return Err(ErrorTypes.MalformedRequestError);
     }
 
     const created = await db.transaction(async (tx) => {
-      const [newEvent] = await tx.insert(events).values({
-        title: body.title,
-        description: body.description,
-      }).returning();
+      const [newEvent] = await tx
+        .insert(events)
+        .values({
+          title: body.title,
+          description: body.description,
+        })
+        .returning();
 
       if (!newEvent) {
         throw new Error("Failed to insert base event");
       }
 
-      const [newPersonalEvent] = await tx.insert(personalEvents).values({
-        id: newEvent.id,
-        username: username,
-        date: body.date,
-        location: body.location ?? null,
-        startTime: startTimeVal,
-        endTime: endTimeVal,
-        repeat: body.repeat,
-        public: body.public,
-      }).returning();
+      const [newPersonalEvent] = await tx
+        .insert(personalEvents)
+        .values({
+          id: newEvent.id,
+          username: username,
+          date: body.date,
+          location: body.location ?? null,
+          startTime: startTimeVal,
+          endTime: endTimeVal,
+          repeat: body.repeat,
+          public: body.public,
+        })
+        .returning();
 
       if (!newPersonalEvent) {
         throw new Error("Failed to insert personal event");
@@ -746,8 +848,16 @@ export const createPersonalEvent = async (
 export const editPersonalEvent = async (
   username: string,
   eventId: string,
-  body: EditPersonalEventBody
-): Promise<Result<PersonalEventDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError | ErrorTypes.MalformedRequestError | ErrorTypes.UpdateError>> => {
+  body: EditPersonalEventBody,
+): Promise<
+  Result<
+    PersonalEventDTO,
+    | ErrorTypes.ConversionError
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.MalformedRequestError
+    | ErrorTypes.UpdateError
+  >
+> => {
   try {
     const existing = await db.query.personalEvents.findFirst({
       where: { id: eventId, username: username },
@@ -757,34 +867,53 @@ export const editPersonalEvent = async (
       return Err(ErrorTypes.UnknownIdError);
     }
 
-    const startTimeStr = body.startTime !== undefined ? body.startTime : existing.startTime.toISOString();
-    const endTimeStr = body.endTime !== undefined ? body.endTime : existing.endTime.toISOString();
+    const startTimeStr =
+      body.startTime !== undefined
+        ? body.startTime
+        : existing.startTime.toISOString();
+    const endTimeStr =
+      body.endTime !== undefined
+        ? body.endTime
+        : existing.endTime.toISOString();
     if (new Date(startTimeStr) >= new Date(endTimeStr)) {
-      app.log.warn(`Edit personal event constraint violated: startTime (${startTimeStr}) must be earlier than endTime (${endTimeStr})`);
+      app.log.warn(
+        `Edit personal event constraint violated: startTime (${startTimeStr}) must be earlier than endTime (${endTimeStr})`,
+      );
       return Err(ErrorTypes.MalformedRequestError);
     }
 
     await db.transaction(async (tx) => {
       if (body.title !== undefined || body.description !== undefined) {
-        await tx.update(events).set({
-          title: body.title,
-          description: body.description,
-          updatedAt: new Date(),
-        }).where(eq(events.id, eventId));
+        await tx
+          .update(events)
+          .set({
+            title: body.title,
+            description: body.description,
+            updatedAt: new Date(),
+          })
+          .where(eq(events.id, eventId));
       }
 
       const updateValues: Record<string, any> = {};
       if (body.date !== undefined) updateValues.date = body.date;
       if (body.location !== undefined) updateValues.location = body.location;
-      if (body.startTime !== undefined) updateValues.startTime = new Date(body.startTime);
-      if (body.endTime !== undefined) updateValues.endTime = new Date(body.endTime);
+      if (body.startTime !== undefined)
+        updateValues.startTime = new Date(body.startTime);
+      if (body.endTime !== undefined)
+        updateValues.endTime = new Date(body.endTime);
       if (body.repeat !== undefined) updateValues.repeat = body.repeat;
       if (body.public !== undefined) updateValues.public = body.public;
 
       if (Object.keys(updateValues).length > 0) {
-        await tx.update(personalEvents)
+        await tx
+          .update(personalEvents)
           .set(updateValues)
-          .where(and(eq(personalEvents.id, eventId), eq(personalEvents.username, username)));
+          .where(
+            and(
+              eq(personalEvents.id, eventId),
+              eq(personalEvents.username, username),
+            ),
+          );
       }
     });
 
@@ -801,8 +930,13 @@ export const editPersonalEvent = async (
 export const confirmEventAttendance = async (
   groupId: string,
   username: string,
-  confirmedAt: string
-): Promise<Result<EventConfirmationDTO, ErrorTypes.ResourceCreationError | ErrorTypes.ConversionError>> => {
+  confirmedAt: string,
+): Promise<
+  Result<
+    EventConfirmationDTO,
+    ErrorTypes.ResourceCreationError | ErrorTypes.ConversionError
+  >
+> => {
   try {
     const [inserted] = await db
       .insert(eventConfirmations)
@@ -839,16 +973,18 @@ export const confirmEventAttendance = async (
  */
 export const revokeEventAttendance = async (
   groupId: string,
-  username: string
-): Promise<Result<null, ErrorTypes.DeleteError | ErrorTypes.UnknownIdError>> => {
+  username: string,
+): Promise<
+  Result<null, ErrorTypes.DeleteError | ErrorTypes.UnknownIdError>
+> => {
   try {
     const deleted = await db
       .delete(eventConfirmations)
       .where(
         and(
           eq(eventConfirmations.groupId, groupId),
-          eq(eventConfirmations.username, username)
-        )
+          eq(eventConfirmations.username, username),
+        ),
       )
       .returning();
 
@@ -858,7 +994,10 @@ export const revokeEventAttendance = async (
 
     return Ok(null);
   } catch (error) {
-    app.log.error(error as any, "Failed to revoke event attendance confirmation");
+    app.log.error(
+      error as any,
+      "Failed to revoke event attendance confirmation",
+    );
     return Err(ErrorTypes.DeleteError);
   }
 };
@@ -867,7 +1006,7 @@ export const revokeEventAttendance = async (
  * Lists all attendance confirmations for a group event.
  */
 export const getEventConfirmations = async (
-  groupId: string
+  groupId: string,
 ): Promise<Result<EventConfirmationDTO[], ErrorTypes.ConversionError>> => {
   try {
     const rows = await db
@@ -879,7 +1018,9 @@ export const getEventConfirmations = async (
     if (Value.Check(Type.Array(eventConfirmationDTO), checkSchema)) {
       return Ok(checkSchema as EventConfirmationDTO[]);
     } else {
-      app.log.error(Value.Errors(Type.Array(eventConfirmationDTO), checkSchema));
+      app.log.error(
+        Value.Errors(Type.Array(eventConfirmationDTO), checkSchema),
+      );
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
@@ -887,4 +1028,3 @@ export const getEventConfirmations = async (
     return Err(ErrorTypes.ConversionError);
   }
 };
-

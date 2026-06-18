@@ -7,7 +7,6 @@ import type { UUID } from "crypto";
  */
 export type Maybe<T> = T | undefined;
 
-
 /**
  * This type represents the result of an operation that can either succeed with a value of type T or
  * fail with an error of type E. Contains a boolean 'ok' to indicate success or failure, and either
@@ -53,15 +52,14 @@ export type Failable<E> = Result<void, E>;
  */
 export const FailableOk = () => Ok(undefined);
 
-
 /**
  * Represents the result of fetching an image, specifying how the image data is provided.
  */
 export type GetImageResult =
-// | { type: "stream"; data: Readable; contentType: string } // alternate way for fs uploads, not currently implemented
-// | { type: "buffer"; data: Buffer; contentType: string } // used for db uploads, not currently implemented
-// | { type: "redirect"; url: string } // used for cloud uploads, not currently implemented
-{ type: "static"; filename: string }; // used for fs files
+  // | { type: "stream"; data: Readable; contentType: string } // alternate way for fs uploads, not currently implemented
+  // | { type: "buffer"; data: Buffer; contentType: string } // used for db uploads, not currently implemented
+  // | { type: "redirect"; url: string } // used for cloud uploads, not currently implemented
+  { type: "static"; filename: string }; // used for fs files
 
 /**
  * Errors that can occur during the setup of the application or its services.

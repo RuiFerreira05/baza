@@ -1,7 +1,13 @@
 import { plans, votes, groupEvents, groupMembers } from "@baza/db/schemas";
 import { db } from "../lib/db";
 import { eq, and, sql } from "drizzle-orm";
-import { ErrorTypes, planDTO, type PlanDTO, type CreatePlanBody, type EditPlanBody } from "@baza/shared-types";
+import {
+  ErrorTypes,
+  planDTO,
+  type PlanDTO,
+  type CreatePlanBody,
+  type EditPlanBody,
+} from "@baza/shared-types";
 import { Value } from "typebox/value";
 import { Type } from "typebox";
 import { Err, Ok, type Result } from "../lib/types";
@@ -11,14 +17,26 @@ export const createEventPlan = async (
   groupId: string,
   eventId: string,
   proposerUsername: string,
-  body: CreatePlanBody
-): Promise<Result<PlanDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreationError | ErrorTypes.UnknownIdError | ErrorTypes.MalformedRequestError>> => {
+  body: CreatePlanBody,
+): Promise<
+  Result<
+    PlanDTO,
+    | ErrorTypes.ConversionError
+    | ErrorTypes.ResourceCreationError
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.MalformedRequestError
+  >
+> => {
   try {
     if (body.startTime >= body.endTime) {
       return Err(ErrorTypes.MalformedRequestError);
     }
 
-    if (body.minBudget !== undefined && body.maxBudget !== undefined && body.minBudget >= body.maxBudget) {
+    if (
+      body.minBudget !== undefined &&
+      body.maxBudget !== undefined &&
+      body.minBudget >= body.maxBudget
+    ) {
       return Err(ErrorTypes.MalformedRequestError);
     }
 
@@ -32,38 +50,53 @@ export const createEventPlan = async (
       return Err(ErrorTypes.UnknownIdError);
     }
 
-    if (event.state !== "unfinished" || (event.votingEndTime && new Date() >= new Date(event.votingEndTime))) {
+    if (
+      event.state !== "unfinished" ||
+      (event.votingEndTime && new Date() >= new Date(event.votingEndTime))
+    ) {
       return Err(ErrorTypes.MalformedRequestError);
     }
 
     const [member] = await db
       .select()
       .from(groupMembers)
-      .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.username, proposerUsername)))
+      .where(
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.username, proposerUsername),
+        ),
+      )
       .limit(1);
 
     if (!member) {
       return Err(ErrorTypes.UnknownIdError);
     }
 
-    const [newPlan] = await db.insert(plans).values({
-      groupEventId: eventId,
-      username: proposerUsername,
-      title: body.title,
-      date: body.date,
-      startTime: body.startTime,
-      endTime: body.endTime,
-      activity: body.activity ?? null,
-      location: body.location,
-      minBudget: body.minBudget ?? null,
-      maxBudget: body.maxBudget ?? null,
-    }).returning();
+    const [newPlan] = await db
+      .insert(plans)
+      .values({
+        groupEventId: eventId,
+        username: proposerUsername,
+        title: body.title,
+        date: body.date,
+        startTime: body.startTime,
+        endTime: body.endTime,
+        activity: body.activity ?? null,
+        location: body.location,
+        minBudget: body.minBudget ?? null,
+        maxBudget: body.maxBudget ?? null,
+      })
+      .returning();
 
     if (newPlan) {
       const formatted = {
         ...newPlan,
-        startTime: newPlan.startTime.includes("Z") ? newPlan.startTime : `${newPlan.startTime}Z`,
-        endTime: newPlan.endTime.includes("Z") ? newPlan.endTime : `${newPlan.endTime}Z`,
+        startTime: newPlan.startTime.includes("Z")
+          ? newPlan.startTime
+          : `${newPlan.startTime}Z`,
+        endTime: newPlan.endTime.includes("Z")
+          ? newPlan.endTime
+          : `${newPlan.endTime}Z`,
         votesCount: 0,
         createdAt: newPlan.createdAt.toISOString(),
         updatedAt: newPlan.updatedAt.toISOString(),
@@ -74,7 +107,10 @@ export const createEventPlan = async (
         return Ok(conv);
       } else {
         const errorArray = Array.from(Value.Errors(planDTO, conv));
-        app.log.error({ errors: errorArray }, "Conversion check failed for planDTO");
+        app.log.error(
+          { errors: errorArray },
+          "Conversion check failed for planDTO",
+        );
         return Err(ErrorTypes.ConversionError);
       }
     } else {
@@ -88,8 +124,10 @@ export const createEventPlan = async (
 
 export const getEventPlans = async (
   groupId: string,
-  eventId: string
-): Promise<Result<PlanDTO[], ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>> => {
+  eventId: string,
+): Promise<
+  Result<PlanDTO[], ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>
+> => {
   try {
     const [event] = await db
       .select()
@@ -125,7 +163,9 @@ export const getEventPlans = async (
 
     const formatted = proposals.map((plan) => ({
       ...plan,
-      startTime: plan.startTime.includes("Z") ? plan.startTime : `${plan.startTime}Z`,
+      startTime: plan.startTime.includes("Z")
+        ? plan.startTime
+        : `${plan.startTime}Z`,
       endTime: plan.endTime.includes("Z") ? plan.endTime : `${plan.endTime}Z`,
       createdAt: plan.createdAt.toISOString(),
       updatedAt: plan.updatedAt.toISOString(),
@@ -135,8 +175,13 @@ export const getEventPlans = async (
     if (Value.Check(Type.Array(planDTO), checkSchema)) {
       return Ok(checkSchema as PlanDTO[]);
     } else {
-      const errorArray = Array.from(Value.Errors(Type.Array(planDTO), checkSchema));
-      app.log.error({ errors: errorArray }, "Conversion check failed for Array(planDTO)");
+      const errorArray = Array.from(
+        Value.Errors(Type.Array(planDTO), checkSchema),
+      );
+      app.log.error(
+        { errors: errorArray },
+        "Conversion check failed for Array(planDTO)",
+      );
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
@@ -148,8 +193,10 @@ export const getEventPlans = async (
 export const getEventPlanById = async (
   groupId: string,
   eventId: string,
-  planId: string
-): Promise<Result<PlanDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>> => {
+  planId: string,
+): Promise<
+  Result<PlanDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>
+> => {
   try {
     const [event] = await db
       .select()
@@ -190,7 +237,9 @@ export const getEventPlanById = async (
 
     const formatted = {
       ...plan,
-      startTime: plan.startTime.includes("Z") ? plan.startTime : `${plan.startTime}Z`,
+      startTime: plan.startTime.includes("Z")
+        ? plan.startTime
+        : `${plan.startTime}Z`,
       endTime: plan.endTime.includes("Z") ? plan.endTime : `${plan.endTime}Z`,
       createdAt: plan.createdAt.toISOString(),
       updatedAt: plan.updatedAt.toISOString(),
@@ -201,7 +250,10 @@ export const getEventPlanById = async (
       return Ok(conv);
     } else {
       const errorArray = Array.from(Value.Errors(planDTO, conv));
-      app.log.error({ errors: errorArray }, "Conversion check failed for planDTO");
+      app.log.error(
+        { errors: errorArray },
+        "Conversion check failed for planDTO",
+      );
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
@@ -215,8 +267,16 @@ export const editEventPlan = async (
   eventId: string,
   planId: string,
   editorUsername: string,
-  body: EditPlanBody
-): Promise<Result<PlanDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError | ErrorTypes.UpdateError | ErrorTypes.MalformedRequestError>> => {
+  body: EditPlanBody,
+): Promise<
+  Result<
+    PlanDTO,
+    | ErrorTypes.ConversionError
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.UpdateError
+    | ErrorTypes.MalformedRequestError
+  >
+> => {
   try {
     const [plan] = await db
       .select()
@@ -238,7 +298,10 @@ export const editEventPlan = async (
       return Err(ErrorTypes.UnknownIdError);
     }
 
-    if (event.state !== "unfinished" || (event.votingEndTime && new Date() >= new Date(event.votingEndTime))) {
+    if (
+      event.state !== "unfinished" ||
+      (event.votingEndTime && new Date() >= new Date(event.votingEndTime))
+    ) {
       return Err(ErrorTypes.MalformedRequestError);
     }
 
@@ -246,31 +309,43 @@ export const editEventPlan = async (
       return Err(ErrorTypes.UpdateError);
     }
 
-    const mergedStartTime = body.startTime !== undefined ? body.startTime : plan.startTime;
-    const mergedEndTime = body.endTime !== undefined ? body.endTime : plan.endTime;
+    const mergedStartTime =
+      body.startTime !== undefined ? body.startTime : plan.startTime;
+    const mergedEndTime =
+      body.endTime !== undefined ? body.endTime : plan.endTime;
 
     if (mergedStartTime >= mergedEndTime) {
       return Err(ErrorTypes.MalformedRequestError);
     }
 
-    const mergedMinBudget = body.minBudget !== undefined ? body.minBudget : plan.minBudget;
-    const mergedMaxBudget = body.maxBudget !== undefined ? body.maxBudget : plan.maxBudget;
+    const mergedMinBudget =
+      body.minBudget !== undefined ? body.minBudget : plan.minBudget;
+    const mergedMaxBudget =
+      body.maxBudget !== undefined ? body.maxBudget : plan.maxBudget;
 
-    if (mergedMinBudget !== null && mergedMaxBudget !== null && mergedMinBudget >= mergedMaxBudget) {
+    if (
+      mergedMinBudget !== null &&
+      mergedMaxBudget !== null &&
+      mergedMinBudget >= mergedMaxBudget
+    ) {
       return Err(ErrorTypes.MalformedRequestError);
     }
 
-    const [updated] = await db.update(plans).set({
-      title: body.title,
-      date: body.date,
-      startTime: body.startTime,
-      endTime: body.endTime,
-      activity: body.activity,
-      location: body.location,
-      minBudget: body.minBudget,
-      maxBudget: body.maxBudget,
-      updatedAt: new Date(),
-    }).where(eq(plans.id, planId)).returning();
+    const [updated] = await db
+      .update(plans)
+      .set({
+        title: body.title,
+        date: body.date,
+        startTime: body.startTime,
+        endTime: body.endTime,
+        activity: body.activity,
+        location: body.location,
+        minBudget: body.minBudget,
+        maxBudget: body.maxBudget,
+        updatedAt: new Date(),
+      })
+      .where(eq(plans.id, planId))
+      .returning();
 
     if (!updated) {
       return Err(ErrorTypes.UpdateError);
@@ -287,8 +362,15 @@ export const voteEventPlan = async (
   groupId: string,
   eventId: string,
   planId: string,
-  voterUsername: string
-): Promise<Result<null, ErrorTypes.UnknownIdError | ErrorTypes.ResourceCreationError | ErrorTypes.MalformedRequestError>> => {
+  voterUsername: string,
+): Promise<
+  Result<
+    null,
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.ResourceCreationError
+    | ErrorTypes.MalformedRequestError
+  >
+> => {
   try {
     const [event] = await db
       .select()
@@ -299,7 +381,10 @@ export const voteEventPlan = async (
       return Err(ErrorTypes.UnknownIdError);
     }
 
-    if (event.state !== "unfinished" || (event.votingEndTime && new Date() >= new Date(event.votingEndTime))) {
+    if (
+      event.state !== "unfinished" ||
+      (event.votingEndTime && new Date() >= new Date(event.votingEndTime))
+    ) {
       return Err(ErrorTypes.MalformedRequestError);
     }
 
@@ -336,8 +421,15 @@ export const removeVoteEventPlan = async (
   groupId: string,
   eventId: string,
   planId: string,
-  voterUsername: string
-): Promise<Result<null, ErrorTypes.UnknownIdError | ErrorTypes.DeleteError | ErrorTypes.MalformedRequestError>> => {
+  voterUsername: string,
+): Promise<
+  Result<
+    null,
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.DeleteError
+    | ErrorTypes.MalformedRequestError
+  >
+> => {
   try {
     const [event] = await db
       .select()
@@ -348,7 +440,10 @@ export const removeVoteEventPlan = async (
       return Err(ErrorTypes.UnknownIdError);
     }
 
-    if (event.state !== "unfinished" || (event.votingEndTime && new Date() >= new Date(event.votingEndTime))) {
+    if (
+      event.state !== "unfinished" ||
+      (event.votingEndTime && new Date() >= new Date(event.votingEndTime))
+    ) {
       return Err(ErrorTypes.MalformedRequestError);
     }
 
@@ -361,7 +456,9 @@ export const removeVoteEventPlan = async (
       return Err(ErrorTypes.UnknownIdError);
     }
 
-    await db.delete(votes).where(and(eq(votes.planId, planId), eq(votes.username, voterUsername)));
+    await db
+      .delete(votes)
+      .where(and(eq(votes.planId, planId), eq(votes.username, voterUsername)));
     return Ok(null);
   } catch (error) {
     app.log.error(error as any, "Failed to remove vote");

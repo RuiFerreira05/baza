@@ -1,9 +1,11 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
+import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 
 export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  eslintPluginPrettierRecommended,
   {
     ignores: [
       "eslint.config.js",
@@ -21,18 +23,18 @@ export default tseslint.config(
       },
     },
     rules: {
-      "semi": ["error", "always"],
-      "quotes": ["error", "double", { "avoidEscape": true }],
+      semi: ["error", "always"],
+      quotes: ["error", "double", { avoidEscape: true }],
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
-          "argsIgnorePattern": "^_",
-          "varsIgnorePattern": "^_",
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
         },
       ],
       "@typescript-eslint/no-explicit-any": "warn",
       "no-console": "off", // Logging is standard in Fastify server outputs
     },
-  }
+  },
 );

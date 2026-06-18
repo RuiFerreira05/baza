@@ -1,24 +1,47 @@
-import { profiles, users, friends, groups, groupMembers } from "@baza/db/schemas";
+import {
+  profiles,
+  users,
+  friends,
+  groups,
+  groupMembers,
+} from "@baza/db/schemas";
 import { db } from "../lib/db";
 import { eq, and, sql } from "drizzle-orm";
-import { ErrorTypes, profileDTO, groupDTO, groupMemberDTO, FriendRequestDTO, SentFriendRequestDTO, type CreateProfileBody, type PersonalEventDTO, type ProfileDTO, type GroupDTO, type GroupMemberDTO } from "@baza/shared-types";
+import {
+  ErrorTypes,
+  profileDTO,
+  groupDTO,
+  groupMemberDTO,
+  FriendRequestDTO,
+  SentFriendRequestDTO,
+  type CreateProfileBody,
+  type PersonalEventDTO,
+  type ProfileDTO,
+  type GroupDTO,
+  type GroupMemberDTO,
+} from "@baza/shared-types";
 import { Value } from "typebox/value";
 import { Type } from "typebox";
 import { Err, Ok, type Result } from "../lib/types";
 import { app } from "../setup";
 
 /**
- * This method fetches the profile data of a specific user from the database by their username, 
- * converts it to a profileDTO, and returns it. If no user with the provided username is found, 
- * it returns an UnknownUsernameError. If there is an error converting the profile data to the 
+ * This method fetches the profile data of a specific user from the database by their username,
+ * converts it to a profileDTO, and returns it. If no user with the provided username is found,
+ * it returns an UnknownUsernameError. If there is an error converting the profile data to the
  * expected format, it returns a ConversionError.
- * 
+ *
  * @param username user's name in the app
  * @returns a promised result with a profileDTO, or an error
  */
-export const getUserByUsername = async (username: string):
- Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownUsernameError>> => {
-  
+export const getUserByUsername = async (
+  username: string,
+): Promise<
+  Result<
+    ProfileDTO,
+    ErrorTypes.ConversionError | ErrorTypes.UnknownUsernameError
+  >
+> => {
   const profile = await db.query.profiles.findFirst({
     columns: {
       settings: false,
@@ -28,24 +51,21 @@ export const getUserByUsername = async (username: string):
     },
   });
 
-  if(profile){
-
+  if (profile) {
     const sanitizedProfile = {
-        ...profile,
-        createdAt: profile.createdAt.toISOString(),
-        updatedAt: profile.updatedAt.toISOString(),
+      ...profile,
+      createdAt: profile.createdAt.toISOString(),
+      updatedAt: profile.updatedAt.toISOString(),
     };
 
     const converted = Value.Convert(profileDTO, sanitizedProfile);
-    if(Value.Check(profileDTO, converted)){
+    if (Value.Check(profileDTO, converted)) {
       return Ok(converted);
-    }
-    else{
+    } else {
       app.log.error(Value.Errors(profileDTO, converted));
       return Err(ErrorTypes.ConversionError);
     }
-  }
-  else{
+  } else {
     return Err(ErrorTypes.UnknownUsernameError);
   }
 };
@@ -55,25 +75,37 @@ export const getUserByUsername = async (username: string):
  * It then converts the created profile to a profileDTO and returns it. If there is an error creating the profile,
  * it returns a ResourceCreationError. If there is an error converting the profile data to the
  * expected format, it returns a ConversionError.
- * 
+ *
  * @param userProfile schema with username and id of user
  * @returns a promised result with the created profileDTO, or an error
  */
-export const createUserProfile = async (userProfile: CreateProfileBody): 
-Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreationError | ErrorTypes.UnknownIdError>> => {
-
+export const createUserProfile = async (
+  userProfile: CreateProfileBody,
+): Promise<
+  Result<
+    ProfileDTO,
+    | ErrorTypes.ConversionError
+    | ErrorTypes.ResourceCreationError
+    | ErrorTypes.UnknownIdError
+  >
+> => {
   //Verify if the user whose profile is being created, exists.
-  const user = await db.select().from(users).where(eq(users.id, userProfile.userId));
+  const user = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userProfile.userId));
 
-  if(user.length == 1){
-    const [newProfile] = await db.insert(profiles).values({
-      username: userProfile.username,
-      userId: userProfile.userId,
-      settings: {},
-    }).returning();
+  if (user.length == 1) {
+    const [newProfile] = await db
+      .insert(profiles)
+      .values({
+        username: userProfile.username,
+        userId: userProfile.userId,
+        settings: {},
+      })
+      .returning();
 
-    if(newProfile){
-
+    if (newProfile) {
       const sanitizedProfile = {
         ...newProfile,
         createdAt: newProfile?.createdAt.toISOString(),
@@ -81,19 +113,16 @@ Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreat
       };
 
       const converted = Value.Convert(profileDTO, sanitizedProfile);
-      if(Value.Check(profileDTO, converted)){
+      if (Value.Check(profileDTO, converted)) {
         return Ok(converted);
-      }
-      else{
+      } else {
         app.log.error(Value.Errors(profileDTO, converted));
         return Err(ErrorTypes.ConversionError);
       }
-    }
-    else{
+    } else {
       return Err(ErrorTypes.ResourceCreationError);
     }
-  }
-  else{
+  } else {
     return Err(ErrorTypes.UnknownIdError);
   }
 };
@@ -103,18 +132,23 @@ Promise<Result<ProfileDTO, ErrorTypes.ConversionError | ErrorTypes.ResourceCreat
  * If the profile is successfully deleted, it returns the deleted profile as a profileDTO.
  * If the profile is not found, it returns an UnknownUsernameError. If there is an error during
  * the deletion process or conversion, it returns a DeleteError.
- * 
+ *
  * @param username the username of the user whose profile is being deleted
  * @returns a promised result with the deleted profileDTO, or an error
  */
-export const deleteUserProfile = async (username: string):
-Promise<Result<ProfileDTO, ErrorTypes.DeleteError | ErrorTypes.UnknownUsernameError>> => {
- 
-  try{
-      const deletedProfile = await db.transaction(async (tx) => {
-      const [profile] = await tx.delete(profiles).where(eq(profiles.username, username)).returning();
-        
-      if(!profile){
+export const deleteUserProfile = async (
+  username: string,
+): Promise<
+  Result<ProfileDTO, ErrorTypes.DeleteError | ErrorTypes.UnknownUsernameError>
+> => {
+  try {
+    const deletedProfile = await db.transaction(async (tx) => {
+      const [profile] = await tx
+        .delete(profiles)
+        .where(eq(profiles.username, username))
+        .returning();
+
+      if (!profile) {
         app.log.warn(`Profile from user with username ${username} not found`);
         tx.rollback();
       }
@@ -126,23 +160,23 @@ Promise<Result<ProfileDTO, ErrorTypes.DeleteError | ErrorTypes.UnknownUsernameEr
       };
 
       const converted = Value.Convert(profileDTO, sanitizedProfile);
-      if(Value.Check(profileDTO, converted)){
+      if (Value.Check(profileDTO, converted)) {
         return converted;
-      }
-      else{
+      } else {
         app.log.error(Value.Errors(profileDTO, converted));
         tx.rollback();
       }
     });
 
-    if(deletedProfile){
+    if (deletedProfile) {
       return Ok(deletedProfile);
-    }
-    else{
+    } else {
       return Err(ErrorTypes.UnknownUsernameError);
     }
-  } catch (error){
-    app.log.error(`Failed to delete profile from user with username ${username}: ${(error as Error).message}`);
+  } catch (error) {
+    app.log.error(
+      `Failed to delete profile from user with username ${username}: ${(error as Error).message}`,
+    );
     return Err(ErrorTypes.DeleteError);
   }
 };
@@ -152,50 +186,60 @@ Promise<Result<ProfileDTO, ErrorTypes.DeleteError | ErrorTypes.UnknownUsernameEr
  * returns the updated profile as a profileDTO. If no user with the provided username is found, it
  * returns an UnknownUsernameError. If there is an error converting the profile data to the
  * expected format, it returns a ConversionError.
- * 
+ *
  * @param username username of the user whose profile is being edited
  * @param newUserName new username of the user whose profile is being edited
  * @param description new description of the profile that is being edited
  * @returns a promised result with the updated profileDTO, or an error
  */
-export const editUserProfile = async ( username: string, newUserName: string | undefined, description: string | undefined):
-Promise<Result<ProfileDTO, ErrorTypes.UnknownUsernameError | ErrorTypes.ConversionError | ErrorTypes.ExistingResourceError>> => {
-  
+export const editUserProfile = async (
+  username: string,
+  newUserName: string | undefined,
+  description: string | undefined,
+): Promise<
+  Result<
+    ProfileDTO,
+    | ErrorTypes.UnknownUsernameError
+    | ErrorTypes.ConversionError
+    | ErrorTypes.ExistingResourceError
+  >
+> => {
   const usernameCheck = await db.query.profiles.findFirst({
     where: {
       username: newUserName,
     },
   });
 
-  if(!usernameCheck || newUserName == undefined){
-    const [profile] = await db.update(profiles).set({
-      username: newUserName,
-      description: description,
-      updatedAt: new Date(),
-    }).where(eq(profiles.username, username)).returning();
+  if (!usernameCheck || newUserName == undefined) {
+    const [profile] = await db
+      .update(profiles)
+      .set({
+        username: newUserName,
+        description: description,
+        updatedAt: new Date(),
+      })
+      .where(eq(profiles.username, username))
+      .returning();
 
-    if(profile){
+    if (profile) {
       const sanitizedProfile = {
-          ...profile,
-          createdAt: profile?.createdAt.toISOString(),
-          updatedAt: profile?.updatedAt.toISOString(),
-        };
+        ...profile,
+        createdAt: profile?.createdAt.toISOString(),
+        updatedAt: profile?.updatedAt.toISOString(),
+      };
 
-        const converted = Value.Convert(profileDTO, sanitizedProfile);
-        if(Value.Check(profileDTO, converted)){
-          return Ok(converted);
-        }
-        else{
-          app.log.error(Value.Errors(profileDTO, converted));
-          return Err(ErrorTypes.ConversionError);
-        }
-    }
-    else{
+      const converted = Value.Convert(profileDTO, sanitizedProfile);
+      if (Value.Check(profileDTO, converted)) {
+        return Ok(converted);
+      } else {
+        app.log.error(Value.Errors(profileDTO, converted));
+        return Err(ErrorTypes.ConversionError);
+      }
+    } else {
       app.log.warn(`User with id ${username} not found`);
       return Err(ErrorTypes.UnknownUsernameError);
     }
-  }
-  else{
+  } else {
     app.log.warn(`User with name ${newUserName} already exists`);
     return Err(ErrorTypes.ExistingResourceError);
   }
@@ -205,7 +249,7 @@ Promise<Result<ProfileDTO, ErrorTypes.UnknownUsernameError | ErrorTypes.Conversi
  * Gets user settings.
  */
 export const getUserSettings = async (
-  username: string
+  username: string,
 ): Promise<Result<any, ErrorTypes.UnknownUsernameError>> => {
   try {
     const profile = await db.query.profiles.findFirst({
@@ -231,8 +275,10 @@ export const getUserSettings = async (
  */
 export const updateUserSettings = async (
   username: string,
-  settings: any
-): Promise<Result<any, ErrorTypes.UnknownUsernameError | ErrorTypes.UpdateError>> => {
+  settings: any,
+): Promise<
+  Result<any, ErrorTypes.UnknownUsernameError | ErrorTypes.UpdateError>
+> => {
   try {
     const [updated] = await db
       .update(profiles)
@@ -258,7 +304,7 @@ export const updateUserSettings = async (
  * Retrieves the groups that the user is an active member of.
  */
 export const getUserGroups = async (
-  username: string
+  username: string,
 ): Promise<Result<GroupDTO[], ErrorTypes.ConversionError>> => {
   try {
     const rows = await db
@@ -274,8 +320,8 @@ export const getUserGroups = async (
         and(
           eq(groupMembers.username, username),
           eq(groupMembers.acceptedInvite, true),
-          eq(groupMembers.banned, false)
-        )
+          eq(groupMembers.banned, false),
+        ),
       );
 
     const checkSchema = Value.Convert(Type.Array(groupDTO), rows);
@@ -296,8 +342,10 @@ export const getUserGroups = async (
  */
 export const getUserGroupById = async (
   username: string,
-  groupId: string
-): Promise<Result<GroupDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>> => {
+  groupId: string,
+): Promise<
+  Result<GroupDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>
+> => {
   try {
     const [row] = await db
       .select({
@@ -313,8 +361,8 @@ export const getUserGroupById = async (
           eq(groupMembers.username, username),
           eq(groupMembers.groupId, groupId),
           eq(groupMembers.acceptedInvite, true),
-          eq(groupMembers.banned, false)
-        )
+          eq(groupMembers.banned, false),
+        ),
       )
       .limit(1);
 
@@ -339,7 +387,7 @@ export const getUserGroupById = async (
  * Retrieves the pending group invitations for the user.
  */
 export const getUserGroupInvites = async (
-  username: string
+  username: string,
 ): Promise<Result<GroupDTO[], ErrorTypes.ConversionError>> => {
   try {
     const rows = await db
@@ -355,8 +403,8 @@ export const getUserGroupInvites = async (
         and(
           eq(groupMembers.username, username),
           eq(groupMembers.acceptedInvite, false),
-          eq(groupMembers.banned, false)
-        )
+          eq(groupMembers.banned, false),
+        ),
       );
 
     const checkSchema = Value.Convert(Type.Array(groupDTO), rows);
@@ -377,8 +425,15 @@ export const getUserGroupInvites = async (
  */
 export const acceptGroupInvite = async (
   username: string,
-  groupId: string
-): Promise<Result<GroupMemberDTO, ErrorTypes.UnknownIdError | ErrorTypes.UpdateError | ErrorTypes.ConversionError>> => {
+  groupId: string,
+): Promise<
+  Result<
+    GroupMemberDTO,
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.UpdateError
+    | ErrorTypes.ConversionError
+  >
+> => {
   try {
     const [updated] = await db
       .update(groupMembers)
@@ -390,8 +445,8 @@ export const acceptGroupInvite = async (
         and(
           eq(groupMembers.username, username),
           eq(groupMembers.groupId, groupId),
-          eq(groupMembers.acceptedInvite, false)
-        )
+          eq(groupMembers.acceptedInvite, false),
+        ),
       )
       .returning();
 
@@ -417,8 +472,10 @@ export const acceptGroupInvite = async (
  */
 export const declineGroupInvite = async (
   username: string,
-  groupId: string
-): Promise<Result<null, ErrorTypes.UnknownIdError | ErrorTypes.DeleteError>> => {
+  groupId: string,
+): Promise<
+  Result<null, ErrorTypes.UnknownIdError | ErrorTypes.DeleteError>
+> => {
   try {
     const result = await db
       .delete(groupMembers)
@@ -426,8 +483,8 @@ export const declineGroupInvite = async (
         and(
           eq(groupMembers.username, username),
           eq(groupMembers.groupId, groupId),
-          eq(groupMembers.acceptedInvite, false)
-        )
+          eq(groupMembers.acceptedInvite, false),
+        ),
       )
       .returning();
 
@@ -446,7 +503,7 @@ export const declineGroupInvite = async (
  * Gets the profile of all accepted friends.
  */
 export const getFriends = async (
-  username: string
+  username: string,
 ): Promise<Result<ProfileDTO[], ErrorTypes.ConversionError>> => {
   try {
     const sentFriends = await db
@@ -460,7 +517,9 @@ export const getFriends = async (
       })
       .from(friends)
       .innerJoin(profiles, eq(friends.receivedBy, profiles.username))
-      .where(and(eq(friends.sentBy, username), eq(friends.friendStatus, "accepted")));
+      .where(
+        and(eq(friends.sentBy, username), eq(friends.friendStatus, "accepted")),
+      );
 
     const receivedFriends = await db
       .select({
@@ -473,7 +532,12 @@ export const getFriends = async (
       })
       .from(friends)
       .innerJoin(profiles, eq(friends.sentBy, profiles.username))
-      .where(and(eq(friends.receivedBy, username), eq(friends.friendStatus, "accepted")));
+      .where(
+        and(
+          eq(friends.receivedBy, username),
+          eq(friends.friendStatus, "accepted"),
+        ),
+      );
 
     const records = [...sentFriends, ...receivedFriends];
 
@@ -501,8 +565,13 @@ export const getFriends = async (
  */
 export const getFriendProfile = async (
   username: string,
-  friendUsername: string
-): Promise<Result<ProfileDTO, ErrorTypes.UnknownUsernameError | ErrorTypes.ConversionError>> => {
+  friendUsername: string,
+): Promise<
+  Result<
+    ProfileDTO,
+    ErrorTypes.UnknownUsernameError | ErrorTypes.ConversionError
+  >
+> => {
   try {
     const [friendship] = await db
       .select()
@@ -510,8 +579,8 @@ export const getFriendProfile = async (
       .where(
         and(
           sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${friendUsername}) OR (${friends.sentBy} = ${friendUsername} AND ${friends.receivedBy} = ${username}))`,
-          eq(friends.friendStatus, "accepted")
-        )
+          eq(friends.friendStatus, "accepted"),
+        ),
       )
       .limit(1);
 
@@ -531,13 +600,15 @@ export const getFriendProfile = async (
  */
 export const removeFriend = async (
   username: string,
-  friendUsername: string
-): Promise<Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.DeleteError>> => {
+  friendUsername: string,
+): Promise<
+  Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.DeleteError>
+> => {
   try {
     const deleted = await db
       .delete(friends)
       .where(
-        sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${friendUsername}) OR (${friends.sentBy} = ${friendUsername} AND ${friends.receivedBy} = ${username}))`
+        sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${friendUsername}) OR (${friends.sentBy} = ${friendUsername} AND ${friends.receivedBy} = ${username}))`,
       )
       .returning();
 
@@ -557,8 +628,15 @@ export const removeFriend = async (
  */
 export const sendFriendRequest = async (
   username: string,
-  recipientUsername: string
-): Promise<Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.MalformedRequestError | ErrorTypes.ExistingResourceError>> => {
+  recipientUsername: string,
+): Promise<
+  Result<
+    null,
+    | ErrorTypes.UnknownUsernameError
+    | ErrorTypes.MalformedRequestError
+    | ErrorTypes.ExistingResourceError
+  >
+> => {
   try {
     if (username === recipientUsername) {
       return Err(ErrorTypes.MalformedRequestError);
@@ -576,12 +654,15 @@ export const sendFriendRequest = async (
       .select()
       .from(friends)
       .where(
-        sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${recipientUsername}) OR (${friends.sentBy} = ${recipientUsername} AND ${friends.receivedBy} = ${username}))`
+        sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${recipientUsername}) OR (${friends.sentBy} = ${recipientUsername} AND ${friends.receivedBy} = ${username}))`,
       )
       .limit(1);
 
     if (existing) {
-      if (existing.friendStatus === "accepted" || existing.friendStatus === "pending") {
+      if (
+        existing.friendStatus === "accepted" ||
+        existing.friendStatus === "pending"
+      ) {
         return Err(ErrorTypes.ExistingResourceError);
       }
       if (existing.friendStatus === "blocked") {
@@ -598,7 +679,7 @@ export const sendFriendRequest = async (
           updatedAt: new Date(),
         })
         .where(
-          sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${recipientUsername}) OR (${friends.sentBy} = ${recipientUsername} AND ${friends.receivedBy} = ${username}))`
+          sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${recipientUsername}) OR (${friends.sentBy} = ${recipientUsername} AND ${friends.receivedBy} = ${username}))`,
         );
       return Ok(null);
     }
@@ -620,7 +701,7 @@ export const sendFriendRequest = async (
  * Gets pending received friend requests.
  */
 export const getPendingFriendRequests = async (
-  username: string
+  username: string,
 ): Promise<Result<any[], ErrorTypes.ConversionError>> => {
   try {
     const records = await db
@@ -638,8 +719,8 @@ export const getPendingFriendRequests = async (
       .where(
         and(
           eq(friends.receivedBy, username),
-          eq(friends.friendStatus, "pending")
-        )
+          eq(friends.friendStatus, "pending"),
+        ),
       );
 
     const formatted = records.map((r) => ({
@@ -672,8 +753,10 @@ export const getPendingFriendRequests = async (
  */
 export const acceptFriendRequest = async (
   username: string,
-  senderUsername: string
-): Promise<Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.UpdateError>> => {
+  senderUsername: string,
+): Promise<
+  Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.UpdateError>
+> => {
   try {
     const [updated] = await db
       .update(friends)
@@ -686,8 +769,8 @@ export const acceptFriendRequest = async (
         and(
           eq(friends.sentBy, senderUsername),
           eq(friends.receivedBy, username),
-          eq(friends.friendStatus, "pending")
-        )
+          eq(friends.friendStatus, "pending"),
+        ),
       )
       .returning();
 
@@ -707,8 +790,10 @@ export const acceptFriendRequest = async (
  */
 export const declineFriendRequest = async (
   username: string,
-  senderUsername: string
-): Promise<Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.UpdateError>> => {
+  senderUsername: string,
+): Promise<
+  Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.UpdateError>
+> => {
   try {
     const [updated] = await db
       .update(friends)
@@ -720,8 +805,8 @@ export const declineFriendRequest = async (
         and(
           eq(friends.sentBy, senderUsername),
           eq(friends.receivedBy, username),
-          eq(friends.friendStatus, "pending")
-        )
+          eq(friends.friendStatus, "pending"),
+        ),
       )
       .returning();
 
@@ -741,8 +826,10 @@ export const declineFriendRequest = async (
  */
 export const blockUser = async (
   username: string,
-  friendUsername: string
-): Promise<Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.UpdateError>> => {
+  friendUsername: string,
+): Promise<
+  Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.UpdateError>
+> => {
   try {
     const recipient = await db.query.profiles.findFirst({
       where: { username: friendUsername },
@@ -755,7 +842,7 @@ export const blockUser = async (
       .select()
       .from(friends)
       .where(
-        sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${friendUsername}) OR (${friends.sentBy} = ${friendUsername} AND ${friends.receivedBy} = ${username}))`
+        sql`((${friends.sentBy} = ${username} AND ${friends.receivedBy} = ${friendUsername}) OR (${friends.sentBy} = ${friendUsername} AND ${friends.receivedBy} = ${username}))`,
       )
       .limit(1);
 
@@ -770,7 +857,7 @@ export const blockUser = async (
           updatedAt: new Date(),
         })
         .where(
-          sql`((${friends.sentBy} = ${existing.sentBy} AND ${friends.receivedBy} = ${existing.receivedBy}))`
+          sql`((${friends.sentBy} = ${existing.sentBy} AND ${friends.receivedBy} = ${existing.receivedBy}))`,
         );
     } else {
       await db.insert(friends).values({
@@ -793,8 +880,10 @@ export const blockUser = async (
  */
 export const unblockUser = async (
   username: string,
-  friendUsername: string
-): Promise<Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.DeleteError>> => {
+  friendUsername: string,
+): Promise<
+  Result<null, ErrorTypes.UnknownUsernameError | ErrorTypes.DeleteError>
+> => {
   try {
     const deleted = await db
       .delete(friends)
@@ -802,8 +891,8 @@ export const unblockUser = async (
         and(
           eq(friends.sentBy, username),
           eq(friends.receivedBy, friendUsername),
-          eq(friends.friendStatus, "blocked")
-        )
+          eq(friends.friendStatus, "blocked"),
+        ),
       )
       .returning();
 
@@ -822,7 +911,7 @@ export const unblockUser = async (
  * Gets pending outgoing (sent) friend requests.
  */
 export const getPendingSentFriendRequests = async (
-  username: string
+  username: string,
 ): Promise<Result<any[], ErrorTypes.ConversionError>> => {
   try {
     const records = await db
@@ -838,10 +927,7 @@ export const getPendingSentFriendRequests = async (
       .from(friends)
       .innerJoin(profiles, eq(friends.receivedBy, profiles.username))
       .where(
-        and(
-          eq(friends.sentBy, username),
-          eq(friends.friendStatus, "pending")
-        )
+        and(eq(friends.sentBy, username), eq(friends.friendStatus, "pending")),
       );
 
     const formatted = records.map((r) => ({
@@ -856,11 +942,16 @@ export const getPendingSentFriendRequests = async (
       requestSentAt: r.requestSentAt.toISOString(),
     }));
 
-    const checkSchema = Value.Convert(Type.Array(SentFriendRequestDTO), formatted);
+    const checkSchema = Value.Convert(
+      Type.Array(SentFriendRequestDTO),
+      formatted,
+    );
     if (Value.Check(Type.Array(SentFriendRequestDTO), checkSchema)) {
       return Ok(checkSchema as any[]);
     } else {
-      app.log.error(Value.Errors(Type.Array(SentFriendRequestDTO), checkSchema));
+      app.log.error(
+        Value.Errors(Type.Array(SentFriendRequestDTO), checkSchema),
+      );
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
@@ -868,4 +959,3 @@ export const getPendingSentFriendRequests = async (
     return Err(ErrorTypes.ConversionError);
   }
 };
-

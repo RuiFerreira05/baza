@@ -41,13 +41,18 @@ export const userService = {
 
   // GET /v1/restricted/users/:username/friends/:friendUsername
   getFriendProfile: (username: string, friendUsername: string) =>
-    apiClient<ProfileDTO>(`/v1/restricted/users/${username}/friends/${friendUsername}`),
+    apiClient<ProfileDTO>(
+      `/v1/restricted/users/${username}/friends/${friendUsername}`,
+    ),
 
   // DELETE /v1/restricted/users/:username/friends/:friendUsername
   removeFriend: (username: string, friendUsername: string) =>
-    apiClient<null>(`/v1/restricted/users/${username}/friends/${friendUsername}`, {
-      method: "DELETE",
-    }),
+    apiClient<null>(
+      `/v1/restricted/users/${username}/friends/${friendUsername}`,
+      {
+        method: "DELETE",
+      },
+    ),
 
   // POST /v1/restricted/users/:username/friends/requests
   sendFriendRequest: (username: string, body: SendFriendRequestBody) =>
@@ -58,18 +63,29 @@ export const userService = {
 
   // GET /v1/restricted/users/:username/friends/requests
   getPendingFriendRequests: (username: string) =>
-    apiClient<FriendRequestDTO[]>(`/v1/restricted/users/${username}/friends/requests`),
+    apiClient<FriendRequestDTO[]>(
+      `/v1/restricted/users/${username}/friends/requests`,
+    ),
 
   // GET /v1/restricted/users/:username/friends/requests/sent
   getPendingSentFriendRequests: (username: string) =>
-    apiClient<SentFriendRequestDTO[]>(`/v1/restricted/users/${username}/friends/requests/sent`),
+    apiClient<SentFriendRequestDTO[]>(
+      `/v1/restricted/users/${username}/friends/requests/sent`,
+    ),
 
   // PATCH /v1/restricted/users/:username/friends/requests/:senderUsername
-  respondFriendRequest: (username: string, senderUsername: string, body: RespondFriendRequestBody) =>
-    apiClient<null>(`/v1/restricted/users/${username}/friends/requests/${senderUsername}`, {
-      method: "PATCH",
-      json: body,
-    }),
+  respondFriendRequest: (
+    username: string,
+    senderUsername: string,
+    body: RespondFriendRequestBody,
+  ) =>
+    apiClient<null>(
+      `/v1/restricted/users/${username}/friends/requests/${senderUsername}`,
+      {
+        method: "PATCH",
+        json: body,
+      },
+    ),
 
   // POST /v1/restricted/users/:username/blocks
   blockUser: (username: string, body: BlockUserBody) =>
@@ -80,9 +96,12 @@ export const userService = {
 
   // DELETE /v1/restricted/users/:username/blocks/:blockedUsername
   unblockUser: (username: string, blockedUsername: string) =>
-    apiClient<null>(`/v1/restricted/users/${username}/blocks/${blockedUsername}`, {
-      method: "DELETE",
-    }),
+    apiClient<null>(
+      `/v1/restricted/users/${username}/blocks/${blockedUsername}`,
+      {
+        method: "DELETE",
+      },
+    ),
 
   // GET /v1/restricted/users/:username/settings
   getSettings: (username: string) =>

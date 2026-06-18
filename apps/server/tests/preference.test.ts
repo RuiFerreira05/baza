@@ -108,13 +108,11 @@ describe("Preference Routes", () => {
       .values({ userId: VALID_USER_ID, username: "testuser", settings: {} });
 
     const OTHER_USER_ID = "22222222-2222-2222-2222-222222222222";
-    await db
-      .insert(users)
-      .values({
-        id: OTHER_USER_ID,
-        name: "Other User",
-        email: "other@example.com",
-      });
+    await db.insert(users).values({
+      id: OTHER_USER_ID,
+      name: "Other User",
+      email: "other@example.com",
+    });
     await db
       .insert(profiles)
       .values({ userId: OTHER_USER_ID, username: "otheruser", settings: {} });
@@ -212,13 +210,11 @@ describe("Preference Routes", () => {
       .values({ userId: VALID_USER_ID, username: "testuser", settings: {} });
 
     const OTHER_USER_ID = "22222222-2222-2222-2222-222222222222";
-    await db
-      .insert(users)
-      .values({
-        id: OTHER_USER_ID,
-        name: "Other User",
-        email: "other@example.com",
-      });
+    await db.insert(users).values({
+      id: OTHER_USER_ID,
+      name: "Other User",
+      email: "other@example.com",
+    });
     await db
       .insert(profiles)
       .values({ userId: OTHER_USER_ID, username: "otheruser", settings: {} });
