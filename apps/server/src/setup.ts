@@ -10,16 +10,26 @@ import path from "path";
 import { auth } from "./lib/auth";
 import { env } from "./lib/env";
 import { FSUploadService } from "./lib/FSUploadService";
+import { authPreHandler } from "./middlewares/authMiddleware";
 import { groupRoutes } from "./routes/groupRoutes";
 import { userRoutes } from "./routes/profileRoutes";
-import { authPreHandler } from "./middlewares/authMiddleware";
 
 // ##### APP SETUP #####
 
 export const app = fastify({
   logger: {
     level: "info",
-    file: env.LOG_FILE_PATH,
+    transport: {
+      target: "pino-roll",
+      options: {
+        file: env.LOG_FILE_PATH,
+        frequency: "daily",
+        size: "10m",
+        limit: { count: 5 },
+        mkdir: true,
+        dateFormat: "yyyy-MM-dd",
+      },
+    },
   },
 });
 app.setValidatorCompiler(TypeBoxValidatorCompiler);
@@ -72,8 +82,8 @@ app.route({
       reply.send(response.body ? await response.text() : null);
     } catch (error) {
       app.log.error(
-        "Authentication Error:",
         error instanceof Error ? error : new Error(String(error)),
+        "Authentication Error:",
       );
       reply.status(500).send({
         error: "Internal authentication error",

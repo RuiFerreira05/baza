@@ -92,6 +92,7 @@ An API server powered by **Fastify**, using **Typebox** for payload validation, 
 * **API Documentation**: Uses `@fastify/swagger` and `@fastify/swagger-ui` serving Interactive documentation under `/v1/docs`.
 * **File Uploads**: Supports multipart parsing via `@fastify/multipart` with localized file system storage (`FSUploadService`).
 * **Workspaces Integration**: Direct dependencies on local workspaces `@baza/db` and `@baza/shared-types`.
+* **Logging & Rotation**: Uses Fastify's native logger powered by Pino with a `pino-roll` transport. Automatically rotates log files daily or when they reach 10MB in size, keeping a retention limit of 5 files.
 * **Linting & Code Quality**: Managed locally via [eslint.config.js](file:///c:/Users/rui/local-projects/baza/apps/server/eslint.config.js) using `typescript-eslint` and [tsconfig.eslint.json](file:///c:/Users/rui/local-projects/baza/apps/server/tsconfig.eslint.json) to cover source, tests, and config files.
 
 ### Route Registrations (`apps/server/src/routes/`)
