@@ -1,7 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import {
   getUserGroups,
-  getUserGroupById,
   getUserGroupInvites,
   acceptGroupInvite,
   declineGroupInvite,
@@ -34,44 +33,6 @@ export const getUserGroupsHandler = async (
           "Failed to retrieve groups list.",
         ),
       );
-  } else {
-    return res.status(200).send(createStatusOK(result.value));
-  }
-};
-
-// GET /users/:username/groups/:idGroup
-export const getUserGroupByIdHandler = async (
-  req: FastifyRequest,
-  res: FastifyReply,
-) => {
-  app.log.info("Received get user's group by ID request");
-  const { username } = req.params as SimpleUsernameParam;
-  const { idGroup: groupId } = req.params as { idGroup: string };
-
-  const result = await getUserGroupById(username, groupId);
-
-  if (!result.ok) {
-    switch (result.error) {
-      case ErrorTypes.UnknownIdError:
-        return res
-          .status(404)
-          .send(
-            createStatusError(
-              ErrorTypes.UnknownIdError,
-              "Group not found or user is not a member.",
-            ),
-          );
-      case ErrorTypes.ConversionError:
-      default:
-        return res
-          .status(500)
-          .send(
-            createStatusError(
-              ErrorTypes.ConversionError,
-              "Failed to convert group data.",
-            ),
-          );
-    }
   } else {
     return res.status(200).send(createStatusOK(result.value));
   }

@@ -265,7 +265,10 @@ export const getUserSettings = async (
 
     return Ok(profile.settings);
   } catch (error) {
-    app.log.error(error as any, "Failed to get user settings");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to get user settings",
+    );
     return Err(ErrorTypes.UnknownUsernameError);
   }
 };
@@ -295,7 +298,10 @@ export const updateUserSettings = async (
 
     return Ok(updated.settings);
   } catch (error) {
-    app.log.error(error as any, "Failed to update user settings");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to update user settings",
+    );
     return Err(ErrorTypes.UpdateError);
   }
 };
@@ -332,54 +338,11 @@ export const getUserGroups = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to fetch user groups");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to fetch user groups",
+    );
     return Err(ErrorTypes.ConversionError);
-  }
-};
-
-/**
- * Gets details of a specific group that the user is an active member of.
- */
-export const getUserGroupById = async (
-  username: string,
-  groupId: string,
-): Promise<
-  Result<GroupDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>
-> => {
-  try {
-    const [row] = await db
-      .select({
-        id: groups.id,
-        groupname: groups.groupname,
-        description: groups.description,
-        photo: groups.photo,
-      })
-      .from(groupMembers)
-      .innerJoin(groups, eq(groupMembers.groupId, groups.id))
-      .where(
-        and(
-          eq(groupMembers.username, username),
-          eq(groupMembers.groupId, groupId),
-          eq(groupMembers.acceptedInvite, true),
-          eq(groupMembers.banned, false),
-        ),
-      )
-      .limit(1);
-
-    if (!row) {
-      return Err(ErrorTypes.UnknownIdError);
-    }
-
-    const conv = Value.Convert(groupDTO, row);
-    if (Value.Check(groupDTO, conv)) {
-      return Ok(conv);
-    } else {
-      app.log.error(Value.Errors(groupDTO, conv));
-      return Err(ErrorTypes.ConversionError);
-    }
-  } catch (error) {
-    app.log.error(error as any, "Failed to fetch user group by ID");
-    return Err(ErrorTypes.UnknownIdError);
   }
 };
 
@@ -415,7 +378,10 @@ export const getUserGroupInvites = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to fetch user group invites");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to fetch user group invites",
+    );
     return Err(ErrorTypes.ConversionError);
   }
 };
@@ -462,7 +428,10 @@ export const acceptGroupInvite = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to accept group invite");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to accept group invite",
+    );
     return Err(ErrorTypes.UpdateError);
   }
 };
@@ -494,7 +463,10 @@ export const declineGroupInvite = async (
 
     return Ok(null);
   } catch (error) {
-    app.log.error(error as any, "Failed to decline group invite");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to decline group invite",
+    );
     return Err(ErrorTypes.DeleteError);
   }
 };
@@ -555,7 +527,10 @@ export const getFriends = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to fetch friends list");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to fetch friends list",
+    );
     return Err(ErrorTypes.ConversionError);
   }
 };
@@ -590,7 +565,10 @@ export const getFriendProfile = async (
 
     return getUserByUsername(friendUsername);
   } catch (error) {
-    app.log.error(error as any, "Failed to fetch friend profile");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to fetch friend profile",
+    );
     return Err(ErrorTypes.UnknownUsernameError);
   }
 };
@@ -618,7 +596,10 @@ export const removeFriend = async (
 
     return Ok(null);
   } catch (error) {
-    app.log.error(error as any, "Failed to remove friend");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to remove friend",
+    );
     return Err(ErrorTypes.DeleteError);
   }
 };
@@ -692,7 +673,10 @@ export const sendFriendRequest = async (
 
     return Ok(null);
   } catch (error) {
-    app.log.error(error as any, "Failed to send friend request");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to send friend request",
+    );
     return Err(ErrorTypes.MalformedRequestError);
   }
 };
@@ -743,7 +727,10 @@ export const getPendingFriendRequests = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to fetch pending requests");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to fetch pending requests",
+    );
     return Err(ErrorTypes.ConversionError);
   }
 };
@@ -780,7 +767,10 @@ export const acceptFriendRequest = async (
 
     return Ok(null);
   } catch (error) {
-    app.log.error(error as any, "Failed to accept friend request");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to accept friend request",
+    );
     return Err(ErrorTypes.UpdateError);
   }
 };
@@ -816,7 +806,10 @@ export const declineFriendRequest = async (
 
     return Ok(null);
   } catch (error) {
-    app.log.error(error as any, "Failed to decline friend request");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to decline friend request",
+    );
     return Err(ErrorTypes.UpdateError);
   }
 };
@@ -870,7 +863,10 @@ export const blockUser = async (
 
     return Ok(null);
   } catch (error) {
-    app.log.error(error as any, "Failed to block user");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to block user",
+    );
     return Err(ErrorTypes.UpdateError);
   }
 };
@@ -902,7 +898,10 @@ export const unblockUser = async (
 
     return Ok(null);
   } catch (error) {
-    app.log.error(error as any, "Failed to unblock user");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to unblock user",
+    );
     return Err(ErrorTypes.DeleteError);
   }
 };
@@ -955,7 +954,10 @@ export const getPendingSentFriendRequests = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to fetch pending sent requests");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to fetch pending sent requests",
+    );
     return Err(ErrorTypes.ConversionError);
   }
 };

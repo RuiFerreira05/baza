@@ -87,7 +87,10 @@ export const getAuthenticatedUsername = async (
     req.username = profile.username;
     return profile.username;
   } catch (error) {
-    req.log.error(error as any, "Authentication check failed");
+    req.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Authentication check failed",
+    );
     res
       .status(500)
       .send(

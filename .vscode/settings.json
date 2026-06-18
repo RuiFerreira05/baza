@@ -1,5 +1,8 @@
 // You can ignore this file, it is used by vscode to store workspace settings. I set the tab size to
 // 2 for this project, this way both of us will have the same formatting when we edit things.
 {
-    "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "always"
+  }
 }

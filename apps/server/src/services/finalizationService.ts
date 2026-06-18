@@ -26,7 +26,7 @@ export const finalizeExpiredEvents = async () => {
     }
   } catch (error) {
     app.log.error(
-      error as any,
+      error instanceof Error ? error : new Error(String(error)),
       "Error in finalizeExpiredEvents background task",
     );
   }
@@ -78,7 +78,7 @@ export const checkAndApplyFallbacks = async () => {
     }
   } catch (error) {
     app.log.error(
-      error as any,
+      error instanceof Error ? error : new Error(String(error)),
       "Error in checkAndApplyFallbacks background task",
     );
   }
@@ -155,7 +155,10 @@ export const finalizeEvent = async (eventId: string): Promise<void> => {
       );
     }
   } catch (error) {
-    app.log.error(error as any, `Failed to finalize event ${eventId}`);
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      `Failed to finalize event ${eventId}`,
+    );
   }
 };
 
@@ -213,7 +216,7 @@ const applyFallbackResolution = async (eventId: string): Promise<void> => {
     }
   } catch (error) {
     app.log.error(
-      error as any,
+      error instanceof Error ? error : new Error(String(error)),
       `Failed fallback tie-breaker for event ${eventId}`,
     );
   }
@@ -281,7 +284,10 @@ export const resolveTie = async (
     );
     return Ok(null);
   } catch (error) {
-    app.log.error(error as any, `Failed to resolve tie for event ${eventId}`);
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      `Failed to resolve tie for event ${eventId}`,
+    );
     return Err(ErrorTypes.UpdateError);
   }
 };

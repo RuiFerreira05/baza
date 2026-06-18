@@ -117,7 +117,10 @@ export const createEventPlan = async (
       return Err(ErrorTypes.ResourceCreationError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to create plan");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to create plan",
+    );
     return Err(ErrorTypes.ResourceCreationError);
   }
 };
@@ -185,7 +188,10 @@ export const getEventPlans = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to get plans");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to get plans",
+    );
     return Err(ErrorTypes.ConversionError);
   }
 };
@@ -257,7 +263,10 @@ export const getEventPlanById = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to get plan by ID");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to get plan by ID",
+    );
     return Err(ErrorTypes.UnknownIdError);
   }
 };
@@ -353,7 +362,10 @@ export const editEventPlan = async (
 
     return getEventPlanById(groupId, eventId, planId);
   } catch (error) {
-    app.log.error(error as any, "Failed to edit plan");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to edit plan",
+    );
     return Err(ErrorTypes.UpdateError);
   }
 };
@@ -412,7 +424,10 @@ export const voteEventPlan = async (
 
     return Ok(null);
   } catch (error) {
-    app.log.error(error as any, "Failed to vote for plan");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to vote for plan",
+    );
     return Err(ErrorTypes.ResourceCreationError);
   }
 };
@@ -461,7 +476,10 @@ export const removeVoteEventPlan = async (
       .where(and(eq(votes.planId, planId), eq(votes.username, voterUsername)));
     return Ok(null);
   } catch (error) {
-    app.log.error(error as any, "Failed to remove vote");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to remove vote",
+    );
     return Err(ErrorTypes.DeleteError);
   }
 };

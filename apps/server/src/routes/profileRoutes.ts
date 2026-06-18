@@ -50,7 +50,6 @@ import {
 } from "../handlers/settingsHandlers";
 import {
   getUserGroupsHandler,
-  getUserGroupByIdHandler,
   getUserGroupInvitesHandler,
   respondGroupInviteHandler,
 } from "../handlers/userGroupHandlers";

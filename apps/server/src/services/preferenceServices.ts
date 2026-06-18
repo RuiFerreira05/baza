@@ -117,7 +117,10 @@ export const createOrEditEventPreference = async (
       return Err(ErrorTypes.ResourceCreationError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to save preference");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to save preference",
+    );
     return Err(ErrorTypes.ResourceCreationError);
   }
 };
@@ -173,7 +176,10 @@ export const getEventPreferenceByUsername = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to query user preference");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to query user preference",
+    );
     return Err(ErrorTypes.UnknownIdError);
   }
 };
@@ -225,7 +231,10 @@ export const getEventPreferences = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to query preferences");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to query preferences",
+    );
     return Err(ErrorTypes.ConversionError);
   }
 };
@@ -338,7 +347,10 @@ export const getGroupPreferenceAggregation = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to aggregate group preferences");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to aggregate group preferences",
+    );
     return Err(ErrorTypes.ConversionError);
   }
 };

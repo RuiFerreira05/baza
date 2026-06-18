@@ -513,7 +513,10 @@ export const verifyGroupMembership = async (
       .limit(1);
     return !!membership;
   } catch (error) {
-    app.log.error(error as any, "Failed to verify group membership");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to verify group membership",
+    );
     return false;
   }
 };

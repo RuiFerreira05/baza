@@ -120,7 +120,10 @@ export const createGroupEvent = async (
       return Err(ErrorTypes.ResourceCreationError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to create group event");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to create group event",
+    );
     return Err(ErrorTypes.ResourceCreationError);
   }
 };
@@ -234,7 +237,10 @@ export const getGroupEvents = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to query group events");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to query group events",
+    );
     return Err(ErrorTypes.ConversionError);
   }
 };
@@ -344,7 +350,10 @@ export const getGroupEventById = async (
       return Err(ErrorTypes.UnknownIdError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to query group event by ID");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to query group event by ID",
+    );
     return Err(ErrorTypes.UnknownIdError);
   }
 };
@@ -418,7 +427,10 @@ export const editGroupEvent = async (
 
     return getGroupEventById(groupId, eventId);
   } catch (error) {
-    app.log.error(error as any, "Failed to edit group event");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to edit group event",
+    );
     return Err(ErrorTypes.UpdateError);
   }
 };
@@ -624,7 +636,10 @@ export const getGroupCalendar = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to query group calendar");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to query group calendar",
+    );
     return Err(ErrorTypes.ConversionError);
   }
 };
@@ -748,7 +763,10 @@ export const getPersonalEventById = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to query personal event by ID");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to query personal event by ID",
+    );
     return Err(ErrorTypes.ConversionError);
   }
 };
@@ -837,7 +855,10 @@ export const createPersonalEvent = async (
       return Err(ErrorTypes.ResourceCreationError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to create personal event");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to create personal event",
+    );
     return Err(ErrorTypes.ResourceCreationError);
   }
 };
@@ -919,7 +940,10 @@ export const editPersonalEvent = async (
 
     return getPersonalEventById(username, eventId);
   } catch (error) {
-    app.log.error(error as any, "Failed to edit personal event");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to edit personal event",
+    );
     return Err(ErrorTypes.UpdateError);
   }
 };
@@ -963,7 +987,10 @@ export const confirmEventAttendance = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to confirm event attendance");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to confirm event attendance",
+    );
     return Err(ErrorTypes.ResourceCreationError);
   }
 };
@@ -995,7 +1022,7 @@ export const revokeEventAttendance = async (
     return Ok(null);
   } catch (error) {
     app.log.error(
-      error as any,
+      error instanceof Error ? error : new Error(String(error)),
       "Failed to revoke event attendance confirmation",
     );
     return Err(ErrorTypes.DeleteError);
@@ -1024,7 +1051,10 @@ export const getEventConfirmations = async (
       return Err(ErrorTypes.ConversionError);
     }
   } catch (error) {
-    app.log.error(error as any, "Failed to retrieve event confirmations");
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to retrieve event confirmations",
+    );
     return Err(ErrorTypes.ConversionError);
   }
 };

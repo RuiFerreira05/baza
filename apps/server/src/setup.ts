@@ -70,8 +70,11 @@ app.route({
       reply.status(response.status);
       response.headers.forEach((value, key) => reply.header(key, value));
       reply.send(response.body ? await response.text() : null);
-    } catch (error: any) {
-      app.log.error("Authentication Error:", error);
+    } catch (error) {
+      app.log.error(
+        "Authentication Error:",
+        error instanceof Error ? error : new Error(String(error)),
+      );
       reply.status(500).send({
         error: "Internal authentication error",
         code: "AUTH_FAILURE",

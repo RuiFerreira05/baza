@@ -94,7 +94,10 @@ export const authPreHandler = async (
         }
         return;
       } catch (error) {
-        req.log.error(error as any, "Session check failed on profile creation");
+        req.log.error(
+          error instanceof Error ? error : new Error(String(error)),
+          "Session check failed on profile creation",
+        );
         return res
           .status(500)
           .send(
