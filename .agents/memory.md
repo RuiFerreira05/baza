@@ -211,9 +211,10 @@ pnpm --filter @baza/server generate-auth-schema
 ```
 
 ### 3. Testing & Test Database Isolation
-Tests run sequentially against a separate isolated database (`baza_test`).
-* **Environment Configuration**: Configured in `apps/server/vitest.config.ts`. The `DATABASE_URL` for tests is set to `postgres://postgres:postgres@localhost:5432/baza_test`.
-* **Automatic Creation & Migration**: Handled by a global setup hook in `apps/server/tests/helpers/globalSetup.ts` which runs before tests start. It automatically checks if `baza_test` exists, creates it if missing, and executes drizzle migrations against it. This prevents tests from truncating or corrupting development database data.
+Tests run sequentially against separate test setups:
+* **Backend Server Tests**: Configured in `apps/server/vitest.config.ts`. Run sequentially against a separate isolated database (`baza_test`). Handled by a global setup hook in `apps/server/tests/helpers/globalSetup.ts` which automatically creates the test DB and runs migrations.
+* **Client Mobile Tests**: Configured in `apps/client/jest.config.js`. Uses `jest-expo` as a preset with `@swc/jest` configured to compile ESM (`.mjs`) files in `node_modules` (e.g., `typebox`). This prevents the variable shadowing and namespace collision issues with Babel presets when importing `@baza/shared-types` in components and services.
+
 
 ---
 

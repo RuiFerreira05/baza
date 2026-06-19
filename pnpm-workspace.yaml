@@ -1,27 +1,9 @@
-# This is the configuration file for the pnpm workspaces we are using. It tells pnpm where to find
-# the packages in our monorepo, and also some other settings related to how pnpm should install
-# dependencies and link packages together.
-
 packages:
   - apps/*
   - packages/*
 
-# This setting tells pnpm to hoist (not SymLink) dependencies to the root node_modules folder. pnpm
-# has a the great feature of being able to create symlinks for all packages in the monorepo to a
-# centralized node_modules folder, so instead of having multiple copies of the same dependency
-# across different packages, we have just one copy at the root. This is usually good for performance
-# and disk space, but it can cause some issues with certain packages that expect to be able to find
-# their dependencies in a specific location (cough- cough- React Native). By setting this to
-# "hoisted", we are telling pnpm to not use symlinks and instead install dependencies in the
-# traditional way, which can help avoid these issues.
-nodeLinker: hoisted 
+nodeLinker: hoisted
 
-# This setting tells pnpm which dependencies should be allowed to run their build scripts during
-# installation. By default, pnpm will only run build scripts for the dependencies that are actually
-# being built (i.e. the ones that are being linked to the root node_modules folder in nodeLinker:
-# isolated mode). However, some packages might have build scripts that need to be run even if they
-# are not being built, for example because they are dependencies of our dependencies. By adding
-# "esbuild" to this list, we are allowing pnpm to run the build script for esbuild during
-# installation.
 onlyBuiltDependencies:
   - esbuild
+  - unrs-resolver
