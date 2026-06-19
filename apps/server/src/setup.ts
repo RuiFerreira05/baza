@@ -1,3 +1,4 @@
+import { createStatusError, ErrorTypes } from "@baza/shared-types";
 import { fastifyMultipart } from "@fastify/multipart";
 import fastifyStatic from "@fastify/static";
 import fastifySwagger from "@fastify/swagger";
@@ -34,6 +35,35 @@ export const app = fastify({
 });
 app.setValidatorCompiler(TypeBoxValidatorCompiler);
 
+// Register a global error handler to convert all unhandled exceptions
+// into type-safe StatusError responses and bypass route serialization schemas
+app.setErrorHandler((error, request, reply) => {
+  request.log.error(error);
+
+  const err = error as any;
+  const statusCode = err.statusCode || 500;
+
+  // Determine appropriate error type based on status code or validation
+  let errorType = ErrorTypes.UnexpectedServerError;
+  if (statusCode === 400) {
+    errorType = ErrorTypes.MalformedRequestError;
+  } else if (statusCode === 401) {
+    errorType = ErrorTypes.UnauthorizedError;
+  } else if (statusCode === 404) {
+    errorType = ErrorTypes.UnknownIdError;
+  }
+
+  const errorResponse = createStatusError(
+    errorType,
+    err.message || "An unexpected server error occurred",
+  );
+
+  reply
+    .status(statusCode)
+    .header("Content-Type", "application/json; charset=utf-8")
+    .send(JSON.stringify(errorResponse));
+});
+
 await app.register(fastifyMultipart);
 
 bootstrapDirs();
@@ -43,7 +73,9 @@ const fileUploadServiceMap = {
 };
 
 export const fileUploadService = fileUploadServiceMap[env.FILE_UPLOAD_SERVICE];
-fileUploadService.setup(); // TODO: handle setup failure
+if (!fileUploadService.setup().ok) {
+  throw new Error("File upload service setup failed. Check logs for details.");
+}
 
 // ##### SWAGGER SETUP #####
 

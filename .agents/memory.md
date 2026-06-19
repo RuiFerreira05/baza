@@ -120,6 +120,8 @@ A modern mobile application built with **React Native** and **Expo (SDK 55)**.
 * **State & Fetching**: Integrates **Better-Auth Client** (`better-auth/react` with `@better-auth/expo/client` plugin).
 * **API Client & Services**: Custom `apiClient` in `src/services/apiClient.ts` that handles session tokens asynchronously from SecureStore, processes query parameters dynamically, and standardizes error formats. Views/ViewModels consume flat endpoints in `src/services/` (e.g. `userService`, `eventService`) which leverage `unwrapResult` to return clean `Result<T, StatusError>` structures.
 * **Storage**: Session persistence uses `expo-secure-store`.
+* **Fonts & Typography**: Standardized Google Fonts (*Inter* - Regular, Medium, SemiBold, Bold) loaded dynamically using `@expo-google-fonts/inter`. Hiding of the native splash screen is coordinated to delay until both fonts are loaded and session state has resolved.
+* **Global Notifications**: Standardized `react-native-toast-message` integration rendered in the root layout, supporting imperative alerts from anywhere (such as within apiClient error catch blocks).
 * **Aesthetics & Styling**: Simplified CSS-free layouts using a basic centering container (`GlobalStyles.container` in `global.ts`) with no colors or borders. Custom buttons replaced with built-in React Native `Button` components.
 * **Deep Linking**: Defined scheme `"baza"`.
 * **Authentication Guard**: Centralized in root [_layout.tsx](file:///c:/Users/rui/local-projects/baza/apps/client/src/app/_layout.tsx) using `useSegments()` and `authClient.useSession()`. Controlled by `EXPO_PUBLIC_BYPASS_AUTH` and strictly guarded by `__DEV__` to prevent accidental production leaks.

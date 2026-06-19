@@ -8,7 +8,7 @@ import { ActivityIndicator, Button, Text, View } from "react-native";
 export default function GroupsScreen() {
   // This was a valid uuid in my dev db, if you want to test this, you can create a group in your
   // dev db and use that id here. Or use pnpm seed.
-  const groupId = "9b35292f-4ad4-40a4-94cc-a3dcf52a2726";
+  const groupId = "4ef01bb1-c74c-4fe9-bf07-9ee004004b24";
 
   const router = useRouter();
   const [group, setGroup] = useState<GroupDTO | null>(null);
@@ -18,16 +18,23 @@ export default function GroupsScreen() {
   // Unauthorized error. Also all of this should be handled by a viewmodel but it's just a demo so
   // we can skip that for now.
   const fetchGroup = async (groupId: string) => {
+    setError(null);
     try {
       const result = await groupService.getGroup(groupId);
       if (result.ok) {
         setGroup(result.value);
       } else {
+        setGroup(null);
+        console.error(
+          `Error fetching group: ${result.error.error.type} - ${result.error.error.message}`,
+        );
         setError(
           `Error fetching group: ${result.error.error.type} - ${result.error.error.message}`,
         );
       }
     } catch (error) {
+      setGroup(null);
+      console.error(`Unexpected error: ${error}`);
       setError(`Unexpected error: ${error}`);
     }
   };

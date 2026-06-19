@@ -48,6 +48,12 @@ export enum ErrorTypes {
    * (CLIENT SIDE).
    */
   ConnectionError = "ConnectionError",
+  /**
+   * Indicates that an unexpected error occurred on the server side, which does not fall into any of
+   * the other defined error categories. This is a catch-all error type for unhandled exceptions or
+   * unforeseen issues.
+   */
+  UnexpectedServerError = "UnexpectedServerError",
 }
 
 export type Result<T, E> = Ok<T> | Err<E>;
