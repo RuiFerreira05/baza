@@ -1,10 +1,66 @@
-# Baza Fastify API Server Routes
+# Baza Developer Guide
 
-This is a compiled reference of all backend routes registered on the Baza server.
+Baza is a collaborative scheduling and planning application that enables users to form groups, propose plans, vote on events, share calendars, and manage coordinates.
 
 ---
 
-## 👤 User / Profile Routes (Mounted at `/v1/restricted/users`)
+## Workspace Structure
+
+The project is structured as a monorepo managed with pnpm workspaces.
+
+- **apps/client**: Expo React Native mobile client (SDK 55).
+- **apps/server**: Fastify backend API.
+- **packages/db**: Drizzle ORM client, database schemas, and migration files.
+- **packages/shared**: Shared types and Typebox schemas for DTO and payload validation.
+- **docs**: Project reference materials.
+
+---
+
+## Development Scripts
+
+Run these scripts from the monorepo root:
+
+- `pnpm dev:server`: Start the Fastify backend server.
+- `pnpm dev:client`: Start the Expo mobile client.
+- `pnpm db:studio`: Open the Drizzle Studio database viewer.
+- `pnpm db:generate`: Generate SQL migration files based on schema changes.
+- `pnpm db:migrate`: Run database migrations.
+- `pnpm db:seed`: Seed the development database.
+- `pnpm test:server`: Run the Fastify backend test suite.
+- `pnpm lint`: Run linting across all workspace packages.
+
+---
+
+## Database Management
+
+We use PostgreSQL with Drizzle ORM.
+
+### Schema Changes
+
+1. Modify schema definitions in `packages/db/src/schemas/`.
+2. Generate migration script: `pnpm db:generate`
+3. Apply migration to your database: `pnpm db:migrate`
+
+### Test Database Isolation
+
+Tests run sequentially on an isolated database named `baza_test`. The test framework automatically checks for, creates, and runs migrations on `baza_test` before running tests. This prevents test runs from polluting or modifying your development database.
+
+---
+
+## Developer Conventions
+
+- **Imports**: Use workspace imports (`@baza/db`, `@baza/shared-types`) rather than relative relative path references when importing across packages. Use `@/` for local application pathing.
+- **Time Serialization**: When returning PostgreSQL `TIME` fields (timezone-less strings like `"HH:MM:SS"`), append a `"Z"` offset suffix (e.g. `"HH:MM:SSZ"`) to conform to TypeBox's `format: "time"` schema checks.
+- **DateTime Fields**: Personal calendar event times return as Javascript `Date` objects from Drizzle. Convert them to ISO strings (`.toISOString()`) to satisfy the Typebox `format: "date-time"` requirements.
+- **Error Handling**: API client requests normalize non-conforming responses automatically. Service layers should validate constraints (like budget boundaries or start/end times) before hitting the database, returning `400 Bad Request` payloads on violation.
+
+---
+
+## Backend API Routes
+
+The backend API routes registered on the server are detailed below.
+
+### User / Profile Routes (Mounted at `/v1/restricted/users`)
 
 | Method     | Path                                          | Description                                             |
 | :--------- | :-------------------------------------------- | :------------------------------------------------------ |
@@ -31,9 +87,7 @@ This is a compiled reference of all backend routes registered on the Baza server
 | **GET**    | `/:username/settings`                         | Retrieve user profile settings                          |
 | **PATCH**  | `/:username/settings`                         | Update user profile settings                            |
 
----
-
-## 👥 Group / Event / Plan Routes (Mounted at `/v1/restricted/groups`)
+### Group / Event / Plan Routes (Mounted at `/v1/restricted/groups`)
 
 | Method     | Path                                         | Description                                        |
 | :--------- | :------------------------------------------- | :------------------------------------------------- |
