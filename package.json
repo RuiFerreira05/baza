@@ -21,6 +21,7 @@
     "db:generate": "pnpm --filter @baza/db db:generate",
     "db:migrate": "pnpm --filter @baza/db db:migrate",
     "db:seed": "tsx packages/db/src/seed.ts",
+    "test:server": "pnpm --filter @baza/server test",
     "lint": "pnpm -r lint"
   },
   "devDependencies": {
