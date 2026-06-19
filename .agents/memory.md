@@ -117,8 +117,12 @@ A modern mobile application built with **React Native** and **Expo (SDK 55)**.
 
 ### Tech Stack & Configuration
 * **Router**: Uses **Expo Router** with standard Stack navigation (NativeTabs removed).
-* **State & Fetching**: Integrates **Better-Auth Client** (`better-auth/react` with `@better-auth/expo/client` plugin).
-* **API Client & Services**: Custom `apiClient` in `src/services/apiClient.ts` that handles session tokens asynchronously from SecureStore, processes query parameters dynamically, and standardizes error formats. Views/ViewModels consume flat endpoints in `src/services/` (e.g. `userService`, `eventService`) which leverage `unwrapResult` to return clean `Result<T, StatusError>` structures.
+* **State & Fetching**: Integrates **Better-Auth Client** (`better-auth/react` with `@better-auth/expo/client` plugin) and **TanStack Query** (`@tanstack/react-query`) for server-state caching and synchronization.
+* **Custom Query Hooks**: Wrapper hooks `useAppQuery` (in `src/hooks/useAppQuery.ts`) and `useAppMutation` (in `src/hooks/useAppMutation.ts`) intercept and unwrap monadic `Result<T, StatusError>` responses, automatically throwing any `StatusError` so it integrates natively with React Query error tracking and UI boundaries.
+* **API Client & Services**: Custom `apiClient` in `src/services/apiClient.ts` that handles session tokens asynchronously from SecureStore, processes query parameters dynamically, and standardizes error formats. Views/ViewModels consume flat endpoints in `src/services/` (e.g. `userService`, `eventService`) which return `Result<T, StatusError>` structures.
+* **Error Boundaries & Reporting**:
+  - A global `errorReporter` (in `src/services/errorReporter.ts`) hooks into JavaScript's `PromiseRejectionTracking` to catch uncaught async exceptions and promise rejections.
+  - A reusable fallback `ErrorBoundary` UI component (in `src/components/ErrorBoundary.tsx`) is exported from the root `_layout.tsx` to catch rendering crashes via Expo Router's native error routing boundaries.
 * **Storage**: Session persistence uses `expo-secure-store`.
 * **Fonts & Typography**: Standardized Google Fonts (*Inter* - Regular, Medium, SemiBold, Bold) loaded dynamically using `@expo-google-fonts/inter`. Hiding of the native splash screen is coordinated to delay until both fonts are loaded and session state has resolved.
 * **Global Notifications**: Standardized `react-native-toast-message` integration rendered in the root layout, supporting imperative alerts from anywhere (such as within apiClient error catch blocks).

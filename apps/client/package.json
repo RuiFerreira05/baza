@@ -13,11 +13,12 @@
   "dependencies": {
     "@baza/shared-types": "workspace:*",
     "@better-auth/expo": "^1.5.6",
-    "@expo/vector-icons": "^15.1.1",
     "@expo-google-fonts/inter": "^0.4.2",
+    "@expo/vector-icons": "^15.1.1",
     "@react-navigation/bottom-tabs": "^7.15.5",
     "@react-navigation/elements": "^2.9.10",
     "@react-navigation/native": "^7.1.33",
+    "@tanstack/react-query": "^5.101.0",
     "better-auth": "^1.5.6",
     "expo": "~55.0.9",
     "expo-constants": "~55.0.9",

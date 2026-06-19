@@ -1,5 +1,7 @@
 import { authClient } from "@/lib/auth";
 import { env } from "@/lib/env";
+import { queryClient } from "@/lib/queryClient";
+import { errorReporter } from "@/services/errorReporter";
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -7,10 +9,17 @@ import {
   Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
+
+// Initialize global exception and rejection handlers
+errorReporter.initialize();
+
+// Export the ErrorBoundary component for Expo Router to catch render crashes
+export { AppErrorBoundary as ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Bypasses auth check only in development mode if EXPO_PUBLIC_BYPASS_AUTH is set to "true".
 // This ensures that authentication checks are never bypassed in production releases.
@@ -51,9 +60,11 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-      <Toast />
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+        <Toast />
+      </SafeAreaProvider>
+    </QueryClientProvider>
   );
 }
