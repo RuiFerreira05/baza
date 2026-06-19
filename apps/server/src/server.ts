@@ -1,11 +1,11 @@
 // apps/server/src/server.ts
 import "dotenv/config";
 import { env } from "./lib/env";
-import { app } from "./setup";
 import {
-  finalizeExpiredEvents,
   checkAndApplyFallbacks,
+  finalizeExpiredEvents,
 } from "./services/finalizationService";
+import { app } from "./setup";
 
 app.listen(
   { port: parseInt(env.SERVER_PORT), host: env.SERVER_HOST },
@@ -16,6 +16,9 @@ app.listen(
     }
     console.log(
       `Server running on http://${env.SERVER_HOST}:${env.SERVER_PORT}`,
+    );
+    console.log(
+      `BYPASS_AUTH is ${env.BYPASS_AUTH === "true" ? "enabled" : "disabled"}.`,
     );
 
     // Background Dynamic Finalization loop (runs every 60 seconds, preventing overlaps)

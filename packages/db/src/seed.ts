@@ -1,19 +1,21 @@
 import "dotenv/config";
 import { createDbClient } from "./client";
 import {
-  users,
-  profiles,
-  friends,
-  groups,
-  groupMembers,
   events,
+  friends,
   groupEvents,
+  groupMembers,
+  groups,
   plans,
+  preferences,
+  profiles,
+  users,
   votes,
-  preferences
 } from "./schemas";
 
-const databaseUrl = process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/baza";
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  "postgres://postgres:postgres@localhost:5432/baza";
 console.log(`Connecting to database at ${databaseUrl}...`);
 const db = createDbClient(databaseUrl);
 
@@ -28,36 +30,39 @@ async function main() {
 
   // 2. Insert Users
   console.log("Seeding users...");
-  const seededUsers = await db.insert(users).values([
-    {
-      id: "usr_alice",
-      name: "Alice Smith",
-      email: "alice@example.com",
-      emailVerified: true,
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice",
-    },
-    {
-      id: "usr_bob",
-      name: "Bob Jones",
-      email: "bob@example.com",
-      emailVerified: true,
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob",
-    },
-    {
-      id: "usr_charlie",
-      name: "Charlie Brown",
-      email: "charlie@example.com",
-      emailVerified: true,
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie",
-    },
-    {
-      id: "usr_diana",
-      name: "Diana Prince",
-      email: "diana@example.com",
-      emailVerified: true,
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Diana",
-    }
-  ]).returning();
+  const seededUsers = await db
+    .insert(users)
+    .values([
+      {
+        id: "usr_alice",
+        name: "Alice Smith",
+        email: "alice@example.com",
+        emailVerified: true,
+        image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice",
+      },
+      {
+        id: "usr_bob",
+        name: "Bob Jones",
+        email: "bob@example.com",
+        emailVerified: true,
+        image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob",
+      },
+      {
+        id: "usr_charlie",
+        name: "Charlie Brown",
+        email: "charlie@example.com",
+        emailVerified: true,
+        image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie",
+      },
+      {
+        id: "usr_diana",
+        name: "Diana Prince",
+        email: "diana@example.com",
+        emailVerified: true,
+        image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Diana",
+      },
+    ])
+    .returning();
 
   // 3. Insert Profiles
   console.log("Seeding profiles...");
@@ -89,7 +94,7 @@ async function main() {
       description: "Adventure seeker. Let's make plans!",
       settings: { theme: "dark", notifications: true },
       userId: "usr_diana",
-    }
+    },
   ]);
 
   // 4. Insert Friends
@@ -117,18 +122,23 @@ async function main() {
       sentBy: "charlie_brown",
       receivedBy: "diana_prince",
       friendStatus: "pending",
-    }
+    },
   ]);
 
   // 5. Insert Groups
   console.log("Seeding groups...");
-  const [weekendGroup] = await db.insert(groups).values([
-    {
-      groupname: "Weekend_Hikers",
-      description: "For organizing weekly outdoor activities and weekend trails.",
-      photo: "https://images.unsplash.com/photo-1551632811-561732d1e306?w=200",
-    }
-  ]).returning();
+  const [weekendGroup] = await db
+    .insert(groups)
+    .values([
+      {
+        groupname: "Weekend_Hikers",
+        description:
+          "For organizing weekly outdoor activities and weekend trails.",
+        photo:
+          "https://images.unsplash.com/photo-1551632811-561732d1e306?w=200",
+      },
+    ])
+    .returning();
 
   if (!weekendGroup) {
     throw new Error("Failed to insert group");
@@ -172,138 +182,156 @@ async function main() {
       acceptedInvite: true,
       acceptedAt: new Date(),
       invitedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-    }
+    },
   ]);
 
   // 7. Insert Events
   console.log("Seeding events & groupEvents...");
-  
-  // Event 1: Unfinished, voting open
-  const [event1] = await db.insert(events).values({
-    title: "Summer Mountain Trek",
-    description: "Our annual summer expedition to the mountains.",
-  }).returning();
 
-  const [ge1] = await db.insert(groupEvents).values({
-    id: event1.id,
-    groupId: weekendGroup.id,
-    startDate: "2026-07-20",
-    endDate: "2026-07-22",
-    state: "unfinished",
-    votingEndTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-    createdBy: "alice_smith",
-  }).returning();
+  // Event 1: Unfinished, voting open
+  const [event1] = await db
+    .insert(events)
+    .values({
+      title: "Summer Mountain Trek",
+      description: "Our annual summer expedition to the mountains.",
+    })
+    .returning();
+
+  const [ge1] = await db
+    .insert(groupEvents)
+    .values({
+      id: event1!.id,
+      groupId: weekendGroup.id,
+      startDate: "2026-07-20",
+      endDate: "2026-07-22",
+      state: "unfinished",
+      votingEndTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+      createdBy: "alice_smith",
+    })
+    .returning();
 
   // Event 2: Needs tiebreaker (voting ended, ties exist)
-  const [event2] = await db.insert(events).values({
-    title: "Weekend Bike Trail",
-    description: "A quick bike trail adventure over the weekend.",
-  }).returning();
+  const [event2] = await db
+    .insert(events)
+    .values({
+      title: "Weekend Bike Trail",
+      description: "A quick bike trail adventure over the weekend.",
+    })
+    .returning();
 
-  const [ge2] = await db.insert(groupEvents).values({
-    id: event2.id,
-    groupId: weekendGroup.id,
-    startDate: "2026-06-15",
-    endDate: "2026-06-16",
-    state: "needs_tiebreaker",
-    votingEndTime: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
-    createdBy: "alice_smith",
-  }).returning();
+  const [ge2] = await db
+    .insert(groupEvents)
+    .values({
+      id: event2!.id,
+      groupId: weekendGroup.id,
+      startDate: "2026-06-15",
+      endDate: "2026-06-16",
+      state: "needs_tiebreaker",
+      votingEndTime: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
+      createdBy: "alice_smith",
+    })
+    .returning();
 
   // 8. Insert Preferences for Event 1
   console.log("Seeding preferences...");
   await db.insert(preferences).values([
     {
-      groupEventId: ge1.id,
+      groupEventId: ge1!.id,
       username: "alice_smith",
       preference: {
         availableDates: ["2026-07-20", "2026-07-21"],
         activities: ["trekking", "camping"],
         minBudget: 50,
-        maxBudget: 150
+        maxBudget: 150,
       },
-      private: false
+      private: false,
     },
     {
-      groupEventId: ge1.id,
+      groupEventId: ge1!.id,
       username: "bob_jones",
       preference: {
         availableDates: ["2026-07-21", "2026-07-22"],
         activities: ["trekking", "biking"],
         minBudget: 30,
-        maxBudget: 100
+        maxBudget: 100,
       },
-      private: false
+      private: false,
     },
     {
-      groupEventId: ge1.id,
+      groupEventId: ge1!.id,
       username: "charlie_brown",
       preference: {
         availableDates: ["2026-07-20", "2026-07-21", "2026-07-22"],
         activities: ["camping"],
         minBudget: 80,
-        maxBudget: 200
+        maxBudget: 200,
       },
-      private: true
-    }
+      private: true,
+    },
   ]);
 
   // 9. Insert proposed plans for Event 1
   console.log("Seeding plan proposals...");
-  const planProposals1 = await db.insert(plans).values([
-    {
-      groupEventId: ge1.id,
-      username: "alice_smith",
-      title: "Grand Canyon Trail Route A",
-      date: "2026-07-20",
-      startTime: "08:00:00",
-      endTime: "16:00:00",
-      activity: "Trekking & Camping at North Rim",
-      location: "North Rim National Park",
-      minBudget: 60,
-      maxBudget: 120
-    },
-    {
-      groupEventId: ge1.id,
-      username: "bob_jones",
-      title: "Sedona Red Rock Trail Route B",
-      date: "2026-07-21",
-      startTime: "09:00:00",
-      endTime: "17:00:00",
-      activity: "Scenic biking and canyon walk",
-      location: "Sedona Red Rock Park",
-      minBudget: 40,
-      maxBudget: 90
-    }
-  ]).returning();
+  const planProposals1 = await db
+    .insert(plans)
+    .values([
+      {
+        groupEventId: ge1!.id,
+        username: "alice_smith",
+        title: "Grand Canyon Trail Route A",
+        date: "2026-07-20",
+        startTime: "08:00:00",
+        endTime: "16:00:00",
+        activity: "Trekking & Camping at North Rim",
+        location: "North Rim National Park",
+        minBudget: 60,
+        maxBudget: 120,
+      },
+      {
+        groupEventId: ge1!.id,
+        username: "bob_jones",
+        title: "Sedona Red Rock Trail Route B",
+        date: "2026-07-21",
+        startTime: "09:00:00",
+        endTime: "17:00:00",
+        activity: "Scenic biking and canyon walk",
+        location: "Sedona Red Rock Park",
+        minBudget: 40,
+        maxBudget: 90,
+      },
+    ])
+    .returning();
 
   // 10. Insert proposed plans for Event 2 (Tied plans)
-  const planProposals2 = await db.insert(plans).values([
-    {
-      groupEventId: ge2.id,
-      username: "alice_smith",
-      title: "Ocean View Trail",
-      date: "2026-06-15",
-      startTime: "10:00:00",
-      endTime: "14:00:00",
-      activity: "Coastal bike trail path",
-      location: "Pacific Coast Highway Path",
-      minBudget: 10,
-      maxBudget: 30
-    },
-    {
-      groupEventId: ge2.id,
-      username: "bob_jones",
-      title: "Mountain Foothills Path",
-      date: "2026-06-15",
-      startTime: "10:00:00",
-      endTime: "14:00:00",
-      activity: "Offroad biking trail",
-      location: "Foothill Valley Park",
-      minBudget: 15,
-      maxBudget: 40
-    }
-  ]).returning();
+  const planProposals2 = await db
+    .insert(plans)
+    .values([
+      {
+        groupEventId: ge2!.id,
+        username: "alice_smith",
+        title: "Ocean View Trail",
+        date: "2026-06-15",
+        startTime: "10:00:00",
+        endTime: "14:00:00",
+        activity: "Coastal bike trail path",
+        location: "Pacific Coast Highway Path",
+        minBudget: 10,
+        maxBudget: 30,
+      },
+      {
+        groupEventId: ge2!.id,
+        username: "bob_jones",
+        title: "Mountain Foothills Path",
+        date: "2026-06-15",
+        startTime: "10:00:00",
+        endTime: "14:00:00",
+        activity: "Offroad biking trail",
+        location: "Foothill Valley Park",
+        minBudget: 15,
+        maxBudget: 40,
+      },
+    ])
+    .returning();
 
   // 11. Seed votes (simulating choices)
   console.log("Seeding votes...");
@@ -312,17 +340,17 @@ async function main() {
   // Bob votes Route B
   // Charlie votes Route A
   await db.insert(votes).values([
-    { planId: planProposals1[0].id, username: "alice_smith" },
-    { planId: planProposals1[1].id, username: "bob_jones" },
-    { planId: planProposals1[0].id, username: "charlie_brown" }
+    { planId: planProposals1[0]!.id, username: "alice_smith" },
+    { planId: planProposals1[1]!.id, username: "bob_jones" },
+    { planId: planProposals1[0]!.id, username: "charlie_brown" },
   ]);
 
   // Votes for Event 2 (Tied: 2 votes for Ocean View, 2 votes for Mountain Foothills):
   await db.insert(votes).values([
-    { planId: planProposals2[0].id, username: "alice_smith" },
-    { planId: planProposals2[0].id, username: "charlie_brown" },
-    { planId: planProposals2[1].id, username: "bob_jones" },
-    { planId: planProposals2[1].id, username: "diana_prince" }
+    { planId: planProposals2[0]!.id, username: "alice_smith" },
+    { planId: planProposals2[0]!.id, username: "charlie_brown" },
+    { planId: planProposals2[1]!.id, username: "bob_jones" },
+    { planId: planProposals2[1]!.id, username: "diana_prince" },
   ]);
 
   console.log("Seeding completed successfully!");

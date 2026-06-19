@@ -78,6 +78,17 @@ export async function apiClient(
     }
 
     if (!response.ok) {
+      const isStatusError =
+        data && data.status === "ERROR" && typeof data.error === "object";
+      // If the server returned an error but it wasn't in the expected format, create a generic
+      // StatusError for it
+      if (!isStatusError) {
+        const message =
+          data?.message ||
+          data?.error ||
+          `Server returned status ${response.status}`;
+        data = createStatusError(ErrorTypes.MalformedRequestError, message);
+      }
       return Err(data as StatusError);
     }
 
