@@ -1,4 +1,4 @@
-import { GlobalStyles } from "@/constants/styles/global";
+import { useGlobalStyles } from "@/constants/styles/global";
 import { useCalendarViewModel } from "@/viewmodels/useCalendarViewModel";
 import { Button, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
@@ -7,6 +7,7 @@ import Toast from "react-native-toast-message";
 // inside pages because the tabs will be handling routing themselves.
 // I've included a small example of this pattern here for demonstration purposes.
 export default function CalendarScreen() {
+  const styles = useGlobalStyles();
   const vm = useCalendarViewModel();
 
   const showToast = () => {
@@ -20,7 +21,7 @@ export default function CalendarScreen() {
   };
 
   return (
-    <View style={GlobalStyles.container}>
+    <View style={styles.container}>
       <Text style={{ fontSize: 24, fontWeight: "bold" }}>Calendar Screen</Text>
       <Text style={{ marginVertical: 20 }}>
         Current date: {vm.selectedDate.toDateString()}
@@ -42,3 +43,4 @@ export default function CalendarScreen() {
     </View>
   );
 }
+

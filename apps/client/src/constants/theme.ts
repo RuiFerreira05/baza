@@ -1,52 +1,56 @@
-const Colors = {} as const;
+const Colors = {
+  ExampleColor: "#FF0000",
+} as const;
+
+export type ThemeType = Record<keyof typeof Theme.light, string>;
 
 export const Theme = {
   light: {
-    primary: null,
-    onPrimary: null,
-    secondary: null,
-    onSecondary: null,
-    Tertiary: null,
-    onTertiary: null,
+    primary: Colors.ExampleColor,
+    onPrimary: "",
+    secondary: "",
+    onSecondary: "",
+    tertiary: "",
+    onTertiary: "",
 
-    background: null,
-    onBackground: null,
+    background: "",
+    onBackground: "",
 
-    border: null,
-    placeholder: null,
+    border: "",
+    placeholder: "",
 
-    surface: null,
-    onSurface: null,
-    surfaceVariant: null,
-    onSurfaceVariant: null,
+    surface: "",
+    onSurface: "",
+    surfaceVariant: "",
+    onSurfaceVariant: "",
 
-    error: null,
-    onError: null,
-    Success: null,
-    onSuccess: null,
+    error: "",
+    onError: "",
+    success: "",
+    onSuccess: "",
   },
   dark: {
-    primary: null,
-    onPrimary: null,
-    secondary: null,
-    onSecondary: null,
-    Tertiary: null,
-    onTertiary: null,
+    primary: "",
+    onPrimary: "",
+    secondary: "",
+    onSecondary: "",
+    tertiary: "",
+    onTertiary: "",
 
-    background: null,
-    onBackground: null,
+    background: "",
+    onBackground: "",
 
-    border: null,
-    placeholder: null,
+    border: "",
+    placeholder: "",
 
-    surface: null,
-    onSurface: null,
-    surfaceVariant: null,
-    onSurfaceVariant: null,
+    surface: "",
+    onSurface: "",
+    surfaceVariant: "",
+    onSurfaceVariant: "",
 
-    error: null,
-    onError: null,
-    Success: null,
-    onSuccess: null,
+    error: "",
+    onError: "",
+    success: "",
+    onSuccess: "",
   },
-} as const;
+} satisfies Record<"light" | "dark", unknown>;

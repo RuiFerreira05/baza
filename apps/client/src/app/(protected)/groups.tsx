@@ -1,8 +1,9 @@
-import { GlobalStyles } from "@/constants/styles/global";
+import { useGlobalStyles } from "@/constants/styles/global";
 import { useGroupsViewModel } from "@/viewmodels/useGroupsViewModel";
 import { ActivityIndicator, Button, Text, View } from "react-native";
 
 export default function GroupsScreen() {
+  const styles = useGlobalStyles();
   // This was a valid uuid in my dev db, if you want to test this, you can create a group in your
   // dev db and use that id here. Or use pnpm seed.
   const groupId = "6ee23ba4-1ca5-4def-924f-cd5ef15b27f0";
@@ -10,7 +11,7 @@ export default function GroupsScreen() {
   const vm = useGroupsViewModel(groupId);
 
   return (
-    <View style={GlobalStyles.container}>
+    <View style={styles.container}>
       <Text style={{ fontSize: 24, fontWeight: "bold" }}>Groups Screen</Text>
       {vm.group ? (
         <View>
@@ -32,3 +33,4 @@ export default function GroupsScreen() {
     </View>
   );
 }
+

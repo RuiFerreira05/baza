@@ -1,12 +1,13 @@
-import { GlobalStyles } from "@/constants/styles/global";
+import { useGlobalStyles } from "@/constants/styles/global";
 import { useRouter } from "expo-router";
 import { Button, Text, View } from "react-native";
 
 export default function RegisterScreen() {
+  const styles = useGlobalStyles();
   const router = useRouter();
 
   return (
-    <View style={GlobalStyles.container}>
+    <View style={styles.container}>
       <Text style={{ fontSize: 24, fontWeight: "bold" }}>Baza Register</Text>
 
       <Button
@@ -18,3 +19,4 @@ export default function RegisterScreen() {
     </View>
   );
 }
+

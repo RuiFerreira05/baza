@@ -1,4 +1,4 @@
-import { useSettingsStore, useTheme } from "@/store/useSettingsStore";
+import { ThemeMode, useSettingsStore, useTheme } from "@/store/useSettingsStore";
 import { act, renderHook } from "@testing-library/react-native";
 import * as SecureStore from "expo-secure-store";
 import { Appearance } from "react-native";
@@ -13,30 +13,30 @@ describe("useSettingsStore", () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     await act(async () => {
-      useSettingsStore.setState({ themeMode: "system" });
+      useSettingsStore.setState({ themeMode: ThemeMode.SYSTEM });
     });
   });
 
   it("should initialize with themeMode 'system'", async () => {
     const { result } = await renderHook(() => useSettingsStore());
-    expect(result.current.themeMode).toBe("system");
+    expect(result.current.themeMode).toBe(ThemeMode.SYSTEM);
   });
 
   it("should update themeMode when setThemeMode is called", async () => {
     const { result } = await renderHook(() => useSettingsStore());
 
     await act(async () => {
-      result.current.setThemeMode("dark");
+      result.current.setThemeMode(ThemeMode.DARK);
     });
 
-    expect(result.current.themeMode).toBe("dark");
+    expect(result.current.themeMode).toBe(ThemeMode.DARK);
   });
 
   it("should persist themeMode changes to SecureStore", async () => {
     const { result } = await renderHook(() => useSettingsStore());
 
     await act(async () => {
-      result.current.setThemeMode("light");
+      result.current.setThemeMode(ThemeMode.LIGHT);
     });
 
     // We wait for microtasks so async storage has a chance to execute
@@ -66,7 +66,7 @@ describe("useTheme hook", () => {
     jest.clearAllMocks();
     colorSchemeSpy = jest.spyOn(Appearance, "getColorScheme");
     await act(async () => {
-      useSettingsStore.setState({ themeMode: "system" });
+      useSettingsStore.setState({ themeMode: ThemeMode.SYSTEM });
     });
   });
 
@@ -79,9 +79,9 @@ describe("useTheme hook", () => {
 
     const { result } = await renderHook(() => useTheme());
 
-    expect(result.current.themeMode).toBe("system");
-    expect(result.current.isDark).toBe(false);
-    expect(result.current.theme).toBeDefined();
+    expect(result.current.themeMode).toBe(ThemeMode.SYSTEM);
+    
+    expect(result.current.colors).toBeDefined();
   });
 
   it("should resolve isDark to true if mode is system and OS scheme is dark", async () => {
@@ -89,9 +89,9 @@ describe("useTheme hook", () => {
 
     const { result } = await renderHook(() => useTheme());
 
-    expect(result.current.themeMode).toBe("system");
-    expect(result.current.isDark).toBe(true);
-    expect(result.current.theme).toBeDefined();
+    expect(result.current.themeMode).toBe(ThemeMode.SYSTEM);
+    
+    expect(result.current.colors).toBeDefined();
   });
 
   it("should resolve isDark to true if themeMode is set explicitly to dark", async () => {
@@ -99,13 +99,13 @@ describe("useTheme hook", () => {
 
     const { result: storeResult } = await renderHook(() => useSettingsStore());
     await act(async () => {
-      storeResult.current.setThemeMode("dark");
+      storeResult.current.setThemeMode(ThemeMode.DARK);
     });
 
     const { result } = await renderHook(() => useTheme());
 
-    expect(result.current.themeMode).toBe("dark");
-    expect(result.current.isDark).toBe(true);
+    expect(result.current.themeMode).toBe(ThemeMode.DARK);
+    
   });
 
   it("should resolve isDark to false if themeMode is set explicitly to light", async () => {
@@ -113,12 +113,13 @@ describe("useTheme hook", () => {
 
     const { result: storeResult } = await renderHook(() => useSettingsStore());
     await act(async () => {
-      storeResult.current.setThemeMode("light");
+      storeResult.current.setThemeMode(ThemeMode.LIGHT);
     });
 
     const { result } = await renderHook(() => useTheme());
 
-    expect(result.current.themeMode).toBe("light");
-    expect(result.current.isDark).toBe(false);
+    expect(result.current.themeMode).toBe(ThemeMode.LIGHT);
+    
   });
 });
+

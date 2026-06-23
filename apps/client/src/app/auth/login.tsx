@@ -1,12 +1,13 @@
-import { GlobalStyles } from "@/constants/styles/global";
+import { useGlobalStyles } from "@/constants/styles/global";
 import { useRouter } from "expo-router";
 import { Button, Text, View } from "react-native";
 
 export default function LoginScreen() {
+  const styles = useGlobalStyles();
   const router = useRouter();
 
   return (
-    <View style={GlobalStyles.container}>
+    <View style={styles.container}>
       <Text style={{ fontSize: 24, fontWeight: "bold" }}>Baza Login</Text>
 
       <Button
@@ -21,3 +22,4 @@ export default function LoginScreen() {
     </View>
   );
 }
+

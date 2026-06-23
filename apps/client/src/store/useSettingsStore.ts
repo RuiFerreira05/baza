@@ -1,8 +1,8 @@
-import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { Theme, ThemeType } from "@/constants/theme";
 import * as SecureStore from "expo-secure-store";
 import { Appearance } from "react-native";
-import { Theme } from "@/constants/theme";
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 const secureStoreAdapter = {
   getItem: (name: string) => SecureStore.getItemAsync(name),
@@ -11,7 +11,11 @@ const secureStoreAdapter = {
   removeItem: (name: string) => SecureStore.deleteItemAsync(name),
 };
 
-export type ThemeMode = "light" | "dark" | "system";
+export enum ThemeMode {
+  LIGHT = "light",
+  DARK = "dark",
+  SYSTEM = "system",
+}
 
 interface SettingsState {
   themeMode: ThemeMode;
@@ -21,7 +25,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      themeMode: "system",
+      themeMode: ThemeMode.SYSTEM,
       setThemeMode: (mode) => set({ themeMode: mode }),
     }),
     {
@@ -31,7 +35,12 @@ export const useSettingsStore = create<SettingsState>()(
   ),
 );
 
-export function useTheme() {
+interface useThemeReturnType {
+  themeMode: ThemeMode;
+  colors: ThemeType;
+}
+
+export function useTheme(): useThemeReturnType {
   const themeMode = useSettingsStore((state) => state.themeMode);
   const systemColorScheme = Appearance.getColorScheme();
 
@@ -42,7 +51,6 @@ export function useTheme() {
 
   return {
     themeMode,
-    isDark,
-    theme: Theme[isDark ? "dark" : "light"],
+    colors: Theme[isDark ? "dark" : "light"],
   };
 }
