@@ -1,4 +1,4 @@
-import { Theme, ThemeType } from "@/constants/theme";
+import { Theme, ThemeType } from "@/constants/styles/theme";
 import * as SecureStore from "expo-secure-store";
 import { Appearance } from "react-native";
 import { create } from "zustand";

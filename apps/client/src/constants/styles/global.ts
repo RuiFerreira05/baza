@@ -1,7 +1,7 @@
 import { useTheme } from "@/store/useSettingsStore";
 import { useMemo } from "react";
 import { StyleSheet } from "react-native";
-import { ThemeType } from "../theme";
+import { ThemeType } from "./theme";
 
 export const useGlobalStyles = () => {
   const { colors } = useTheme();
