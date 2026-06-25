@@ -1,10 +1,10 @@
-import { useTheme } from "@/store/useSettingsStore";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { useMemo } from "react";
 import { StyleSheet } from "react-native";
-import { ThemeType } from "./theme";
+import { ThemeType } from "../theme";
 
 export const useGlobalStyles = () => {
-  const { colors } = useTheme();
+  const { colors } = useAppTheme();
 
   return useMemo(() => GlobalStyles(colors), [colors]);
 };

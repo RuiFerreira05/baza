@@ -1,5 +1,6 @@
-import { useGlobalStyles } from "@/constants/styles/global";
-import { ThemeMode, useSettingsStore, useTheme } from "@/store/useSettingsStore";
+import { useGlobalStyles } from "@/constants/styles/useGlobalStyles";
+import { useAppTheme } from "@/hooks/useAppTheme";
+import { ThemeMode, useSettingsStore } from "@/store/useSettingsStore";
 import { useRouter } from "expo-router";
 import { Button, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,7 +9,7 @@ export default function ProfileScreen() {
   const styles = useGlobalStyles();
   const router = useRouter();
   const settingsStore = useSettingsStore();
-  const { themeMode } = useTheme();
+  const { themeMode } = useAppTheme();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -31,4 +32,3 @@ export default function ProfileScreen() {
     </SafeAreaView>
   );
 }
-

@@ -1,4 +1,4 @@
-import { useGlobalStyles } from "@/constants/styles/global";
+import { useGlobalStyles } from "@/constants/styles/useGlobalStyles";
 import { useCalendarViewModel } from "@/viewmodels/useCalendarViewModel";
 import { Button, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
@@ -43,4 +43,3 @@ export default function CalendarScreen() {
     </View>
   );
 }
-

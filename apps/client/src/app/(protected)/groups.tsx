@@ -1,4 +1,4 @@
-import { useGlobalStyles } from "@/constants/styles/global";
+import { useGlobalStyles } from "@/constants/styles/useGlobalStyles";
 import { useGroupsViewModel } from "@/viewmodels/useGroupsViewModel";
 import { ActivityIndicator, Button, Text, View } from "react-native";
 
@@ -33,4 +33,3 @@ export default function GroupsScreen() {
     </View>
   );
 }
-

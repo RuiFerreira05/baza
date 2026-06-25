@@ -2,6 +2,10 @@ packages:
   - apps/*
   - packages/*
 
+allowBuilds:
+  '@swc/core': true
+  esbuild: true
+
 nodeLinker: hoisted
 
 onlyBuiltDependencies:

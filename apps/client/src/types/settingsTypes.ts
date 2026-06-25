@@ -35,17 +35,12 @@ export interface ToggleSetting extends BaseSetting {
   defaultValue?: boolean;
 }
 
-export interface SelectOption {
-  label: string;
-  value: string | number;
-}
-
 export interface SelectSetting extends BaseSetting {
   type: SettingsType.SELECT;
-  options: SelectOption[];
-  value: SelectOption;
-  onChangeFn: (value: SelectOption) => Failable<SettingsError>;
-  defaultValue?: SelectOption;
+  options: string[];
+  value: string;
+  onChangeFn: (value: string) => Failable<SettingsError>;
+  defaultValue?: string;
 }
 
 export interface InputSetting extends BaseSetting {

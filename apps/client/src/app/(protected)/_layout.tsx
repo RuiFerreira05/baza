@@ -1,5 +1,5 @@
-import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons"; // Standard vector icons bundled with Expo
+import { Tabs } from "expo-router";
 
 export default function ProtectedLayout() {
   // Authentication guarding is handled centrally in the root _layout.tsx.
@@ -23,6 +23,20 @@ export default function ProtectedLayout() {
         name="index"
         options={{
           href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: "Settings",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "settings" : "settings-outline"}
+              size={24}
+              color={color}
+            />
+          ),
         }}
       />
 
