@@ -2,21 +2,11 @@ import { Ionicons } from "@expo/vector-icons"; // Standard vector icons bundled 
 import { Tabs } from "expo-router";
 
 export default function ProtectedLayout() {
-  // Authentication guarding is handled centrally in the root _layout.tsx.
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        // tabBarActiveTintColor: "#2f95dc", // Customize the active tab color
-        // tabBarInactiveTintColor: "#8e8e93", // Customize the inactive tab color
-        // tabBarStyle: {
-        //   borderTopWidth: 1,
-        //   borderTopColor: "#e5e5ea",
-        //   height: 50 + insets.bottom,
-        //   paddingBottom: insets.bottom > 0 ? insets.bottom : 6,
-        //   paddingTop: 6,
-        // },
+        animation: "fade",
       }}
     >
       <Tabs.Screen
