@@ -1,6 +1,9 @@
+import { authClient } from "@/lib/auth";
+import { useAccountStore } from "@/store/useAccountStore";
 import { ThemeMode, useSettingsStore } from "@/store/useSettingsStore";
 import { SettingsSchema, SettingsType } from "@/types/settingsTypes";
 import { Ok } from "@baza/shared-types";
+import { router } from "expo-router";
 import { useState } from "react";
 import Toast from "react-native-toast-message";
 
@@ -10,6 +13,8 @@ export const useSettingsViewModel = (): SettingsSchema => {
   const [testToggle, setTestToggle] = useState(false);
   const [hiddenSetting, setHiddenSetting] = useState(true);
   const [hiddenSettingValue, setHiddenSettingValue] = useState("Hidden Value");
+  const clearProfile = useAccountStore((state) => state.clear);
+  const bypassAuth = useAccountStore((state) => state.bypassAuth);
 
   return [
     {
@@ -121,7 +126,31 @@ export const useSettingsViewModel = (): SettingsSchema => {
           description: "Sign out of your account.",
           type: SettingsType.BUTTON,
           onClickFn: () => {
-            console.log("Signing out...");
+            authClient
+              .signOut()
+              .then(() => {
+                clearProfile();
+                Toast.show({
+                  text1: "Signed Out",
+                  text2: "You have been signed out successfully.",
+                  type: "success",
+                  position: "bottom",
+                  bottomOffset: 80,
+                });
+                if (bypassAuth) {
+                  // Simulate authguard activation by navigating to the login page
+                  router.navigate("/auth/login");
+                }
+              })
+              .catch((error) => {
+                Toast.show({
+                  text1: "Sign Out Failed",
+                  text2: `Error: ${error.message}`,
+                  type: "error",
+                  position: "bottom",
+                  bottomOffset: 80,
+                });
+              });
             return Ok();
           },
         },
