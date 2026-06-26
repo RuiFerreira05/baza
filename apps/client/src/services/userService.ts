@@ -1,13 +1,13 @@
 import {
-  ProfileDTO,
+  BlockUserBody,
   CreateProfileBody,
   EditProfileBody,
-  SendFriendRequestBody,
   FriendRequestDTO,
-  SentFriendRequestDTO,
+  ProfileDTO,
   RespondFriendRequestBody,
-  BlockUserBody,
   Result,
+  SendFriendRequestBody,
+  SentFriendRequestDTO,
   StatusError,
 } from "@baza/shared-types";
 import { apiClient, unwrapResult } from "./apiClient";
@@ -18,6 +18,10 @@ export const userService = {
     apiClient(`/v1/restricted/users/${username}`).then(
       unwrapResult<ProfileDTO>,
     ),
+
+  // GET /v1/restricted/users/me
+  getCurrentProfile: (): Promise<Result<ProfileDTO, StatusError>> =>
+    apiClient("/v1/restricted/users/me").then(unwrapResult<ProfileDTO>),
 
   // POST /v1/restricted/users
   createProfile: (

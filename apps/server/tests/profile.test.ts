@@ -508,4 +508,50 @@ describe("Profile Routes", () => {
       .where(and(eq(friends.sentBy, "usera"), eq(friends.receivedBy, "userb")));
     expect(checkFriendship).toHaveLength(0);
   });
+
+  describe("GET /v1/restricted/users/me", () => {
+    it("should retrieve the profile of the currently logged-in user", async () => {
+      vi.mocked(getAuthenticatedUsername).mockResolvedValue("johndoe");
+
+      await db.insert(users).values({
+        id: VALID_USER_ID,
+        name: "John Doe",
+        email: "john@example.com",
+      });
+      await db.insert(profiles).values({
+        userId: VALID_USER_ID,
+        username: "johndoe",
+        settings: {},
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/restricted/users/me",
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = response.json();
+      expect(body.status).toBe("OK");
+      expect(body.data.username).toBe("johndoe");
+      expect(body.data.userId).toBe(VALID_USER_ID);
+    });
+
+    it("should return 401 if getAuthenticatedUsername returns null/undefined", async () => {
+      // Simulate getAuthenticatedUsername failing (returning null and early-returning)
+      vi.mocked(getAuthenticatedUsername).mockImplementation(
+        async (req, res) => {
+          res.status(401).send({ status: "ERROR", error: "UnauthorizedError" });
+          return null;
+        },
+      );
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/restricted/users/me",
+      });
+
+      expect(response.statusCode).toBe(401);
+      expect(response.json().error).toBe("UnauthorizedError");
+    });
+  });
 });

@@ -26,6 +26,7 @@ import {
   createUserProfileHandler,
   deleteUserProfileHandler,
   editUserProfileHandler,
+  getCurrentUserProfileHandler,
 } from "../handlers/profileHandlers";
 import {
   getPersonalEventsHandler,
@@ -57,6 +58,33 @@ import Type from "typebox";
 
 export const userRoutes: FastifyPluginAsync = async (fastify) => {
   const app = fastify.withTypeProvider<TypeBoxTypeProvider>();
+
+  // GET /users/me
+  app.get(
+    "/me",
+    {
+      schema: {
+        description:
+          "This route fetches profile information from the currently logged-in user",
+        tags: ["users"],
+        response: {
+          200: StatusOK(
+            profileDTO,
+            "if the profile information was successfully fetched and converted to the expected format before sending the response",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownUsernameError,
+            "if no profile from user with the provided username was found",
+          ),
+          500: StatusError(
+            ErrorTypes.ConversionError,
+            "if there was an error converting the profile data to the expected format before sending the response",
+          ),
+        },
+      },
+    },
+    getCurrentUserProfileHandler,
+  );
 
   // GET /users/:username
   app.get(

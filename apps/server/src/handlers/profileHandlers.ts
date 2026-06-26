@@ -190,3 +190,57 @@ export const editUserProfileHandler = async (
     return res.send(createStatusOK(result.value));
   }
 };
+
+// GET /users/me
+export const getCurrentUserProfileHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  app.log.info("Received get current user's profile request");
+  const username = req.username;
+
+  if (!username) {
+    app.log.error(
+      "Username missing from request in getCurrentUserProfileHandler",
+    );
+    return res
+      .status(401)
+      .send(
+        createStatusError(
+          ErrorTypes.UnauthorizedError,
+          "Unauthorized request. User profile not found.",
+        ),
+      );
+  }
+
+  app.log.info(`Fetching profile for authenticated user: ${username}`);
+  const data = await getUserByUsername(username);
+
+  if (!data.ok) {
+    switch (data.error) {
+      case ErrorTypes.UnknownUsernameError:
+        app.log.warn("User's profile not found");
+        return res
+          .status(404)
+          .send(
+            createStatusError(
+              ErrorTypes.UnknownUsernameError,
+              "The profile from a user with the username provided was not found",
+            ),
+          );
+
+      case ErrorTypes.ConversionError:
+        app.log.error("Failed to convert profile");
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.ConversionError,
+              "An error occurred while converting the profile data",
+            ),
+          );
+    }
+  } else {
+    return res.send(createStatusOK(data.value));
+  }
+};
