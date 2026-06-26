@@ -1,7 +1,7 @@
 import RootLayout from "@/app/_layout";
 import { authClient } from "@/lib/auth";
 import { useFonts } from "@expo-google-fonts/inter";
-import { render, screen, waitFor } from "@testing-library/react-native";
+import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { useSegments } from "expo-router";
 import React from "react";
 import { Text } from "react-native";
@@ -46,7 +46,7 @@ jest.mock("@/lib/env", () => ({
   },
 }));
 
-jest.mock("@/services/errorReporter", () => ({
+jest.mock("@/lib/errorReporter", () => ({
   errorReporter: {
     initialize: jest.fn(),
     logError: jest.fn(),
@@ -56,6 +56,16 @@ jest.mock("@/services/errorReporter", () => ({
 
 jest.mock("react-native-safe-area-context", () => ({
   SafeAreaProvider: ({ children }: any) => <>{children}</>,
+}));
+
+jest.mock("react-native-keyboard-controller", () => ({
+  KeyboardProvider: ({ children }: any) => <>{children}</>,
+  KeyboardController: {
+    setInputMode: jest.fn(),
+    setDefaultMode: jest.fn(),
+  },
+  useKeyboardHandler: jest.fn(),
+  KeyboardEvents: jest.fn(),
 }));
 
 jest.mock("react-native-toast-message", () => MockToast);
@@ -135,5 +145,31 @@ describe("RootLayout", () => {
       expect(screen.getByText("MockStack")).toBeTruthy();
     });
     expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("should bypass auth if bypassAuth is true in the account store", async () => {
+    const { useAccountStore } = require("@/store/useAccountStore");
+    await act(async () => {
+      useAccountStore.setState({ bypassAuth: true });
+    });
+
+    (useFonts as jest.Mock).mockReturnValue([true]);
+    (authClient.useSession as jest.Mock).mockReturnValue({
+      data: null,
+      isPending: true,
+    });
+    (useSegments as jest.Mock).mockReturnValue(["(protected)", "calendar"]);
+
+    try {
+      await render(<RootLayout />);
+      await waitFor(() => {
+        expect(screen.getByText("MockStack")).toBeTruthy();
+      });
+      expect(mockReplace).not.toHaveBeenCalled();
+    } finally {
+      await act(async () => {
+        useAccountStore.setState({ bypassAuth: false });
+      });
+    }
   });
 });

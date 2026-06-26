@@ -63,8 +63,27 @@ describe("errorReporter", () => {
     );
   });
 
+  it("should log errors via console.error in production (non-dev)", () => {
+    const originalDev = global.__DEV__;
+    // @ts-ignore
+    global.__DEV__ = false;
+    try {
+      const testError = new Error("Production error");
+      const extraInfo = { details: "prod details" };
+      errorReporter.logError(testError, extraInfo);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "[Logged Error]:",
+        testError,
+        extraInfo,
+      );
+    } finally {
+      // @ts-ignore
+      global.__DEV__ = originalDev;
+    }
+  });
+
   it("should log messages via console.log", () => {
-    errorReporter.logMessage("Info message log", "info");
+    errorReporter.logMessage("Info message log");
     expect(consoleLogSpy).toHaveBeenCalledWith("[INFO]:", "Info message log");
 
     errorReporter.logMessage("Warning message log", "warning");

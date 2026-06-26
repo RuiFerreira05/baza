@@ -227,6 +227,43 @@ describe("apiClient", () => {
     }
   });
 
+  it("should not append any query parameters if params object produces an empty query string", async () => {
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+    mockFetch.mockResolvedValue({
+      status: 200,
+      ok: true,
+      headers: new Headers({ "content-type": "application/json" }),
+      json: async () => ({ status: "OK", data: null }),
+    });
+
+    await apiClient("/v1/test", {
+      params: { page: undefined },
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://mock-server.com/v1/test",
+      expect.any(Object),
+    );
+  });
+
+  it("should fallback to default error message if both message and error are missing in non-conforming error response", async () => {
+    const errorBody = {};
+    mockFetch.mockResolvedValue({
+      status: 400,
+      statusText: "Bad Request",
+      ok: false,
+      headers: new Headers({ "content-type": "application/json" }),
+      json: async () => errorBody,
+    });
+
+    const result = await apiClient("/v1/bad-request-empty");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.error.type).toBe(ErrorTypes.MalformedRequestError);
+      expect(result.error.error.message).toBe("Server returned status 400");
+    }
+  });
+
   describe("unwrapResult", () => {
     it("should extract internal data on Ok result", () => {
       const okResult = Ok({ status: "OK" as const, data: "my-payload" });

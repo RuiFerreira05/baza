@@ -4,6 +4,21 @@ import { act, renderHook } from "@testing-library/react-native";
 import * as SecureStore from "expo-secure-store";
 import { Appearance } from "react-native";
 
+const mockUseFonts = jest.fn(() => [true, null]);
+jest.mock("@expo-google-fonts/inter", () => ({
+  useFonts: () => mockUseFonts(),
+  Inter_400Regular: "Inter_400Regular",
+  Inter_500Medium: "Inter_500Medium",
+  Inter_600SemiBold: "Inter_600SemiBold",
+  Inter_700Bold: "Inter_700Bold",
+}));
+
+jest.mock("@/lib/errorReporter", () => ({
+  errorReporter: {
+    logError: jest.fn(),
+  },
+}));
+
 jest.mock("expo-secure-store", () => ({
   getItemAsync: jest.fn(() => Promise.resolve(null)),
   setItemAsync: jest.fn(() => Promise.resolve()),
@@ -121,6 +136,23 @@ describe("useTheme hook", () => {
 
     expect(result.current.themeMode).toBe(ThemeMode.LIGHT);
     
+  });
+
+  it("should log error if useFonts returns an error", async () => {
+    const testError = new Error("Font load failed");
+    mockUseFonts.mockReturnValue([false, testError]);
+
+    try {
+      const { result } = await renderHook(() => useTheme());
+
+      const { errorReporter } = require("@/lib/errorReporter");
+      expect(errorReporter.logError).toHaveBeenCalledWith(testError, {
+        message: "Error loading fonts",
+      });
+      expect(result.current.loading).toBe(true);
+    } finally {
+      mockUseFonts.mockReturnValue([true, null]);
+    }
   });
 });
 
