@@ -31,6 +31,19 @@ jest.mock("@/lib/auth", () => ({
   },
 }));
 
+jest.mock("@/hooks/useAppQuery", () => ({
+  useAppQuery: jest.fn(({ enabled }) => {
+    if (!enabled) {
+      return { data: null, isLoading: false, error: null };
+    }
+    return {
+      data: { username: "johndoe", userId: "1" },
+      isLoading: false,
+      error: null,
+    };
+  }),
+}));
+
 jest.mock("@expo-google-fonts/inter", () => ({
   useFonts: jest.fn(),
   Inter_400Regular: "Inter_400Regular",
