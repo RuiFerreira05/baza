@@ -1,5 +1,5 @@
 import { Theme, ThemeType } from "@/constants/theme";
-import { errorReporter } from "@/services/errorReporter";
+import { errorReporter } from "@/lib/errorReporter";
 import { ThemeMode, useSettingsStore } from "@/store/useSettingsStore";
 import {
   Inter_400Regular,

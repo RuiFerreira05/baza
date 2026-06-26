@@ -1,4 +1,4 @@
-import { errorReporter } from "@/services/errorReporter";
+import { errorReporter } from "@/lib/errorReporter";
 
 describe("errorReporter", () => {
   let consoleErrorSpy: jest.SpyInstance;
