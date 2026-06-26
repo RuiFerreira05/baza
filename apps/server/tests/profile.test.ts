@@ -18,11 +18,9 @@ import {
   friends,
   groups,
   groupMembers,
-  events,
-  personalEvents,
 } from "@baza/db/schemas";
 import { clearDatabase } from "./helpers/dbHelper";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 const VALID_USER_ID = "11111111-1111-1111-1111-111111111111";
 
@@ -552,6 +550,26 @@ describe("Profile Routes", () => {
 
       expect(response.statusCode).toBe(401);
       expect(response.json().error).toBe("UnauthorizedError");
+    });
+
+    it("should return 404 if user is logged in but has no profile in the database", async () => {
+      vi.mocked(getAuthenticatedUsername).mockResolvedValue("johndoe");
+
+      // Insert the user, but do NOT insert a profile for them
+      await db.insert(users).values({
+        id: VALID_USER_ID,
+        name: "John Doe",
+        email: "john@example.com",
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/v1/restricted/users/me",
+      });
+
+      expect(response.statusCode).toBe(404);
+      expect(response.json().status).toBe("ERROR");
+      expect(response.json().error.type).toBe("UnknownUsernameError");
     });
   });
 });

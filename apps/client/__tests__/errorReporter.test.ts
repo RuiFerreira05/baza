@@ -64,9 +64,9 @@ describe("errorReporter", () => {
   });
 
   it("should log errors via console.error in production (non-dev)", () => {
-    const originalDev = global.__DEV__;
+    const originalDev = (globalThis as any).__DEV__;
     // @ts-ignore
-    global.__DEV__ = false;
+    (globalThis as any).__DEV__ = false;
     try {
       const testError = new Error("Production error");
       const extraInfo = { details: "prod details" };

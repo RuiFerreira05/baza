@@ -12,7 +12,9 @@ export default async function globalSetup() {
     process.env.DATABASE_URL ||
     "postgres://postgres:postgres@localhost:5432/baza_test";
 
-  console.log(`[Global Setup] Isolating test database: parsing ${testDatabaseUrl}`);
+  console.log(
+    `[Global Setup] Isolating test database: parsing ${testDatabaseUrl}`,
+  );
 
   let testDbName = "baza_test";
   let baseDatabaseUrl = "postgres://postgres:postgres@localhost:5432/postgres";
@@ -24,35 +26,43 @@ export default async function globalSetup() {
     baseDatabaseUrl = url.toString();
   } catch (err) {
     console.warn(
-      `[Global Setup] Failed to parse DATABASE_URL as URL object, using defaults. Error:`,
+      "[Global Setup] Failed to parse DATABASE_URL as URL object, using defaults. Error:",
       err,
     );
   }
 
-  console.log(`[Global Setup] Connecting to database server to check database: ${testDbName}`);
+  console.log(
+    `[Global Setup] Connecting to database server to check database: ${testDbName}`,
+  );
   const client = new pg.Client({ connectionString: baseDatabaseUrl });
   await client.connect();
 
   try {
     const res = await client.query(
-      `SELECT 1 FROM pg_database WHERE datname = $1`,
+      "SELECT 1 FROM pg_database WHERE datname = $1",
       [testDbName],
     );
     if (res.rowCount === 0) {
-      console.log(`[Global Setup] Database '${testDbName}' does not exist. Creating...`);
+      console.log(
+        `[Global Setup] Database '${testDbName}' does not exist. Creating...`,
+      );
       await client.query(`CREATE DATABASE "${testDbName}"`);
-      console.log(`[Global Setup] Database '${testDbName}' created successfully.`);
+      console.log(
+        `[Global Setup] Database '${testDbName}' created successfully.`,
+      );
     } else {
       console.log(`[Global Setup] Database '${testDbName}' already exists.`);
     }
   } catch (err) {
-    console.error(`[Global Setup] Error checking/creating test database:`, err);
+    console.error("[Global Setup] Error checking/creating test database:", err);
     throw err;
   } finally {
     await client.end();
   }
 
-  console.log(`[Global Setup] Connecting to test database to execute migrations...`);
+  console.log(
+    "[Global Setup] Connecting to test database to execute migrations...",
+  );
   const db = createDbClient(testDatabaseUrl);
 
   try {
@@ -63,9 +73,12 @@ export default async function globalSetup() {
     );
     console.log(`[Global Setup] Running migrations from: ${migrationsFolder}`);
     await migrate(db, { migrationsFolder });
-    console.log(`[Global Setup] Database migrations applied successfully.`);
+    console.log("[Global Setup] Database migrations applied successfully.");
   } catch (err) {
-    console.error(`[Global Setup] Failed to apply migrations to test database:`, err);
+    console.error(
+      "[Global Setup] Failed to apply migrations to test database:",
+      err,
+    );
     throw err;
   }
 }

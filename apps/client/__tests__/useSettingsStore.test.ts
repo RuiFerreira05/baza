@@ -140,7 +140,7 @@ describe("useTheme hook", () => {
 
   it("should log error if useFonts returns an error", async () => {
     const testError = new Error("Font load failed");
-    mockUseFonts.mockReturnValue([false, testError]);
+    mockUseFonts.mockReturnValue([false, testError] as any);
 
     try {
       const { result } = await renderHook(() => useTheme());

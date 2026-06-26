@@ -10,8 +10,6 @@ import {
   createStatusOK,
   ErrorTypes,
   type CreateProfileBody,
-  type ProfileDTO,
-  type SimpleIdParam,
   type SimpleUsernameParam,
   type EditProfileBody,
 } from "@baza/shared-types";
