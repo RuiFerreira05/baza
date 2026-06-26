@@ -23,6 +23,10 @@ import {
   ToggleSetting,
 } from "@/types/settingsTypes";
 import { useSettingsViewModel } from "@/viewmodels/useSettingsViewModel";
+import {
+  KeyboardAvoidingView,
+  KeyboardGestureArea,
+} from "react-native-keyboard-controller";
 
 export default function SettingsScreen() {
   const { colors } = useAppTheme();
@@ -61,16 +65,20 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <SectionList
-        sections={visibleSections}
-        keyExtractor={(item) => item.id}
-        renderItem={renderSettingItem}
-        renderSectionHeader={({ section: { title } }) => (
-          <Text style={styles.sectionHeader}>{title}</Text>
-        )}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        contentContainerStyle={styles.listContent}
-      />
+      <KeyboardAvoidingView behavior="padding">
+        <KeyboardGestureArea>
+          <SectionList
+            sections={visibleSections}
+            keyExtractor={(item) => item.id}
+            renderItem={renderSettingItem}
+            renderSectionHeader={({ section: { title } }) => (
+              <Text style={styles.sectionHeader}>{title}</Text>
+            )}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            contentContainerStyle={styles.listContent}
+          />
+        </KeyboardGestureArea>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
