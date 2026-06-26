@@ -12,19 +12,19 @@ export default function GroupsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Groups Screen</Text>
+      <Text style={styles.title}>Groups Screen</Text>
       {vm.group ? (
-        <View>
-          <Text>Group ID: {vm.group.id}</Text>
-          <Text>Group Name: {vm.group.groupname}</Text>
-          <Text>Group Description: {vm.group.description}</Text>
+        <View style={{ gap: 8 }}>
+          <Text style={styles.text}>Group ID: {vm.group.id}</Text>
+          <Text style={styles.text}>Group Name: {vm.group.groupname}</Text>
+          <Text style={styles.text}>Group Description: {vm.group.description}</Text>
         </View>
       ) : vm.error ? (
         <Text style={{ color: "red" }}>{vm.error}</Text>
       ) : vm.isLoading ? (
         <ActivityIndicator size="large" />
       ) : (
-        <Text>No group found.</Text>
+        <Text style={styles.text}>No group found.</Text>
       )}
 
       <Button title="Refresh Group info" onPress={vm.refetchGroup} />

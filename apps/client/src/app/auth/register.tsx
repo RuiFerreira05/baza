@@ -8,7 +8,7 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Baza Register</Text>
+      <Text style={styles.title}>Baza Register</Text>
 
       <Button
         title="Register (Mock)"

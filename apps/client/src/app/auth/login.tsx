@@ -8,7 +8,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Baza Login</Text>
+      <Text style={styles.title}>Baza Login</Text>
 
       <Button
         title="Login (Mock)"

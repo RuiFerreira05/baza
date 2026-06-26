@@ -16,5 +16,14 @@ export const GlobalStyles = (colors: ThemeType) =>
       justifyContent: "center",
       alignItems: "center",
       gap: 16,
+      backgroundColor: colors.background,
+    },
+    text: {
+      color: colors.onBackground,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: colors.onBackground,
     },
   });

@@ -22,8 +22,8 @@ export default function CalendarScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Calendar Screen</Text>
-      <Text style={{ marginVertical: 20 }}>
+      <Text style={styles.title}>Calendar Screen</Text>
+      <Text style={[styles.text, { marginVertical: 20 }]}>
         Current date: {vm.selectedDate.toDateString()}
       </Text>
 

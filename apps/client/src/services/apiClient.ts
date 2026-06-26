@@ -114,5 +114,5 @@ export function unwrapResult<T>(
   if (!result.ok) {
     return result;
   }
-  return Ok(result.value.data as T);
+  return Ok(result.value!.data as T);
 }

@@ -13,9 +13,11 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Profile Screen</Text>
+      <Text style={styles.title}>Profile Screen</Text>
 
-      <Text style={{ marginTop: 10 }}>Current Theme Mode: {themeMode}</Text>
+      <Text style={[styles.text, { marginTop: 10 }]}>
+        Current Theme Mode: {themeMode}
+      </Text>
       <Button
         title="Change to dark"
         onPress={() => settingsStore.setThemeMode(ThemeMode.DARK)}

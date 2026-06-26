@@ -22,7 +22,7 @@ export function useAppMutation<TData, TVariables = void>(
       if (!result.ok) {
         throw result.error;
       }
-      return result.value;
+      return result.value as TData;
     },
   });
 }

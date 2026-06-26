@@ -1,4 +1,5 @@
-import { ThemeMode, useSettingsStore, useTheme } from "@/store/useSettingsStore";
+import { ThemeMode, useSettingsStore } from "@/store/useSettingsStore";
+import { useAppTheme as useTheme } from "@/hooks/useAppTheme";
 import { act, renderHook } from "@testing-library/react-native";
 import * as SecureStore from "expo-secure-store";
 import { Appearance } from "react-native";

@@ -1,14 +1,10 @@
+import { getToastConfig } from "@/components/ToastConfig";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { authClient } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { queryClient } from "@/lib/queryClient";
 import { errorReporter } from "@/services/errorReporter";
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  useFonts,
-} from "@expo-google-fonts/inter";
+import { ThemeProvider } from "@react-navigation/native";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
@@ -27,19 +23,14 @@ const BYPASS_AUTH = __DEV__ && env.EXPO_PUBLIC_BYPASS_AUTH === "true";
 console.log(`Bypass auth: ${BYPASS_AUTH}`);
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-  });
+  const { colors, appTheme, loading: themeLoading } = useAppTheme();
+  const toastConfig = getToastConfig(colors, appTheme);
 
   const { data: session, isPending } = authClient.useSession();
-
   const segments = useSegments();
   const router = useRouter();
 
-  const isReady = fontsLoaded && (BYPASS_AUTH || !isPending);
+  const isReady = !themeLoading && (BYPASS_AUTH || !isPending);
 
   useEffect(() => {
     if (!isReady) return;
@@ -62,8 +53,10 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
-        <Stack screenOptions={{ headerShown: false }} />
-        <Toast />
+        <ThemeProvider value={appTheme}>
+          <Stack screenOptions={{ headerShown: false }} />
+          <Toast config={toastConfig} />
+        </ThemeProvider>
       </SafeAreaProvider>
     </QueryClientProvider>
   );
