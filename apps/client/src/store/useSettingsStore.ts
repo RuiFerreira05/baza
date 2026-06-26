@@ -1,19 +1,12 @@
-import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { secureStoreAdapter } from "./secureStoreAdapter";
 
 export enum ThemeMode {
   LIGHT = "light",
   DARK = "dark",
   SYSTEM = "system",
 }
-
-const secureStoreAdapter = {
-  getItem: (name: string) => SecureStore.getItemAsync(name),
-  setItem: (name: string, value: string) =>
-    SecureStore.setItemAsync(name, value),
-  removeItem: (name: string) => SecureStore.deleteItemAsync(name),
-};
 
 interface SettingsState {
   themeMode: ThemeMode;

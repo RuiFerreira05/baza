@@ -112,5 +112,20 @@ export const useSettingsViewModel = (): SettingsSchema => {
         },
       ],
     },
+    {
+      title: "Account",
+      settings: [
+        {
+          id: "signOut",
+          label: "Sign Out",
+          description: "Sign out of your account.",
+          type: SettingsType.BUTTON,
+          onClickFn: () => {
+            console.log("Signing out...");
+            return Ok();
+          },
+        },
+      ],
+    },
   ];
 };
