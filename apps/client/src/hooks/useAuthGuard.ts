@@ -75,7 +75,7 @@ export function useAuthGuard() {
 
     const inProtectedGroup = segments[0] === "(protected)";
     const inAuthGroup = segments[0] === "auth";
-    const isCreateProfileScreen = segments[1] === "createProfile";
+    const inOnboardingGroup = segments[0] === "(onboarding)";
 
     // Scenario A: No active session
     if (!session) {
@@ -89,15 +89,15 @@ export function useAuthGuard() {
     const hasNoProfile =
       queryError?.error?.type === ErrorTypes.UnknownUsernameError;
     if (hasNoProfile) {
-      if (!isCreateProfileScreen) {
-        router.replace("/auth/createProfile");
+      if (!inOnboardingGroup) {
+        router.replace("/(onboarding)/createProfile");
       }
       return;
     }
 
     // Scenario C: Profile loaded successfully
     if (profileData) {
-      if (inAuthGroup || isCreateProfileScreen) {
+      if (inAuthGroup || inOnboardingGroup) {
         router.replace("/(protected)/calendar");
       }
     }
