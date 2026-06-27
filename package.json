@@ -1,16 +1,4 @@
 {
-  "//": [
-    "This file is essentially the heart of the project. It defines the name of the project, its",
-    "version, its global dependencies, and some scripts we are gonna be using. Every package in the",
-    "monorepo will have its own package.json file with more specific dependencies and scripts but this",
-    "one kinda ties everything together. It is important to mention that dependencies defined here are not",
-    "automatically available to all packages, they are just installed at the root level and can be",
-    "then consumed by the packages that need them. Meaning we have a single source of truth for our",
-    "dependencies versions.",
-    "And yes, this is how comments are done here, it sucks, and therefore i won't be adding more ",
-    "comments to the other package.json files in the project. They can get pretty complex tho, so ",
-    "if you need clarification on any of them, just ask."
-  ],
   "name": "baza",
   "version": "0.0.1",
   "private": true,
@@ -21,8 +9,12 @@
     "db:generate": "pnpm --filter @baza/db db:generate",
     "db:migrate": "pnpm --filter @baza/db db:migrate",
     "db:seed": "tsx packages/db/src/seed.ts",
+    "test": "pnpm -r test",
     "test:server": "pnpm --filter @baza/server test",
-    "lint": "pnpm -r lint"
+    "test:client": "pnpm --filter @baza/client test",
+    "lint": "pnpm -r lint",
+    "lint:server": "pnpm --filter @baza/server lint",
+    "lint:client": "pnpm --filter @baza/client lint"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
