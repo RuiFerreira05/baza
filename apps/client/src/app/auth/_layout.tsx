@@ -1,10 +1,32 @@
-import { Stack } from "expo-router";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
 
 export default function AuthLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="login" />
-      <Stack.Screen name="register" />
-    </Stack>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        animation: "fade",
+      }}
+    >
+      <Tabs.Screen
+        name="login"
+        options={{
+          title: "Login",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="login" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="register"
+        options={{
+          title: "Register",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="person-add" size={24} color={color} />
+          ),
+        }}
+      />
+    </Tabs>
   );
 }
