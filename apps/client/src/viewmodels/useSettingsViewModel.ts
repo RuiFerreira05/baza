@@ -36,6 +36,7 @@ export const useSettingsViewModel = (): SettingsSchema => {
     },
     {
       title: "Testing",
+      visibilityFn: () => __DEV__,
       settings: [
         {
           id: "testButton",

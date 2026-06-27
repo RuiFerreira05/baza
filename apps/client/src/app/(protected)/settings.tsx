@@ -35,6 +35,7 @@ export default function SettingsScreen() {
   // 1. Filter out hidden settings and format for SectionList
   const visibleSections = useMemo(() => {
     return rawSections
+      .filter((section) => !section.visibilityFn || section.visibilityFn())
       .map((section) => ({
         title: section.title,
         data: section.settings.filter(
