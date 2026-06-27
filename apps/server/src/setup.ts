@@ -14,6 +14,7 @@ import { FSUploadService } from "./lib/FSUploadService";
 import { authPreHandler } from "./middlewares/authMiddleware";
 import { groupRoutes } from "./routes/groupRoutes";
 import { userRoutes } from "./routes/profileRoutes";
+import { auditLogger } from "./lib/auditLogger";
 
 // ##### APP SETUP #####
 
@@ -137,6 +138,54 @@ app.register(
   { prefix: "/v1/restricted" },
 );
 
+// ##### AUDITING HOOK SETUP #####
+
+app.addHook("onResponse", async (request, reply) => {
+  // Audit requests matching protected paths or auth endpoints
+  const isAuthOrRestricted =
+    request.url.startsWith("/v1/restricted") ||
+    request.url.startsWith("/api/auth");
+
+  if (!isAuthOrRestricted) return;
+
+  const duration = reply.elapsedTime || 0;
+  const userId = request.session?.user?.id || null;
+  const username = request.username || null;
+
+  // Determine dynamic logging level and outcome status text
+  let level: "info" | "warn" | "error" = "info";
+  let statusText = "Success";
+
+  if (reply.statusCode >= 500) {
+    level = "error";
+    statusText = "Server Error";
+  } else if (reply.statusCode >= 400) {
+    level = "warn";
+    statusText = "Client Error";
+  }
+
+  // Pre-render a highly readable, human-friendly summary message
+  const userIdentity = username ? `User '${username}'` : "Anonymous user";
+  const durationText = `${Math.round(duration)}ms`;
+  const readableMsg = `${userIdentity} performed ${request.method} ${request.url} - STATUS: ${reply.statusCode} (${statusText}) - IP: ${request.ip} - DURATION: ${durationText}`;
+
+  // Log the structured JSON entry with the friendly message
+  auditLogger[level]({
+    msg: readableMsg,
+    audit: {
+      userId,
+      username,
+      ipAddress: request.ip,
+      method: request.method,
+      path: request.url,
+      route: request.routeOptions?.url || null,
+      statusCode: reply.statusCode,
+      success: reply.statusCode >= 200 && reply.statusCode < 400,
+      durationMs: Math.round(duration),
+    },
+  });
+});
+
 if (env.FILE_UPLOAD_SERVICE === "fs") {
   app.register(fastifyStatic, {
     root: path.resolve(env.UPLOAD_DIR),
@@ -151,6 +200,12 @@ async function bootstrapDirs() {
   if (!fs.existsSync(logsDir)) {
     app.log.info(`Logs directory not found, creating at ${logsDir}`);
     fs.mkdirSync(logsDir, { recursive: true });
+  }
+
+  const auditLogsDir = path.dirname(env.AUDIT_LOG_FILE_PATH);
+  if (!fs.existsSync(auditLogsDir)) {
+    app.log.info(`Audit logs directory not found, creating at ${auditLogsDir}`);
+    fs.mkdirSync(auditLogsDir, { recursive: true });
   }
 
   app.log.info("Required directories are set up");

@@ -33,6 +33,10 @@ const serverEnvSchema = Type.Object({
     description: "The file path where server logs will be written",
     default: "./logs/server.log",
   }),
+  AUDIT_LOG_FILE_PATH: Type.String({
+    description: "The file path where audit logs will be written",
+    default: "./logs/audit.log",
+  }),
   FILE_UPLOAD_SERVICE: Type.Union([Type.Literal("fs")], {
     description: "The file upload service to use for handling file uploads",
     default: "fs",
