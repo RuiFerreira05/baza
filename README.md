@@ -64,8 +64,9 @@ The backend API routes registered on the server are detailed below.
 
 | Method     | Path                                          | Description                                             |
 | :--------- | :-------------------------------------------- | :------------------------------------------------------ |
-| **GET**    | `/:username`                                  | Fetch public profile details                            |
 | **POST**   | `/`                                           | Initialize user profile                                 |
+| **GET**    | `/me`                                         | Fetch authenticated user profile                        |
+| **GET**    | `/:username`                                  | Fetch public profile details                            |
 | **DELETE** | `/:username`                                  | Delete user profile                                     |
 | **PATCH**  | `/:username`                                  | Edit user profile (username/bio)                        |
 | **GET**    | `/:username/events`                           | List all user calendar events in a date window          |
