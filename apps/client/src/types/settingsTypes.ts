@@ -5,6 +5,7 @@ export type SettingsSchema = SettingsSection[];
 export interface SettingsSection {
   title: string;
   settings: Settings[];
+  visibilityFn?: () => boolean;
 }
 
 export type Settings =

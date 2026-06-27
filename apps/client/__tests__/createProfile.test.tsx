@@ -1,6 +1,6 @@
+import CreateProfileScreen from "@/app/(onboarding)/createProfile";
+import { fireEvent, render } from "@testing-library/react-native";
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
-import CreateProfileScreen from "@/app/auth/createProfile";
 
 jest.mock("@/lib/env", () => ({
   env: {
