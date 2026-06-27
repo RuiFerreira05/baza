@@ -62,7 +62,7 @@ export type Err<E> = { ok: false; error: E };
 
 export const Ok = <T>(value?: T): Ok<T> => ({
   ok: true,
-  value: value ?? undefined,
+  value: value === undefined ? undefined : value,
 });
 export const Err = <E>(error: E): Err<E> => ({ ok: false, error });
 
