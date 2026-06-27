@@ -31,10 +31,7 @@ describe("ToastConfig", () => {
   it("should render success toast with correct styles and text", async () => {
     const SuccessToastComponent = config.success;
     await render(
-      <SuccessToastComponent
-        text1="Success Title"
-        text2="Success Details"
-      />
+      <SuccessToastComponent text1="Success Title" text2="Success Details" />,
     );
 
     expect(screen.getByText("Success Title")).toBeTruthy();
@@ -44,10 +41,7 @@ describe("ToastConfig", () => {
   it("should render error toast with correct styles and text", async () => {
     const ErrorToastComponent = config.error;
     await render(
-      <ErrorToastComponent
-        text1="Error Title"
-        text2="Error Details"
-      />
+      <ErrorToastComponent text1="Error Title" text2="Error Details" />,
     );
 
     expect(screen.getByText("Error Title")).toBeTruthy();
@@ -57,10 +51,7 @@ describe("ToastConfig", () => {
   it("should render info toast with correct styles and text", async () => {
     const InfoToastComponent = config.info;
     await render(
-      <InfoToastComponent
-        text1="Info Title"
-        text2="Info Details"
-      />
+      <InfoToastComponent text1="Info Title" text2="Info Details" />,
     );
 
     expect(screen.getByText("Info Title")).toBeTruthy();

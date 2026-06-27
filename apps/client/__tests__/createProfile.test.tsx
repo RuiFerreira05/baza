@@ -1,3 +1,7 @@
+import React from "react";
+import { render, fireEvent } from "@testing-library/react-native";
+import CreateProfileScreen from "@/app/auth/createProfile";
+
 jest.mock("@/lib/env", () => ({
   env: {
     EXPO_PUBLIC_SERVER_URL: "http://mock-server.com",
@@ -19,10 +23,6 @@ jest.mock("expo-router", () => ({
     replace: mockReplace,
   }),
 }));
-
-import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
-import CreateProfileScreen from "@/app/auth/createProfile";
 
 describe("CreateProfileScreen", () => {
   beforeEach(() => {

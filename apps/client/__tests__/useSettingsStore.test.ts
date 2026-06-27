@@ -96,7 +96,7 @@ describe("useTheme hook", () => {
     const { result } = await renderHook(() => useTheme());
 
     expect(result.current.themeMode).toBe(ThemeMode.SYSTEM);
-    
+
     expect(result.current.colors).toBeDefined();
   });
 
@@ -106,7 +106,7 @@ describe("useTheme hook", () => {
     const { result } = await renderHook(() => useTheme());
 
     expect(result.current.themeMode).toBe(ThemeMode.SYSTEM);
-    
+
     expect(result.current.colors).toBeDefined();
   });
 
@@ -121,7 +121,6 @@ describe("useTheme hook", () => {
     const { result } = await renderHook(() => useTheme());
 
     expect(result.current.themeMode).toBe(ThemeMode.DARK);
-    
   });
 
   it("should resolve isDark to false if themeMode is set explicitly to light", async () => {
@@ -135,7 +134,6 @@ describe("useTheme hook", () => {
     const { result } = await renderHook(() => useTheme());
 
     expect(result.current.themeMode).toBe(ThemeMode.LIGHT);
-    
   });
 
   it("should log error if useFonts returns an error", async () => {
@@ -155,4 +153,3 @@ describe("useTheme hook", () => {
     }
   });
 });
-

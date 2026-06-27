@@ -1,12 +1,11 @@
-import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { useAppQuery } from "@/hooks/useAppQuery";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { authClient } from "@/lib/auth";
 import { userService } from "@/services/userService";
 import { useAccountStore } from "@/store/useAccountStore";
-import { createStatusError, Err, ErrorTypes, Ok } from "@baza/shared-types";
-import { renderHook, waitFor, act } from "@testing-library/react-native";
+import { createStatusError, ErrorTypes } from "@baza/shared-types";
+import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { useSegments } from "expo-router";
-import React from "react";
 import { createWrapper } from "./helpers/wrapper";
 
 const mockReplace = jest.fn();
@@ -231,7 +230,9 @@ describe("useAuthGuard", () => {
     });
 
     const wrapper = createWrapper();
-    const { result, rerender } = await renderHook(() => useAuthGuard(), { wrapper });
+    const { result, rerender } = await renderHook(() => useAuthGuard(), {
+      wrapper,
+    });
 
     await waitFor(() => expect(result.current.isReady).toBe(true));
 
@@ -297,7 +298,9 @@ describe("useAuthGuard", () => {
     });
 
     const wrapper = createWrapper();
-    const { result, rerender } = await renderHook(() => useAuthGuard(), { wrapper });
+    const { result, rerender } = await renderHook(() => useAuthGuard(), {
+      wrapper,
+    });
 
     await waitFor(() => expect(useAccountStore.getState().loading).toBe(true));
     expect(setLoadingSpy).toHaveBeenCalledWith(true);
@@ -329,7 +332,10 @@ describe("useAuthGuard", () => {
     });
     (useSegments as jest.Mock).mockReturnValue(["(protected)", "calendar"]);
 
-    const mockError = createStatusError(ErrorTypes.UnknownUsernameError, "Error");
+    const mockError = createStatusError(
+      ErrorTypes.UnknownUsernameError,
+      "Error",
+    );
 
     (useAppQuery as jest.Mock).mockImplementation((options) => {
       if (options.enabled && typeof options.queryFn === "function") {
@@ -345,7 +351,9 @@ describe("useAuthGuard", () => {
     const wrapper = createWrapper();
     const { result } = await renderHook(() => useAuthGuard(), { wrapper });
 
-    await waitFor(() => expect(useAccountStore.getState().error).toEqual(mockError));
+    await waitFor(() =>
+      expect(useAccountStore.getState().error).toEqual(mockError),
+    );
     expect(setErrorSpy).toHaveBeenCalledWith(mockError);
 
     setErrorSpy.mockRestore();

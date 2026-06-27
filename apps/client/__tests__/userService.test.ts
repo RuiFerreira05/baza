@@ -1,13 +1,13 @@
+import { userService } from "@/services/userService";
+import { apiClient } from "@/services/apiClient";
+import { Ok, Err, createStatusError, ErrorTypes } from "@baza/shared-types";
+
 jest.mock("@/lib/env", () => ({
   env: {
     EXPO_PUBLIC_SERVER_URL: "http://mock-server.com",
     EXPO_PUBLIC_BYPASS_AUTH: "false",
   },
 }));
-
-import { userService } from "@/services/userService";
-import { apiClient } from "@/services/apiClient";
-import { Ok, Err, createStatusError, ErrorTypes } from "@baza/shared-types";
 
 jest.mock("@/services/apiClient", () => {
   const actual = jest.requireActual("@/services/apiClient");
@@ -28,7 +28,7 @@ describe("userService", () => {
 
   const mockError = createStatusError(
     ErrorTypes.UnknownUsernameError,
-    "User not found"
+    "User not found",
   );
 
   beforeEach(() => {
@@ -38,7 +38,7 @@ describe("userService", () => {
   describe("getProfile", () => {
     it("should retrieve a user profile successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: mockProfile })
+        Ok({ status: "OK", data: mockProfile }),
       );
 
       const result = await userService.getProfile("johndoe");
@@ -59,7 +59,7 @@ describe("userService", () => {
   describe("getCurrentProfile", () => {
     it("should retrieve the current user profile successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: mockProfile })
+        Ok({ status: "OK", data: mockProfile }),
       );
 
       const result = await userService.getCurrentProfile();
@@ -82,7 +82,7 @@ describe("userService", () => {
 
     it("should create a profile successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: mockProfile })
+        Ok({ status: "OK", data: mockProfile }),
       );
 
       const result = await userService.createProfile(body);
@@ -106,7 +106,7 @@ describe("userService", () => {
   describe("deleteProfile", () => {
     it("should delete profile successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: mockProfile })
+        Ok({ status: "OK", data: mockProfile }),
       );
 
       const result = await userService.deleteProfile("johndoe");
@@ -131,7 +131,7 @@ describe("userService", () => {
 
     it("should edit profile successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: mockProfile })
+        Ok({ status: "OK", data: mockProfile }),
       );
 
       const result = await userService.editProfile("johndoe", body);
@@ -157,12 +157,14 @@ describe("userService", () => {
 
     it("should retrieve friends list successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: mockFriends })
+        Ok({ status: "OK", data: mockFriends }),
       );
 
       const result = await userService.getFriends("johndoe");
 
-      expect(apiClient).toHaveBeenCalledWith("/v1/restricted/users/johndoe/friends");
+      expect(apiClient).toHaveBeenCalledWith(
+        "/v1/restricted/users/johndoe/friends",
+      );
       expect(result).toEqual(Ok(mockFriends));
     });
 
@@ -178,13 +180,13 @@ describe("userService", () => {
   describe("getFriendProfile", () => {
     it("should retrieve friend profile successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: mockProfile })
+        Ok({ status: "OK", data: mockProfile }),
       );
 
       const result = await userService.getFriendProfile("usera", "userb");
 
       expect(apiClient).toHaveBeenCalledWith(
-        "/v1/restricted/users/usera/friends/userb"
+        "/v1/restricted/users/usera/friends/userb",
       );
       expect(result).toEqual(Ok(mockProfile));
     });
@@ -201,14 +203,14 @@ describe("userService", () => {
   describe("removeFriend", () => {
     it("should remove friend successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: null })
+        Ok({ status: "OK", data: null }),
       );
 
       const result = await userService.removeFriend("usera", "userb");
 
       expect(apiClient).toHaveBeenCalledWith(
         "/v1/restricted/users/usera/friends/userb",
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
       expect(result).toEqual(Ok(null));
     });
@@ -227,14 +229,14 @@ describe("userService", () => {
 
     it("should send friend request successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: null })
+        Ok({ status: "OK", data: null }),
       );
 
       const result = await userService.sendFriendRequest("usera", body);
 
       expect(apiClient).toHaveBeenCalledWith(
         "/v1/restricted/users/usera/friends/requests",
-        { method: "POST", json: body }
+        { method: "POST", json: body },
       );
       expect(result).toEqual(Ok(null));
     });
@@ -249,17 +251,19 @@ describe("userService", () => {
   });
 
   describe("getPendingFriendRequests", () => {
-    const mockRequests = [{ sender: mockProfile, id: "req-1", status: "pending" }];
+    const mockRequests = [
+      { sender: mockProfile, id: "req-1", status: "pending" },
+    ];
 
     it("should retrieve pending friend requests successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: mockRequests })
+        Ok({ status: "OK", data: mockRequests }),
       );
 
       const result = await userService.getPendingFriendRequests("usera");
 
       expect(apiClient).toHaveBeenCalledWith(
-        "/v1/restricted/users/usera/friends/requests"
+        "/v1/restricted/users/usera/friends/requests",
       );
       expect(result).toEqual(Ok(mockRequests));
     });
@@ -274,17 +278,19 @@ describe("userService", () => {
   });
 
   describe("getPendingSentFriendRequests", () => {
-    const mockSentRequests = [{ recipient: mockProfile, id: "req-1", status: "pending" }];
+    const mockSentRequests = [
+      { recipient: mockProfile, id: "req-1", status: "pending" },
+    ];
 
     it("should retrieve pending sent requests successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: mockSentRequests })
+        Ok({ status: "OK", data: mockSentRequests }),
       );
 
       const result = await userService.getPendingSentFriendRequests("usera");
 
       expect(apiClient).toHaveBeenCalledWith(
-        "/v1/restricted/users/usera/friends/requests/sent"
+        "/v1/restricted/users/usera/friends/requests/sent",
       );
       expect(result).toEqual(Ok(mockSentRequests));
     });
@@ -303,14 +309,18 @@ describe("userService", () => {
 
     it("should respond to friend request successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: null })
+        Ok({ status: "OK", data: null }),
       );
 
-      const result = await userService.respondFriendRequest("userb", "usera", body);
+      const result = await userService.respondFriendRequest(
+        "userb",
+        "usera",
+        body,
+      );
 
       expect(apiClient).toHaveBeenCalledWith(
         "/v1/restricted/users/userb/friends/requests/usera",
-        { method: "PATCH", json: body }
+        { method: "PATCH", json: body },
       );
       expect(result).toEqual(Ok(null));
     });
@@ -318,7 +328,11 @@ describe("userService", () => {
     it("should return an error when responding fails", async () => {
       (apiClient as jest.Mock).mockResolvedValue(Err(mockError));
 
-      const result = await userService.respondFriendRequest("userb", "usera", body);
+      const result = await userService.respondFriendRequest(
+        "userb",
+        "usera",
+        body,
+      );
 
       expect(result).toEqual(Err(mockError));
     });
@@ -329,14 +343,14 @@ describe("userService", () => {
 
     it("should block user successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: null })
+        Ok({ status: "OK", data: null }),
       );
 
       const result = await userService.blockUser("usera", body);
 
       expect(apiClient).toHaveBeenCalledWith(
         "/v1/restricted/users/usera/blocks",
-        { method: "POST", json: body }
+        { method: "POST", json: body },
       );
       expect(result).toEqual(Ok(null));
     });
@@ -353,14 +367,14 @@ describe("userService", () => {
   describe("unblockUser", () => {
     it("should unblock user successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: null })
+        Ok({ status: "OK", data: null }),
       );
 
       const result = await userService.unblockUser("usera", "userb");
 
       expect(apiClient).toHaveBeenCalledWith(
         "/v1/restricted/users/usera/blocks/userb",
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
       expect(result).toEqual(Ok(null));
     });
@@ -379,13 +393,13 @@ describe("userService", () => {
 
     it("should retrieve settings successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: settings })
+        Ok({ status: "OK", data: settings }),
       );
 
       const result = await userService.getSettings("johndoe");
 
       expect(apiClient).toHaveBeenCalledWith(
-        "/v1/restricted/users/johndoe/settings"
+        "/v1/restricted/users/johndoe/settings",
       );
       expect(result).toEqual(Ok(settings));
     });
@@ -404,14 +418,14 @@ describe("userService", () => {
 
     it("should update settings successfully", async () => {
       (apiClient as jest.Mock).mockResolvedValue(
-        Ok({ status: "OK", data: settings })
+        Ok({ status: "OK", data: settings }),
       );
 
       const result = await userService.updateSettings("johndoe", settings);
 
       expect(apiClient).toHaveBeenCalledWith(
         "/v1/restricted/users/johndoe/settings",
-        { method: "PATCH", json: settings }
+        { method: "PATCH", json: settings },
       );
       expect(result).toEqual(Ok(settings));
     });
