@@ -1,7 +1,13 @@
 import { useAuthStyles } from "@/constants/styles/useAuthStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useRegisterViewModel } from "@/viewmodels/useRegisterViewModel";
-import { KeyboardAvoidingView, Pressable, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 import { KeyboardGestureArea } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LabeledInput from "../../components/LabeledInput";
@@ -28,7 +34,7 @@ export default function RegisterScreen() {
                 label="Name"
                 value={vm.name}
                 onChangeText={vm.setName}
-                placeholder="Your full name"
+                placeholder="Your name"
                 autoCapitalize="words"
                 autoCorrect={false}
                 isCorrect={vm.isNameValid}
@@ -88,7 +94,11 @@ export default function RegisterScreen() {
                   vm.onSignUp();
                 }}
               >
-                <Text style={styles.buttonText}>Sign Up</Text>
+                {!vm.loading ? (
+                  <Text style={styles.buttonText}>Sign In</Text>
+                ) : (
+                  <ActivityIndicator color={colors.onPrimary} size={"small"} />
+                )}
               </Pressable>
               {vm.error ? (
                 <Text style={{ color: colors.error, marginTop: 8 }}>

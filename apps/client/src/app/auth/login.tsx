@@ -1,17 +1,21 @@
 import LabeledInput from "@/components/LabeledInput";
 import { useAuthStyles } from "@/constants/styles/useAuthStyles";
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import { KeyboardAvoidingView, Pressable, Text, View } from "react-native";
+import { useAppTheme } from "@/hooks/useAppTheme";
+import { useLoginViewModel } from "@/viewmodels/useLoginViewModel";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 import { KeyboardGestureArea } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
   const styles = useAuthStyles();
-  const router = useRouter();
-
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
+  const { colors } = useAppTheme();
+  const vm = useLoginViewModel();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -27,35 +31,48 @@ export default function LoginScreen() {
 
             <View style={styles.form}>
               <LabeledInput
-                label="Email or Username"
-                value={identifier}
-                onChangeText={setIdentifier}
-                placeholder="Enter email or username"
+                label="Email or name"
+                value={vm.identifier}
+                onChangeText={vm.setIdentifier}
+                placeholder="Enter email or name"
                 autoCapitalize="none"
                 autoCorrect={false}
+                isCorrect={vm.isIdentifierValid}
               />
 
               <LabeledInput
                 label="Password"
-                value={password}
-                onChangeText={setPassword}
+                value={vm.password}
+                onChangeText={vm.setPassword}
                 placeholder="Enter password"
                 secureTextEntry
                 autoCapitalize="none"
                 autoCorrect={false}
+                isCorrect={vm.isPasswordValid}
               />
 
               <Pressable
                 style={({ pressed }) => [
                   styles.button,
                   pressed && styles.buttonPressed,
+                  !vm.isFormValid && styles.buttonDisabled,
                 ]}
+                disabled={!vm.isFormValid}
                 onPress={() => {
-                  router.replace("/(protected)");
+                  vm.onSignIn();
                 }}
               >
-                <Text style={styles.buttonText}>Sign In</Text>
+                {!vm.loading ? (
+                  <Text style={styles.buttonText}>Sign In</Text>
+                ) : (
+                  <ActivityIndicator color={colors.onPrimary} size={"small"} />
+                )}
               </Pressable>
+              {vm.error ? (
+                <Text style={{ color: colors.error, marginTop: 8 }}>
+                  {vm.error}
+                </Text>
+              ) : null}
             </View>
           </View>
         </KeyboardGestureArea>

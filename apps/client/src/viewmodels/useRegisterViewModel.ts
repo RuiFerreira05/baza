@@ -1,3 +1,4 @@
+import { authClient } from "@/lib/auth";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 
@@ -26,11 +27,24 @@ export const useRegisterViewModel = () => {
     setLoading(true);
     if (!isFormValid) {
       setError("Please fill out all fields correctly.");
+      setLoading(false);
       return;
     }
-    // authClient.signUp({
-
-    // })
+    authClient.signUp
+      .email({
+        name,
+        email,
+        password,
+      })
+      .then(() => {
+        router.replace("/(protected)");
+      })
+      .catch((err) => {
+        setError(err.message || "An error occurred during registration.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return {
@@ -45,6 +59,8 @@ export const useRegisterViewModel = () => {
     error,
     setError,
     onSignUp,
+    loading,
+    setLoading,
     isNameValid,
     isEmailValid,
     isPasswordValid,
