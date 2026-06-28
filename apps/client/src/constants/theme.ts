@@ -5,11 +5,16 @@ const Colors = {
   Indigo500: "#6366F1",
   Indigo400: "#818CF8",
   Indigo950: "#1E1B4B",
+  Indigo: "#5A43EA",
+  IndigoMedium: "#CBC3FD",
+  IndigoLight: "#EEEBFC",
 
   // Secondary color palette (Sky/Cyan-based)
   Sky500: "#0EA5E9",
   Sky400: "#38BDF8",
   Sky800: "#0369A1",
+  Lime: "#D3EA43",
+  Green: "#70B31A",
 
   // Tertiary/Success color palette (Emerald-based)
   Emerald500: "#10B981",
@@ -40,11 +45,11 @@ export type ThemeType = Record<keyof typeof Theme.light, string>;
 
 export const Theme = {
   light: {
-    primary: Colors.Indigo500,
+    primary: Colors.Indigo,
     onPrimary: Colors.White,
-    secondary: Colors.Sky500,
+    secondary: Colors.Lime,
     onSecondary: Colors.White,
-    tertiary: Colors.Emerald500,
+    tertiary: Colors.Green,
     onTertiary: Colors.White,
 
     background: Colors.Slate50,
@@ -55,7 +60,7 @@ export const Theme = {
 
     surface: Colors.White,
     onSurface: Colors.Slate900,
-    surfaceVariant: Colors.Slate100,
+    surfaceVariant: Colors.IndigoLight,
     onSurfaceVariant: Colors.Slate500,
 
     error: Colors.Red500,
@@ -64,12 +69,12 @@ export const Theme = {
     onSuccess: Colors.White,
   },
   dark: {
-    primary: Colors.Indigo400,
+    primary: Colors.IndigoMedium,
     onPrimary: Colors.Indigo950,
-    secondary: Colors.Sky400,
-    onSecondary: Colors.Sky800,
-    tertiary: Colors.Emerald400,
-    onTertiary: Colors.Emerald950,
+    secondary: Colors.Indigo,
+    onSecondary: Colors.White,
+    tertiary: Colors.Lime,
+    onTertiary: Colors.Indigo,
 
     background: Colors.Slate950,
     onBackground: Colors.Slate100,
