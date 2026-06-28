@@ -1,6 +1,5 @@
 import LabeledInput from "@/components/LabeledInput";
 import { useAuthStyles } from "@/constants/styles/useAuthStyles";
-import { useAppTheme } from "@/hooks/useAppTheme";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, Pressable, Text, View } from "react-native";
@@ -9,7 +8,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
   const styles = useAuthStyles();
-  const { colors } = useAppTheme();
   const router = useRouter();
 
   const [identifier, setIdentifier] = useState("");

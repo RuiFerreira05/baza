@@ -127,31 +127,32 @@ export const useSettingsViewModel = (): SettingsSchema => {
           description: "Sign out of your account.",
           type: SettingsType.BUTTON,
           onClickFn: () => {
-            authClient
-              .signOut()
-              .then(() => {
-                clearProfile();
-                Toast.show({
-                  text1: "Signed Out",
-                  text2: "You have been signed out successfully.",
-                  type: "success",
-                  position: "bottom",
-                  bottomOffset: 80,
+            if (bypassAuth) {
+              // Simulate authguard activation by navigating to the login page
+              router.replace("/auth/login");
+            } else {
+              authClient
+                .signOut()
+                .then(() => {
+                  clearProfile();
+                  Toast.show({
+                    text1: "Signed Out",
+                    text2: "You have been signed out successfully.",
+                    type: "success",
+                    position: "bottom",
+                    bottomOffset: 80,
+                  });
+                })
+                .catch((error) => {
+                  Toast.show({
+                    text1: "Sign Out Failed",
+                    text2: `Error: ${error.message}`,
+                    type: "error",
+                    position: "bottom",
+                    bottomOffset: 80,
+                  });
                 });
-                if (bypassAuth) {
-                  // Simulate authguard activation by navigating to the login page
-                  router.navigate("/auth/login");
-                }
-              })
-              .catch((error) => {
-                Toast.show({
-                  text1: "Sign Out Failed",
-                  text2: `Error: ${error.message}`,
-                  type: "error",
-                  position: "bottom",
-                  bottomOffset: 80,
-                });
-              });
+            }
             return Ok();
           },
         },
