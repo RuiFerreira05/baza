@@ -1,16 +1,16 @@
-import { betterAuth } from "better-auth";
-import type { Session, User } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "./db";
-import { env } from "./env";
-import { expo } from "@better-auth/expo";
 import * as schema from "@baza/db/schemas";
-import { openAPI } from "better-auth/plugins";
-import { fromNodeHeaders } from "better-auth/node";
-import { eq } from "drizzle-orm";
 import { profiles } from "@baza/db/schemas";
 import { createStatusError, ErrorTypes } from "@baza/shared-types";
+import { expo } from "@better-auth/expo";
+import type { Session, User } from "better-auth";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { fromNodeHeaders } from "better-auth/node";
+import { openAPI } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { db } from "./db";
+import { env } from "./env";
 
 export const auth = betterAuth({
   trustedOrigins: ["baza://", `http://10.0.2.2:${env.SERVER_PORT}`], // 10.0.2.2 is the special IP for localhost in Android emulators
@@ -22,6 +22,8 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    minPasswordLength: 8,
+    maxPasswordLength: 128,
   },
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.PUBLIC_SERVER_URL,

@@ -52,6 +52,7 @@ export const Theme = {
 
     border: Colors.Slate200,
     placeholder: Colors.Slate400,
+    disabled: Colors.Slate400,
 
     surface: Colors.White,
     onSurface: Colors.Slate900,
@@ -76,6 +77,7 @@ export const Theme = {
 
     border: Colors.Slate700,
     placeholder: Colors.Slate500,
+    disabled: Colors.Slate500,
 
     surface: Colors.Slate900,
     onSurface: Colors.Slate100,

@@ -6,7 +6,7 @@ export default function AuthLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        animation: "fade",
+        animation: "shift",
       }}
     >
       <Tabs.Screen

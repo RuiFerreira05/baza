@@ -54,6 +54,11 @@ export const AuthStyles = (colors: ThemeType) =>
       fontSize: 14,
       color: colors.onSurface,
     },
+    tip: {
+      fontFamily: "Inter_400Regular",
+      fontSize: 12,
+      color: colors.error,
+    },
     input: {
       fontFamily: "Inter_400Regular",
       height: 48,
@@ -65,9 +70,6 @@ export const AuthStyles = (colors: ThemeType) =>
       color: colors.onSurface,
       backgroundColor: colors.surface,
     },
-    inputFocused: {
-      borderColor: colors.primary,
-    },
     button: {
       backgroundColor: colors.primary,
       height: 48,
@@ -75,6 +77,9 @@ export const AuthStyles = (colors: ThemeType) =>
       justifyContent: "center",
       alignItems: "center",
       marginTop: 8,
+    },
+    buttonDisabled: {
+      backgroundColor: colors.disabled,
     },
     buttonPressed: {
       opacity: 0.9,
