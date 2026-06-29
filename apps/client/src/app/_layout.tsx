@@ -1,6 +1,5 @@
 import { getToastConfig } from "@/components/ToastConfig";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { errorReporter } from "@/lib/errorReporter";
 import { queryClient } from "@/lib/queryClient";
 import { ThemeProvider } from "@react-navigation/native";
@@ -16,34 +15,20 @@ errorReporter.initialize();
 // Export the ErrorBoundary component for Expo Router to catch render crashes
 export { AppErrorBoundary as ErrorBoundary } from "@/components/ErrorBoundary";
 
-function RootLayoutNav() {
-  const { colors, appTheme, loading: themeLoading } = useAppTheme();
+export default function RootLayout() {
+  const { colors, appTheme } = useAppTheme();
   const toastConfig = getToastConfig(colors, appTheme);
 
-  const { isReady: authReady } = useAuthGuard();
-
-  const isReady = !themeLoading && authReady;
-
-  if (!isReady) {
-    return null;
-  }
-
-  return (
-    <SafeAreaProvider>
-      <KeyboardProvider>
-        <ThemeProvider value={appTheme}>
-          <Stack screenOptions={{ headerShown: false }} />
-          <Toast config={toastConfig} />
-        </ThemeProvider>
-      </KeyboardProvider>
-    </SafeAreaProvider>
-  );
-}
-
-export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RootLayoutNav />
+      <SafeAreaProvider>
+        <KeyboardProvider>
+          <ThemeProvider value={appTheme}>
+            <Stack screenOptions={{ headerShown: false }} />
+            <Toast config={toastConfig} />
+          </ThemeProvider>
+        </KeyboardProvider>
+      </SafeAreaProvider>
     </QueryClientProvider>
   );
 }

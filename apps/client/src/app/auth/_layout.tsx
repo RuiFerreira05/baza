@@ -1,7 +1,14 @@
+import { useAuthState } from "@/hooks/useAuthState";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 
 export default function AuthLayout() {
+  const { session, bypassAuth } = useAuthState();
+
+  if (!bypassAuth && session) {
+    return <Redirect href="/(protected)" />;
+  }
+
   return (
     <Tabs
       screenOptions={{

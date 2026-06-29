@@ -1,10 +1,21 @@
 import { useGlobalStyles } from "@/constants/styles/useGlobalStyles";
-import { useRouter } from "expo-router";
+import { useAuthState } from "@/hooks/useAuthState";
+import { Redirect, useRouter } from "expo-router";
 import { Button, Text, View } from "react-native";
 
 export default function CreateProfileScreen() {
   const styles = useGlobalStyles();
   const router = useRouter();
+  const { session, hasNoProfile, bypassAuth } = useAuthState();
+
+  if (!bypassAuth) {
+    if (!session) {
+      return <Redirect href="/auth/login" />;
+    }
+    if (!hasNoProfile) {
+      return <Redirect href="/(protected)/calendar" />;
+    }
+  }
 
   return (
     <View style={styles.container}>

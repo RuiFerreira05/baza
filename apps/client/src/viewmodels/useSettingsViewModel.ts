@@ -1,5 +1,6 @@
+import { useAuthState } from "@/hooks/useAuthState";
 import { authClient } from "@/lib/auth";
-import { useAccountStore } from "@/store/useAccountStore";
+import { queryClient } from "@/lib/queryClient";
 import { ThemeMode, useSettingsStore } from "@/store/useSettingsStore";
 import { SettingsSchema, SettingsType } from "@/types/settingsTypes";
 import { Ok } from "@baza/shared-types";
@@ -13,8 +14,7 @@ export const useSettingsViewModel = (): SettingsSchema => {
   const [testToggle, setTestToggle] = useState(false);
   const [hiddenSetting, setHiddenSetting] = useState(true);
   const [hiddenSettingValue, setHiddenSettingValue] = useState("Hidden Value");
-  const clearProfile = useAccountStore((state) => state.clear);
-  const bypassAuth = useAccountStore((state) => state.bypassAuth);
+  const { bypassAuth } = useAuthState();
 
   return [
     {
@@ -134,7 +134,7 @@ export const useSettingsViewModel = (): SettingsSchema => {
               authClient
                 .signOut()
                 .then(() => {
-                  clearProfile();
+                  queryClient.clear();
                   Toast.show({
                     text1: "Signed Out",
                     text2: "You have been signed out successfully.",

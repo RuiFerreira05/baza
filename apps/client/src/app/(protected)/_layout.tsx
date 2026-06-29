@@ -1,7 +1,19 @@
+import { useAuthState } from "@/hooks/useAuthState";
 import { Ionicons } from "@expo/vector-icons"; // Standard vector icons bundled with Expo
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 
 export default function ProtectedLayout() {
+  const { session, hasNoProfile, bypassAuth } = useAuthState();
+
+  if (!bypassAuth) {
+    if (!session) {
+      return <Redirect href="/auth/login" />;
+    }
+    if (hasNoProfile) {
+      return <Redirect href="/(onboarding)/createProfile" />;
+    }
+  }
+
   return (
     <Tabs
       screenOptions={{

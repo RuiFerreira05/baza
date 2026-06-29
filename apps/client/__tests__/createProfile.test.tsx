@@ -24,6 +24,15 @@ jest.mock("expo-router", () => ({
   }),
 }));
 
+jest.mock("@/hooks/useAuthState", () => ({
+  useAuthState: jest.fn(() => ({
+    session: { user: { id: "1" } },
+    hasNoProfile: true,
+    bypassAuth: false,
+    isLoading: false,
+  })),
+}));
+
 describe("CreateProfileScreen", () => {
   beforeEach(() => {
     jest.clearAllMocks();
