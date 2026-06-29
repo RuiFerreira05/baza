@@ -1,10 +1,4 @@
-import {
-  friends,
-  groupMembers,
-  groups,
-  profiles,
-  users,
-} from "@baza/db/schemas";
+import { friends, groupMembers, groups, profiles } from "@baza/db/schemas";
 import {
   Err,
   ErrorTypes,
@@ -14,7 +8,6 @@ import {
   Ok,
   profileDTO,
   SentFriendRequestDTO,
-  type CreateProfileBody,
   type GroupDTO,
   type GroupMemberDTO,
   type ProfileDTO,
@@ -81,7 +74,8 @@ export const getUserByUsername = async (
  * @returns a promised result with the created profileDTO, or an error
  */
 export const createUserProfile = async (
-  userProfile: CreateProfileBody,
+  username: string,
+  userId: string,
 ): Promise<
   Result<
     ProfileDTO,
@@ -90,41 +84,31 @@ export const createUserProfile = async (
     | ErrorTypes.UnknownIdError
   >
 > => {
-  //Verify if the user whose profile is being created, exists.
-  const user = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, userProfile.userId));
+  const [newProfile] = await db
+    .insert(profiles)
+    .values({
+      username: username,
+      userId: userId,
+      settings: {},
+    })
+    .returning();
 
-  if (user.length == 1) {
-    const [newProfile] = await db
-      .insert(profiles)
-      .values({
-        username: userProfile.username,
-        userId: userProfile.userId,
-        settings: {},
-      })
-      .returning();
+  if (newProfile) {
+    const sanitizedProfile = {
+      ...newProfile,
+      createdAt: newProfile?.createdAt.toISOString(),
+      updatedAt: newProfile?.updatedAt.toISOString(),
+    };
 
-    if (newProfile) {
-      const sanitizedProfile = {
-        ...newProfile,
-        createdAt: newProfile?.createdAt.toISOString(),
-        updatedAt: newProfile?.updatedAt.toISOString(),
-      };
-
-      const converted = Value.Convert(profileDTO, sanitizedProfile);
-      if (Value.Check(profileDTO, converted)) {
-        return Ok(converted);
-      } else {
-        app.log.error(Value.Errors(profileDTO, converted));
-        return Err(ErrorTypes.ConversionError);
-      }
+    const converted = Value.Convert(profileDTO, sanitizedProfile);
+    if (Value.Check(profileDTO, converted)) {
+      return Ok(converted);
     } else {
-      return Err(ErrorTypes.ResourceCreationError);
+      app.log.error(Value.Errors(profileDTO, converted));
+      return Err(ErrorTypes.ConversionError);
     }
   } else {
-    return Err(ErrorTypes.UnknownIdError);
+    return Err(ErrorTypes.ResourceCreationError);
   }
 };
 

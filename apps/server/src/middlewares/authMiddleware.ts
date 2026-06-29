@@ -1,12 +1,12 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
-import { getAuthenticatedUsername, auth } from "../lib/auth";
-import { env } from "../lib/env";
-import { fromNodeHeaders } from "better-auth/node";
-import { createStatusError, ErrorTypes } from "@baza/shared-types";
-import { verifyGroupMembership } from "../services/groupServices";
-import { db } from "../lib/db";
-import { eq } from "drizzle-orm";
 import { groups } from "@baza/db/schemas";
+import { createStatusError, ErrorTypes } from "@baza/shared-types";
+import { fromNodeHeaders } from "better-auth/node";
+import { eq } from "drizzle-orm";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import { auth, getAuthenticatedUsername } from "../lib/auth";
+import { db } from "../lib/db";
+import { env } from "../lib/env";
+import { verifyGroupMembership } from "../services/groupServices";
 
 export const authPreHandler = async (
   req: FastifyRequest,
@@ -79,19 +79,6 @@ export const authPreHandler = async (
         }
 
         req.session = session;
-
-        // Check if body userId matches session user ID
-        const body = req.body as { userId?: string };
-        if (!body || body.userId !== session.user.id) {
-          return res
-            .status(403)
-            .send(
-              createStatusError(
-                ErrorTypes.UnauthorizedError,
-                "Forbidden. You can only create a profile for your own authenticated user.",
-              ),
-            );
-        }
         return;
       } catch (error) {
         req.log.error(

@@ -1,18 +1,18 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
-import {
-  getUserByUsername,
-  createUserProfile,
-  deleteUserProfile,
-  editUserProfile,
-} from "../services/profileServices";
 import {
   createStatusError,
   createStatusOK,
   ErrorTypes,
   type CreateProfileBody,
-  type SimpleUsernameParam,
   type EditProfileBody,
+  type SimpleUsernameParam,
 } from "@baza/shared-types";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import {
+  createUserProfile,
+  deleteUserProfile,
+  editUserProfile,
+  getUserByUsername,
+} from "../services/profileServices";
 import { app } from "../setup";
 
 // GET /users/:username
@@ -62,7 +62,20 @@ export const createUserProfileHandler = async (
 ) => {
   app.log.info("Received create user's profile request");
   const body = req.body as CreateProfileBody;
-  const result = await createUserProfile(body);
+  const userId = req.session?.user?.id;
+  if (!userId) {
+    app.log.error("User ID missing from request in createUserProfileHandler");
+    return res
+      .status(401)
+      .send(
+        createStatusError(
+          ErrorTypes.UnauthorizedError,
+          "Unauthorized request. User ID not found.",
+        ),
+      );
+  }
+
+  const result = await createUserProfile(body.username, userId);
 
   if (!result.ok) {
     switch (result.error) {
@@ -84,16 +97,6 @@ export const createUserProfileHandler = async (
             createStatusError(
               ErrorTypes.ResourceCreationError,
               "An error occurred while creating the profile",
-            ),
-          );
-      case ErrorTypes.UnknownIdError:
-        app.log.warn("User not found");
-        return res
-          .status(404)
-          .send(
-            createStatusError(
-              ErrorTypes.UnknownIdError,
-              "A user with the provided id was not found",
             ),
           );
     }

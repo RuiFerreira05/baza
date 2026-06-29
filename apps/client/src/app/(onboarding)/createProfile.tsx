@@ -1,10 +1,10 @@
-import { useGlobalStyles } from "@/constants/styles/useGlobalStyles";
+import { useAuthStyles } from "@/constants/styles/useAuthStyles";
 import { useAuthState } from "@/hooks/useAuthState";
 import { Redirect, useRouter } from "expo-router";
 import { ActivityIndicator, Button, Text, View } from "react-native";
 
 export default function CreateProfileScreen() {
-  const styles = useGlobalStyles();
+  const styles = useAuthStyles();
   const router = useRouter();
   const { session, hasNoProfile, bypassAuth, isLoading } = useAuthState();
 
@@ -29,7 +29,7 @@ export default function CreateProfileScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Profile (Placeholder)</Text>
-      <Text style={[styles.text, { marginVertical: 10 }]}>
+      <Text style={[styles.subtitle, { marginVertical: 10 }]}>
         Pick a username to get started.
       </Text>
       <Button

@@ -1,63 +1,90 @@
 import {
-  profileDTO,
+  BlockUserBody,
+  CreatePersonalEventBody,
   CreateProfileBody,
+  EditPersonalEventBody,
   EditProfileBody,
   ErrorTypes,
-  StatusOK,
-  StatusError,
-  SimpleUsernameParam,
+  FriendRequestDTO,
   GetPersonalEventsParams,
-  personalEventDTO,
-  CreatePersonalEventBody,
-  EditPersonalEventBody,
   groupDTO,
   groupMemberDTO,
-  SendFriendRequestBody,
-  FriendRequestDTO,
-  SentFriendRequestDTO,
+  personalEventDTO,
+  profileDTO,
   RespondFriendRequestBody,
   RespondGroupInviteBody,
-  BlockUserBody,
+  SendFriendRequestBody,
+  SentFriendRequestDTO,
+  SimpleUsernameParam,
+  StatusError,
+  StatusOK,
 } from "@baza/shared-types";
 import { type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
+import Type from "typebox";
 import {
-  getUserByUsernameHandler,
+  createPersonalEventHandler,
+  editPersonalEventHandler,
+  getPersonalEventByIdHandler,
+  getPersonalEventsHandler,
+} from "../handlers/eventHandlers";
+import {
+  blockUserHandler,
+  getFriendProfileHandler,
+  getFriendsHandler,
+  getPendingFriendRequestsHandler,
+  getPendingSentFriendRequestsHandler,
+  removeFriendHandler,
+  respondFriendRequestHandler,
+  sendFriendRequestHandler,
+  unblockUserHandler,
+} from "../handlers/friendHandlers";
+import {
   createUserProfileHandler,
   deleteUserProfileHandler,
   editUserProfileHandler,
   getCurrentUserProfileHandler,
+  getUserByUsernameHandler,
 } from "../handlers/profileHandlers";
-import {
-  getPersonalEventsHandler,
-  getPersonalEventByIdHandler,
-  createPersonalEventHandler,
-  editPersonalEventHandler,
-} from "../handlers/eventHandlers";
-import {
-  getFriendsHandler,
-  getFriendProfileHandler,
-  removeFriendHandler,
-  sendFriendRequestHandler,
-  getPendingFriendRequestsHandler,
-  respondFriendRequestHandler,
-  blockUserHandler,
-  unblockUserHandler,
-  getPendingSentFriendRequestsHandler,
-} from "../handlers/friendHandlers";
 import {
   getUserSettingsHandler,
   updateUserSettingsHandler,
 } from "../handlers/settingsHandlers";
 import {
-  getUserGroupsHandler,
   getUserGroupInvitesHandler,
+  getUserGroupsHandler,
   respondGroupInviteHandler,
 } from "../handlers/userGroupHandlers";
-import Type from "typebox";
 
 export const userRoutes: FastifyPluginAsync = async (fastify) => {
   const app = fastify.withTypeProvider<TypeBoxTypeProvider>();
+
+  // POST /users
+  app.post(
+    "/",
+    {
+      schema: {
+        description: "This route creates a profile for a user of the app",
+        tags: ["users"],
+        body: CreateProfileBody,
+        response: {
+          200: StatusOK(
+            profileDTO,
+            "if the profile was successfully created and converted to the expected format before sending the response",
+          ),
+          401: StatusError(
+            ErrorTypes.UnauthorizedError,
+            "if the user is not authenticated and authorized to create a profile",
+          ),
+          500: StatusError(
+            ErrorTypes.ConversionError,
+            "if the profile was created but there was an error converting it to the expected format before sending the response",
+          ),
+        },
+      },
+    },
+    createUserProfileHandler,
+  );
 
   // GET /users/me
   app.get(
@@ -114,29 +141,6 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     getUserByUsernameHandler,
-  );
-
-  // POST /users
-  app.post(
-    "/",
-    {
-      schema: {
-        description: "This route creates a profile for a user of the app",
-        tags: ["users"],
-        body: CreateProfileBody,
-        response: {
-          200: StatusOK(
-            profileDTO,
-            "if the profile was successfully created and converted to the expected format before sending the response",
-          ),
-          500: StatusError(
-            ErrorTypes.ConversionError,
-            "if the profile was created but there was an error converting it to the expected format before sending the response",
-          ),
-        },
-      },
-    },
-    createUserProfileHandler,
   );
 
   // DELETE /users/:username

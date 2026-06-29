@@ -1,40 +1,63 @@
 import Type from "typebox";
 
 // ####### DTO #######
-export const userDTO = Type.Object({
-  id: Type.String({
-    description: "user ID, randomly given",
-    example: "1y9889192bfb987",
-  }),
-  name: Type.String({ description: "user name", example: "John Doe" }),
-  email: Type.String({
-    format: "email",
-    description: "user email",
-    example: "test@test.com",
-  }),
-}, {
-  description: "Public user data, without sensitive information like password",
-  title: "UserDTO",
-});
-export type UserDTO = Type.Static<typeof userDTO>; 
+export const userDTO = Type.Object(
+  {
+    id: Type.String({
+      description: "user ID, randomly given",
+      example: "1y9889192bfb987",
+    }),
+    name: Type.String({ description: "user name", example: "John Doe" }),
+    email: Type.String({
+      format: "email",
+      description: "user email",
+      example: "test@test.com",
+    }),
+  },
+  {
+    description:
+      "Public user data, without sensitive information like password",
+    title: "UserDTO",
+  },
+);
+export type UserDTO = Type.Static<typeof userDTO>;
 
-export const profileDTO = Type.Object({
-  username: Type.String({description: "username of user", example: "random_user123"}),
-  photo: Type.Union([ Type.String({description: "profile photo of the user"}), Type.Null() ]),
-  description: Type.Union([ Type.String({description: "Profile description of user", example: "Hi, i'm random_user123!"}), Type.Null() ]),
-  userId: Type.String({description: "user ID (randomly given)", format: "uuid", example: "1y9889192bfb987"}),
-  createdAt: Type.String({
-    description: "The date and time when the profile was created",
-    format: "date-time"
-  }),
-  updatedAt: Type.String({
-    description: "The date and time when the profile was last updated",
-    format: "date-time"
-  }),
-}, {
-  description: "Public user profile data, without sensitive information",
-  title: "UserProfileDTO",
-});
+export const profileDTO = Type.Object(
+  {
+    username: Type.String({
+      description: "username of user",
+      example: "random_user123",
+    }),
+    photo: Type.Union([
+      Type.String({ description: "profile photo of the user" }),
+      Type.Null(),
+    ]),
+    description: Type.Union([
+      Type.String({
+        description: "Profile description of user",
+        example: "Hi, i'm random_user123!",
+      }),
+      Type.Null(),
+    ]),
+    userId: Type.String({
+      description: "user ID (randomly given)",
+      format: "uuid",
+      example: "1y9889192bfb987",
+    }),
+    createdAt: Type.String({
+      description: "The date and time when the profile was created",
+      format: "date-time",
+    }),
+    updatedAt: Type.String({
+      description: "The date and time when the profile was last updated",
+      format: "date-time",
+    }),
+  },
+  {
+    description: "Public user profile data, without sensitive information",
+    title: "UserProfileDTO",
+  },
+);
 export type ProfileDTO = Type.Static<typeof profileDTO>;
 
 // ####### Route Specific Schemas #######
@@ -57,8 +80,10 @@ export type CreateUserRequest = Type.Static<typeof CreateUserRequestSchema>;
 
 // POST /users/createProfile
 export const CreateProfileBody = Type.Object({
-  username: Type.String({ description: "The username of the user who is the owner of the profile being created." }),
-  userId: Type.String({ description: "ID of the user creating this profile.", format: "uuid" }),
+  username: Type.String({
+    description:
+      "The username of the user who is the owner of the profile being created.",
+  }),
 });
 export type CreateProfileBody = Type.Static<typeof CreateProfileBody>;
 
@@ -66,12 +91,14 @@ export type CreateProfileBody = Type.Static<typeof CreateProfileBody>;
 export const EditProfileBody = Type.Object({
   newUsername: Type.Optional(
     Type.String({
-      description: "The new username of the user who's the owner of this profile. If not provided, the username will not be changed",
+      description:
+        "The new username of the user who's the owner of this profile. If not provided, the username will not be changed",
     }),
   ),
   newDescription: Type.Optional(
     Type.String({
-      description: "The new description of the user's profile. If not provided, the profile description will not be changed",
+      description:
+        "The new description of the user's profile. If not provided, the profile description will not be changed",
     }),
   ),
 });
@@ -93,13 +120,16 @@ export const FriendRequestDTO = Type.Object({
 export type FriendRequestDTO = Type.Static<typeof FriendRequestDTO>;
 
 // DTO for Sent Friend Requests
-export const SentFriendRequestDTO = Type.Object({
-  recipient: profileDTO,
-  requestSentAt: Type.String({ format: "date-time" }),
-}, {
-  description: "Pending sent friend request details",
-  title: "SentFriendRequestDTO",
-});
+export const SentFriendRequestDTO = Type.Object(
+  {
+    recipient: profileDTO,
+    requestSentAt: Type.String({ format: "date-time" }),
+  },
+  {
+    description: "Pending sent friend request details",
+    title: "SentFriendRequestDTO",
+  },
+);
 export type SentFriendRequestDTO = Type.Static<typeof SentFriendRequestDTO>;
 
 // PATCH /users/:username/friends/requests/:senderUsername
@@ -108,7 +138,9 @@ export const RespondFriendRequestBody = Type.Object({
     description: "Accept or decline the friend request.",
   }),
 });
-export type RespondFriendRequestBody = Type.Static<typeof RespondFriendRequestBody>;
+export type RespondFriendRequestBody = Type.Static<
+  typeof RespondFriendRequestBody
+>;
 
 // POST /users/:username/blocks
 export const BlockUserBody = Type.Object({
@@ -117,4 +149,3 @@ export const BlockUserBody = Type.Object({
   }),
 });
 export type BlockUserBody = Type.Static<typeof BlockUserBody>;
-
