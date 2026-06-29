@@ -1,12 +1,18 @@
 import { useAuthState } from "@/hooks/useAuthState";
 import { Ionicons } from "@expo/vector-icons"; // Standard vector icons bundled with Expo
 import { Redirect, Tabs } from "expo-router";
+import { ActivityIndicator } from "react-native";
 
 export default function ProtectedLayout() {
   const { session, hasNoProfile, bypassAuth, isLoading } = useAuthState();
 
   if (isLoading) {
-    return null; // Or a loading spinner
+    return (
+      <ActivityIndicator
+        size="large"
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      />
+    );
   }
 
   if (!bypassAuth) {

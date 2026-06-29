@@ -1,7 +1,7 @@
 import { useGlobalStyles } from "@/constants/styles/useGlobalStyles";
 import { useAuthState } from "@/hooks/useAuthState";
 import { Redirect, useRouter } from "expo-router";
-import { Button, Text, View } from "react-native";
+import { ActivityIndicator, Button, Text, View } from "react-native";
 
 export default function CreateProfileScreen() {
   const styles = useGlobalStyles();
@@ -9,7 +9,12 @@ export default function CreateProfileScreen() {
   const { session, hasNoProfile, bypassAuth, isLoading } = useAuthState();
 
   if (isLoading) {
-    return null; // Or a loading spinner
+    return (
+      <ActivityIndicator
+        size="large"
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      />
+    );
   }
 
   if (!bypassAuth) {
