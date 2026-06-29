@@ -3,7 +3,11 @@ import { Ionicons } from "@expo/vector-icons"; // Standard vector icons bundled 
 import { Redirect, Tabs } from "expo-router";
 
 export default function ProtectedLayout() {
-  const { session, hasNoProfile, bypassAuth } = useAuthState();
+  const { session, hasNoProfile, bypassAuth, isLoading } = useAuthState();
+
+  if (isLoading) {
+    return null; // Or a loading spinner
+  }
 
   if (!bypassAuth) {
     if (!session) {

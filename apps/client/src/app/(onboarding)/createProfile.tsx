@@ -6,7 +6,11 @@ import { Button, Text, View } from "react-native";
 export default function CreateProfileScreen() {
   const styles = useGlobalStyles();
   const router = useRouter();
-  const { session, hasNoProfile, bypassAuth } = useAuthState();
+  const { session, hasNoProfile, bypassAuth, isLoading } = useAuthState();
+
+  if (isLoading) {
+    return null; // Or a loading spinner
+  }
 
   if (!bypassAuth) {
     if (!session) {

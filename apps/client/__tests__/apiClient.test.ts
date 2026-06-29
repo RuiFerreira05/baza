@@ -13,6 +13,9 @@ jest.mock("expo-secure-store", () => ({
   getItemAsync: jest.fn(),
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  deleteItem: jest.fn(),
 }));
 
 describe("apiClient", () => {
@@ -29,8 +32,11 @@ describe("apiClient", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it("should inject bearer token if session token exists in SecureStore", async () => {
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue("mocked_token");
+  it("should inject Cookie header if session cookies exist in SecureStore", async () => {
+    const mockCookie = JSON.stringify({
+      "baza_session_token": { value: "mocked_token", expires: null }
+    });
+    (SecureStore.getItem as jest.Mock).mockReturnValue(mockCookie);
     mockFetch.mockResolvedValue({
       status: 200,
       ok: true,
@@ -40,7 +46,7 @@ describe("apiClient", () => {
 
     const result = await apiClient("/v1/test");
 
-    expect(SecureStore.getItemAsync).toHaveBeenCalledWith("baza_session_token");
+    expect(SecureStore.getItem).toHaveBeenCalled();
     expect(mockFetch).toHaveBeenCalledWith(
       "http://mock-server.com/v1/test",
       expect.objectContaining({
@@ -49,7 +55,7 @@ describe("apiClient", () => {
     );
 
     const headers = mockFetch.mock.calls[0][1].headers as Headers;
-    expect(headers.get("Authorization")).toBe("Bearer mocked_token");
+    expect(headers.get("Cookie")).toBe("baza_session_token=mocked_token");
     expect(headers.get("Accept")).toBe("application/json");
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -58,7 +64,7 @@ describe("apiClient", () => {
   });
 
   it("should format query parameters and serialize them", async () => {
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+    (SecureStore.getItem as jest.Mock).mockReturnValue(null);
     mockFetch.mockResolvedValue({
       status: 200,
       ok: true,
@@ -82,7 +88,7 @@ describe("apiClient", () => {
   });
 
   it("should handle JSON post requests correctly", async () => {
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+    (SecureStore.getItem as jest.Mock).mockReturnValue(null);
     mockFetch.mockResolvedValue({
       status: 200,
       ok: true,
@@ -190,7 +196,7 @@ describe("apiClient", () => {
   });
 
   it("should append query parameters with & if the path already contains a query string", async () => {
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+    (SecureStore.getItem as jest.Mock).mockReturnValue(null);
     mockFetch.mockResolvedValue({
       status: 200,
       ok: true,
@@ -228,7 +234,7 @@ describe("apiClient", () => {
   });
 
   it("should not append any query parameters if params object produces an empty query string", async () => {
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+    (SecureStore.getItem as jest.Mock).mockReturnValue(null);
     mockFetch.mockResolvedValue({
       status: 200,
       ok: true,

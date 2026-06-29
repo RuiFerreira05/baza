@@ -1,3 +1,4 @@
+import { authClient } from "@/lib/auth";
 import { env } from "@/lib/env";
 import {
   createStatusError,
@@ -8,7 +9,6 @@ import {
   StatusError,
   StatusOK,
 } from "@baza/shared-types";
-import * as SecureStore from "expo-secure-store";
 
 interface FetchOptions extends RequestInit {
   json?: Record<string, any>;
@@ -43,10 +43,10 @@ export async function apiClient(
 
   const headers = new Headers(options.headers);
 
-  // Read the active session token from SecureStore and inject as Bearer token
-  const token = await SecureStore.getItemAsync("baza_session_token");
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
+  // Read the active session cookies from SecureStore and inject as Cookie header
+  const cookie = authClient.getCookie();
+  if (cookie) {
+    headers.set("Cookie", cookie);
   }
 
   headers.set("Accept", "application/json");
@@ -59,6 +59,7 @@ export async function apiClient(
     const response = await fetch(url, {
       ...options,
       headers,
+      credentials: "omit",
     });
 
     // Handle empty responses (like 204 No Content)

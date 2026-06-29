@@ -3,8 +3,12 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Href, Redirect, Tabs, useLocalSearchParams } from "expo-router";
 
 export default function AuthLayout() {
-  const { session, bypassAuth } = useAuthState();
+  const { session, bypassAuth, isLoading } = useAuthState();
   const { returnUrl } = useLocalSearchParams<{ returnUrl?: string }>();
+
+  if (isLoading) {
+    return null; // Or a loading spinner
+  }
 
   if (!bypassAuth && session) {
     return <Redirect href={(returnUrl || "/(protected)/calendar") as Href} />;

@@ -1,5 +1,4 @@
 import { authClient } from "@/lib/auth";
-import { useRouter } from "expo-router";
 import { useState } from "react";
 
 export const useRegisterViewModel = () => {
@@ -9,7 +8,6 @@ export const useRegisterViewModel = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const isNameValid = name.length > 0;
   const isEmailValid =
@@ -35,9 +33,6 @@ export const useRegisterViewModel = () => {
         name,
         email,
         password,
-      })
-      .then(() => {
-        router.replace("/(protected)");
       })
       .catch((err) => {
         setError(err.message || "An error occurred during registration.");

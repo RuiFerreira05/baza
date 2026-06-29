@@ -1,5 +1,6 @@
 import { authClient } from "@/lib/auth";
 import { env } from "@/lib/env";
+import { errorReporter } from "@/lib/errorReporter";
 import { userService } from "@/services/userService";
 import { ErrorTypes } from "@baza/shared-types";
 import { useAppQuery } from "./useAppQuery";
@@ -22,6 +23,12 @@ export function useAuthState() {
     enabled: !sessionLoading && !!session && !bypassAuth,
     retry: false,
   });
+
+  errorReporter.logMessage(`authState: session=${JSON.stringify(profileData)}`);
+  errorReporter.logMessage(`authState: isLoading=${profileLoading}`);
+  errorReporter.logMessage(
+    `authState: queryError=${JSON.stringify(queryError)}`,
+  );
 
   // 4. Derive boolean flags
   const isLoading =
