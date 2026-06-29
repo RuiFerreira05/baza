@@ -82,33 +82,41 @@ export const createUserProfile = async (
     | ErrorTypes.ConversionError
     | ErrorTypes.ResourceCreationError
     | ErrorTypes.UnknownIdError
+    | ErrorTypes.ExistingResourceError
   >
 > => {
-  const [newProfile] = await db
-    .insert(profiles)
-    .values({
-      username: username,
-      userId: userId,
-      settings: {},
-    })
-    .returning();
+  try {
+    const [newProfile] = await db
+      .insert(profiles)
+      .values({
+        username: username,
+        userId: userId,
+        settings: {},
+      })
+      .returning();
 
-  if (newProfile) {
-    const sanitizedProfile = {
-      ...newProfile,
-      createdAt: newProfile?.createdAt.toISOString(),
-      updatedAt: newProfile?.updatedAt.toISOString(),
-    };
+    if (newProfile) {
+      const sanitizedProfile = {
+        ...newProfile,
+        createdAt: newProfile?.createdAt.toISOString(),
+        updatedAt: newProfile?.updatedAt.toISOString(),
+      };
 
-    const converted = Value.Convert(profileDTO, sanitizedProfile);
-    if (Value.Check(profileDTO, converted)) {
-      return Ok(converted);
+      const converted = Value.Convert(profileDTO, sanitizedProfile);
+      if (Value.Check(profileDTO, converted)) {
+        return Ok(converted);
+      } else {
+        app.log.error(Value.Errors(profileDTO, converted));
+        return Err(ErrorTypes.ConversionError);
+      }
     } else {
-      app.log.error(Value.Errors(profileDTO, converted));
-      return Err(ErrorTypes.ConversionError);
+      return Err(ErrorTypes.ResourceCreationError);
     }
-  } else {
-    return Err(ErrorTypes.ResourceCreationError);
+  } catch (error: any) {
+    app.log.error(
+      `Failed to create profile for user with id ${userId}: ${error.message}`,
+    );
+    return Err(ErrorTypes.ExistingResourceError);
   }
 };
 

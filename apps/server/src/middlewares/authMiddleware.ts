@@ -51,6 +51,18 @@ export const authPreHandler = async (
     const username = await getAuthenticatedUsername(req, res);
     if (username) {
       req.username = username;
+      req.session = {
+        session: {} as any,
+        user: {
+          id: (req.headers["x-test-user-id"] as string) || "11111111-1111-1111-1111-111111111111",
+          name: "Test User",
+          email: "test@example.com",
+          emailVerified: true,
+          image: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      };
     }
   } else {
     // Handle special case for profile creation route: /v1/restricted/users

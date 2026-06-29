@@ -38,8 +38,6 @@ export default function CalendarScreen() {
       <Button title="Go to Groups" onPress={vm.navigateToGroups} />
 
       <Button title="Go to Profile" onPress={vm.navigateToProfile} />
-
-      <Button title="Sign Out" onPress={vm.signOut} />
     </View>
   );
 }

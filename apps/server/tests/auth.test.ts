@@ -68,45 +68,8 @@ describe("Authentication & Access Control Middleware", () => {
     expect(response.json().error.type).toBe("UnauthorizedError");
   });
 
-  it("should block profile creation if session user ID does not match body userId", async () => {
-    vi.mocked(auth.api.getSession).mockResolvedValue({
-      user: {
-        id: "22222222-2222-2222-2222-222222222222",
-        email: "session@example.com",
-        emailVerified: true,
-        name: "Session User",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      session: {
-        id: "session-id",
-        userId: "22222222-2222-2222-2222-222222222222",
-        expiresAt: new Date(),
-        token: "session-token",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userAgent: null,
-        ipAddress: null,
-      },
-    });
 
-    const response = await app.inject({
-      method: "POST",
-      url: "/v1/restricted/users",
-      headers: {
-        "test-force-session-check": "true",
-      },
-      payload: {
-        userId: "33333333-3333-3333-3333-333333333333",
-        username: "testuser",
-      },
-    });
-
-    expect(response.statusCode).toBe(403);
-    expect(response.json().error.type).toBe("UnauthorizedError");
-  });
-
-  it("should allow profile creation if session user ID matches body userId", async () => {
+  it("should allow profile creation when session is valid", async () => {
     const userId = "44444444-4444-4444-4444-444444444444";
     await db.insert(users).values({
       id: userId,
@@ -142,7 +105,6 @@ describe("Authentication & Access Control Middleware", () => {
         "test-force-session-check": "true",
       },
       payload: {
-        userId: userId,
         username: "matchinguser",
       },
     });

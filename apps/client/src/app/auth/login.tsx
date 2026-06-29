@@ -31,10 +31,10 @@ export default function LoginScreen() {
 
             <View style={styles.form}>
               <LabeledInput
-                label="Email or name"
+                label="Email"
                 value={vm.identifier}
                 onChangeText={vm.setIdentifier}
-                placeholder="Enter email or name"
+                placeholder="e.g. john@example.com"
                 autoCapitalize="none"
                 autoCorrect={false}
                 isCorrect={vm.isIdentifierValid}
@@ -68,11 +68,11 @@ export default function LoginScreen() {
                   <ActivityIndicator color={colors.onPrimary} size={"small"} />
                 )}
               </Pressable>
-              {vm.error ? (
+              {vm.error && (
                 <Text style={{ color: colors.error, marginTop: 8 }}>
                   {vm.error}
                 </Text>
-              ) : null}
+              )}
             </View>
           </View>
         </KeyboardGestureArea>

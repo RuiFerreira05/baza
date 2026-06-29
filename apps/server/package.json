@@ -9,7 +9,7 @@
     "build": "tsup",
     "start": "node dist/server.js",
     "generate-auth-schema": "pnpm dlx auth@latest generate --output ../../packages/db/src/schemas/auth.ts",
-    "test": "vitest run",
+    "test": "vitest run --fileParallelism false",
     "lint": "eslint ."
   },
   "dependencies": {

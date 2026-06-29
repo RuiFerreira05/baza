@@ -41,16 +41,13 @@ export const profileDTO = Type.Object(
     ]),
     userId: Type.String({
       description: "user ID (randomly given)",
-      format: "uuid",
       example: "1y9889192bfb987",
     }),
     createdAt: Type.String({
       description: "The date and time when the profile was created",
-      format: "date-time",
     }),
     updatedAt: Type.String({
       description: "The date and time when the profile was last updated",
-      format: "date-time",
     }),
   },
   {

@@ -99,6 +99,16 @@ export const createUserProfileHandler = async (
               "An error occurred while creating the profile",
             ),
           );
+      case ErrorTypes.ExistingResourceError:
+        app.log.warn(`Profile with username ${body.username} already exists`);
+        return res
+          .status(409)
+          .send(
+            createStatusError(
+              ErrorTypes.ExistingResourceError,
+              "This username is already taken. Please choose another one.",
+            ),
+          );
     }
   } else {
     return res.send(createStatusOK(result.value));
