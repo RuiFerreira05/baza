@@ -265,8 +265,8 @@ export const getGroupCalendarHandler = async (
 
   const { id: groupId } = req.params as SimpleIdParam;
   const { startDate, endDate } = req.query as {
-    startDate?: string;
-    endDate?: string;
+    startDate: string;
+    endDate: string;
   };
 
   const result = await getGroupCalendar(groupId, username, startDate, endDate);
