@@ -39,7 +39,7 @@ describe("Calendar Routes", () => {
   it("GET /v1/restricted/groups/:id/calendar should return 404 for unknown group", async () => {
     const response = await app.inject({
       method: "GET",
-      url: "/v1/restricted/groups/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/calendar",
+      url: "/v1/restricted/groups/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/calendar?startDate=2026-06-01&endDate=2026-08-31",
     });
 
     expect(response.statusCode).toBe(404);
@@ -66,7 +66,7 @@ describe("Calendar Routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/v1/restricted/groups/${group.id}/calendar`,
+      url: `/v1/restricted/groups/${group.id}/calendar?startDate=2026-06-01&endDate=2026-08-31`,
     });
 
     expect(response.statusCode).toBe(403);
@@ -193,7 +193,7 @@ describe("Calendar Routes", () => {
     // 7. Fire API Request
     const response = await app.inject({
       method: "GET",
-      url: `/v1/restricted/groups/${group.id}/calendar`,
+      url: `/v1/restricted/groups/${group.id}/calendar?startDate=2026-06-01&endDate=2026-08-31`,
     });
 
     expect(response.statusCode).toBe(200);

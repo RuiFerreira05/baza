@@ -87,7 +87,7 @@ export const eventService = {
   // GET /v1/restricted/groups/:id/calendar
   getGroupCalendar: (
     groupId: string,
-    query?: { startDate?: string; endDate?: string },
+    query: { startDate: string; endDate: string },
   ): Promise<Result<GroupCalendarDTO, StatusError>> =>
     apiClient(`/v1/restricted/groups/${groupId}/calendar`, {
       params: query,
