@@ -2,7 +2,6 @@ import { useAppQuery } from "@/hooks/useAppQuery";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuthState } from "@/hooks/useAuthState";
 import { eventService } from "@/services/eventService";
-import { PersonalEventDTO } from "@baza/shared-types";
 import { useMemo, useState } from "react";
 
 const getTodayString = () => {
@@ -75,7 +74,9 @@ export function useCalendarViewModel() {
     enabled: !!username,
   });
 
-  const events: PersonalEventDTO[] = eventsQuery.data ?? [];
+  const events = useMemo(() => {
+    return eventsQuery.data ?? [];
+  }, [eventsQuery.data]);
 
   // Filter events for the currently selected day
   const selectedDayEvents = useMemo(() => {

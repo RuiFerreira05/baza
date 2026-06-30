@@ -7,21 +7,43 @@ import { useState } from "react";
 import Toast from "react-native-toast-message";
 
 interface UseCreateEventViewModelProps {
-  selectedDate: string; // YYYY-MM-DD format
+  initialDate: string; // YYYY-MM-DD format from the calendar selection
   onSuccess: () => void;
 }
 
+const parseDateString = (dateStr: string): Date => {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
+const formatDateToString = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
 export function useCreateEventViewModel({
-  selectedDate,
+  initialDate,
   onSuccess,
 }: UseCreateEventViewModelProps) {
   const { profile, bypassAuth } = useAuthState();
   const username = profile?.username || (bypassAuth ? "testuser" : "");
 
   // Form states
+  const [eventDate, setEventDate] = useState<Date>(() =>
+    parseDateString(initialDate),
+  );
+  const [prevInitialDate, setPrevInitialDate] = useState(initialDate);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+
+  // Sync eventDate when the calendar's selected day changes (React render-time adjustment)
+  if (initialDate !== prevInitialDate) {
+    setPrevInitialDate(initialDate);
+    setEventDate(parseDateString(initialDate));
+  }
 
   const getInitialTimes = () => {
     const start = new Date();
@@ -40,6 +62,7 @@ export function useCreateEventViewModel({
   const [isPublic, setIsPublic] = useState(false);
 
   // Picker visibility states
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -59,6 +82,7 @@ export function useCreateEventViewModel({
       // Invalidate the cache to trigger calendar refetch
       queryClient.invalidateQueries({ queryKey: ["personal-events"] });
       // Reset form states
+      setEventDate(parseDateString(initialDate));
       setTitle("");
       setDescription("");
       setLocation("");
@@ -77,9 +101,8 @@ export function useCreateEventViewModel({
     },
   });
 
-  const combineDateAndTime = (dateStr: string, time: Date) => {
-    const [year, month, day] = dateStr.split("-").map(Number);
-    const combined = new Date(year, month - 1, day);
+  const combineDateAndTime = (date: Date, time: Date) => {
+    const combined = new Date(date);
     combined.setHours(time.getHours());
     combined.setMinutes(time.getMinutes());
     combined.setSeconds(0);
@@ -119,13 +142,14 @@ export function useCreateEventViewModel({
       return;
     }
 
-    const startISO = combineDateAndTime(selectedDate, startTime);
-    const endISO = combineDateAndTime(selectedDate, endTime);
+    const dateStr = formatDateToString(eventDate);
+    const startISO = combineDateAndTime(eventDate, startTime);
+    const endISO = combineDateAndTime(eventDate, endTime);
 
     const payload: CreatePersonalEventBody = {
       title: title.trim(),
       description: description.trim() || undefined,
-      date: selectedDate,
+      date: dateStr,
       location: location.trim() || undefined,
       startTime: startISO,
       endTime: endISO,
@@ -137,6 +161,9 @@ export function useCreateEventViewModel({
   };
 
   return {
+    eventDate,
+    setEventDate,
+    eventDateLabel: formatDateToString(eventDate),
     title,
     setTitle,
     description,
@@ -151,6 +178,8 @@ export function useCreateEventViewModel({
     setRepeat,
     isPublic,
     setIsPublic,
+    showDatePicker,
+    setShowDatePicker,
     showStartPicker,
     setShowStartPicker,
     showEndPicker,

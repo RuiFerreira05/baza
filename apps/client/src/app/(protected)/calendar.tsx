@@ -11,7 +11,6 @@ import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
@@ -35,7 +34,7 @@ export default function CalendarScreen() {
 
   // Initialize event creation ViewModel
   const formVm = useCreateEventViewModel({
-    selectedDate: vm.selectedDate,
+    initialDate: vm.selectedDate,
     onSuccess: () => {
       setIsCreateModalOpen(false);
       vm.refetchEvents(); // Refresh schedule view
@@ -75,11 +74,19 @@ export default function CalendarScreen() {
         weekday: "short",
         month: "short",
         day: "numeric",
-        year: "numeric",
       });
     } catch {
       return dateStr;
     }
+  };
+
+  const formatDateLong = (date: Date) => {
+    return date.toLocaleDateString([], {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   };
 
   const formatTime = (time: Date) => {
@@ -106,6 +113,10 @@ export default function CalendarScreen() {
           current={vm.selectedDate}
           markedDates={vm.markedDates}
           onDayPress={vm.onDayPress}
+          onDayLongPress={(day: { dateString: string }) => {
+            vm.onDayPress(day);
+            setIsCreateModalOpen(true);
+          }}
           onMonthChange={vm.onMonthChange}
           theme={calendarTheme}
           enableSwipeMonths={true}
@@ -179,10 +190,7 @@ export default function CalendarScreen() {
         transparent={true}
         onRequestClose={() => setIsCreateModalOpen(false)}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={formStyles.modalContainer}
-        >
+        <View style={formStyles.modalContainer}>
           {/* Backdrop Dismiss trigger */}
           <Pressable
             style={StyleSheet.absoluteFill}
@@ -193,7 +201,7 @@ export default function CalendarScreen() {
             {/* Sheet Header */}
             <View style={formStyles.modalHeader}>
               <Text style={formStyles.modalTitle} numberOfLines={1}>
-                Schedule Event ({formatDateLabel(vm.selectedDate)})
+                Schedule Event
               </Text>
               <Pressable
                 style={formStyles.closeButton}
@@ -241,6 +249,47 @@ export default function CalendarScreen() {
                 placeholder="Add optional notes..."
                 autoCapitalize="sentences"
               />
+
+              {/* Event Date selector */}
+              <View style={formStyles.inputGroup}>
+                <Text style={formStyles.label}>Date</Text>
+                {Platform.OS === "ios" ? (
+                  <DateTimePicker
+                    value={formVm.eventDate}
+                    mode="date"
+                    themeVariant={isDark ? "dark" : "light"}
+                    onChange={(_, date) => {
+                      if (date) formVm.setEventDate(date);
+                    }}
+                  />
+                ) : (
+                  <>
+                    <Pressable
+                      style={formStyles.timePickerButton}
+                      onPress={() => formVm.setShowDatePicker(true)}
+                    >
+                      <Text style={formStyles.timePickerText}>
+                        {formatDateLong(formVm.eventDate)}
+                      </Text>
+                      <Ionicons
+                        name="calendar-outline"
+                        size={18}
+                        color={colors.onSurfaceVariant}
+                      />
+                    </Pressable>
+                    {formVm.showDatePicker && (
+                      <DateTimePicker
+                        value={formVm.eventDate}
+                        mode="date"
+                        onChange={(_, date) => {
+                          formVm.setShowDatePicker(false);
+                          if (date) formVm.setEventDate(date);
+                        }}
+                      />
+                    )}
+                  </>
+                )}
+              </View>
 
               {/* Event Start & End Time selectors (Platform specific picker patterns) */}
               <View style={formStyles.timeRow}>
@@ -417,7 +466,7 @@ export default function CalendarScreen() {
               </View>
             </ScrollView>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </Modal>
     </SafeAreaView>
   );
