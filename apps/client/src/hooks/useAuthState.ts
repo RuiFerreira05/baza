@@ -1,6 +1,5 @@
 import { authClient } from "@/lib/auth";
 import { env } from "@/lib/env";
-import { errorReporter } from "@/lib/errorReporter";
 import { userService } from "@/services/userService";
 import { ErrorTypes } from "@baza/shared-types";
 import { useAppQuery } from "./useAppQuery";
@@ -29,14 +28,6 @@ export function useAuthState() {
     !bypassAuth && (sessionLoading || (!!session && profileLoading));
   const hasNoProfile =
     queryError?.error?.type === ErrorTypes.UnknownUsernameError;
-
-  if (!hasNoProfile) {
-    errorReporter.logMessage(
-      `useAuthState: profile successfully fetched for user: ${session?.user?.name}` +
-        `\nprofile: ${JSON.stringify(profileData)}`,
-      "info",
-    );
-  }
 
   return {
     session,

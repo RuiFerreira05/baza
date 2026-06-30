@@ -26,13 +26,13 @@ import {
   type PersonalEventDTO,
   type Result,
 } from "@baza/shared-types";
-import { and, eq, gte, inArray, lte } from "drizzle-orm";
+import { and, eq, gte, inArray, lte, ne, or } from "drizzle-orm";
 import { Type } from "typebox";
 import { Value } from "typebox/value";
 import { db } from "../lib/db";
 import { app } from "../setup";
+import { expandRepeatingEvents } from "../utils/eventUtils";
 import { finalizeEvent } from "./finalizationService";
-
 /**
  * Creates a new group event with an associated base event.
  * Validates that the votingEndTime is strictly earlier than the startDate.
@@ -450,8 +450,8 @@ export const editGroupEvent = async (
 export const getGroupCalendar = async (
   groupId: string,
   requestingUsername: string,
-  startDate?: string,
-  endDate?: string,
+  startDate: string,
+  endDate: string,
 ): Promise<
   Result<
     GroupCalendarDTO,
@@ -509,13 +509,11 @@ export const getGroupCalendar = async (
     const memberUsernames = members.map((m) => m.username);
 
     // 4. Fetch group events within the date range
-    const groupEventsConditions = [eq(groupEvents.groupId, groupId)];
-    if (startDate) {
-      groupEventsConditions.push(gte(groupEvents.startDate, startDate));
-    }
-    if (endDate) {
-      groupEventsConditions.push(lte(groupEvents.endDate, endDate));
-    }
+    const groupEventsConditions = [
+      eq(groupEvents.groupId, groupId),
+      gte(groupEvents.startDate, startDate),
+      lte(groupEvents.endDate, endDate),
+    ];
 
     const dbGroupEvents = await db
       .select({
@@ -554,13 +552,14 @@ export const getGroupCalendar = async (
     if (memberUsernames.length > 0) {
       const personalEventsConditions = [
         inArray(personalEvents.username, memberUsernames),
+        or(
+          and(
+            gte(personalEvents.date, startDate),
+            lte(personalEvents.date, endDate),
+          ),
+          ne(personalEvents.repeat, "never"),
+        ),
       ];
-      if (startDate) {
-        personalEventsConditions.push(gte(personalEvents.date, startDate));
-      }
-      if (endDate) {
-        personalEventsConditions.push(lte(personalEvents.date, endDate));
-      }
 
       const dbPersonalEvents = await db
         .select({
@@ -581,13 +580,25 @@ export const getGroupCalendar = async (
         .innerJoin(events, eq(personalEvents.id, events.id))
         .where(and(...personalEventsConditions));
 
-      formattedMemberEvents = dbPersonalEvents.map((row) => {
+      const expandedPersonalEvents = dbPersonalEvents.flatMap((row) =>
+        expandRepeatingEvents(
+          {
+            ...row,
+            startTime: row.startTime.toISOString(),
+            endTime: row.endTime.toISOString(),
+          },
+          startDate,
+          endDate,
+        ),
+      );
+
+      formattedMemberEvents = expandedPersonalEvents.map((row) => {
         const isOwner = row.username === requestingUsername;
         const isPrivate = !row.public;
 
         const isoDate = row.date;
-        const formattedStartTime = row.startTime.toISOString();
-        const formattedEndTime = row.endTime.toISOString();
+        const formattedStartTime = row.startTime;
+        const formattedEndTime = row.endTime;
 
         if (isPrivate && !isOwner) {
           // Mask private events for other users
@@ -667,22 +678,31 @@ export const getUserEvents = async (
     ErrorTypes.ConversionError | ErrorTypes.UnknownUsernameError
   >
 > => {
-  const personalEvents = await db.query.personalEvents.findMany({
+  const fetchedPersonalEvents = await db.query.personalEvents.findMany({
     where: {
-      username: username,
-      date: {
-        gte: startDate,
-        lte: endDate,
-      },
+      username,
+      OR: [
+        {
+          date: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        {
+          repeat: {
+            ne: "never",
+          },
+        },
+      ],
     },
     with: {
       events: true,
     },
   });
 
-  if (personalEvents) {
+  if (fetchedPersonalEvents) {
     const sanitizedEvents = [];
-    for (const personalEvent of personalEvents) {
+    for (const personalEvent of fetchedPersonalEvents) {
       const { events, ...rest } = personalEvent;
 
       if (events) {
@@ -704,8 +724,12 @@ export const getUserEvents = async (
       }
     }
 
+    const expandedEvents = sanitizedEvents.flatMap((event) =>
+      expandRepeatingEvents(event, startDate, endDate),
+    );
+
     const check = Type.Array(personalEventDTO);
-    const converted = Value.Convert(check, sanitizedEvents);
+    const converted = Value.Convert(check, expandedEvents);
     if (Value.Check(check, converted)) {
       return Ok(converted);
     } else {

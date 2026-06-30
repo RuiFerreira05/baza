@@ -418,8 +418,8 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
         tags: ["groups"],
         params: SimpleIdParam("Group UUID"),
         querystring: Type.Object({
-          startDate: Type.Optional(Type.String({ format: "date" })),
-          endDate: Type.Optional(Type.String({ format: "date" })),
+          startDate: Type.String({ format: "date" }),
+          endDate: Type.String({ format: "date" }),
         }),
         response: {
           200: StatusOK(
