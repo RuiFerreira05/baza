@@ -20,7 +20,7 @@ export default function ProfileScreen() {
         <Image
           style={styles.profileImage}
           source={
-            bypassAuth || !profile?.photo? require("./../../assets/images/profileImg.png") : { uri: 'data:image/png;base64,${profile?.photo}' }}
+            bypassAuth || !profile?.photo? require("./../../../../client/assets/images/profileImg.png") : { uri: 'data:image/png;base64,${profile?.photo}' }}
         />
       </View>
 
