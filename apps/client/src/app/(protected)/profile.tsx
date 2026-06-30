@@ -3,16 +3,28 @@ import { useProfileStyles } from "@/constants/styles/useProfileStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuthState } from "@/hooks/useAuthState";
 import { useProfileViewModel } from "@/viewmodels/useProfileViewModel";
+import { useRouter } from "expo-router";
 import { Image, Text, TouchableHighlight, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const styles = useProfileStyles();
-  // const router = useRouter();
+  const router = useRouter();
   const { colors } = useAppTheme();
 
   const { profile, bypassAuth } = useAuthState();
-  const vm = useProfileViewModel("");
+
+  if(!profile && !bypassAuth) {
+    router.push("../(onboarding)/createProfile");
+  }
+  const vm = useProfileViewModel(profile ?? {
+    username: "Developer", 
+    photo: null, 
+    description: "Just a developer profile", 
+    userId: "fKagbUx7LwvE72kxf0PL7cdd7AjncKBT", 
+    createdAt: new Date().toISOString(), 
+    updatedAt: new Date().toISOString()
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -20,7 +32,9 @@ export default function ProfileScreen() {
         <Image
           style={styles.profileImage}
           source={
-            bypassAuth || !profile?.photo? require("./../../../../client/assets/images/profileImg.png") : { uri: 'data:image/png;base64,${profile?.photo}' }}
+            // bypassAuth || !profile?.photo? require("./../../../../client/assets/images/profileImg.png") :  }}
+            require("./../../../../client/assets/images/profileImg.png")
+          }
         />
       </View>
 
@@ -34,7 +48,7 @@ export default function ProfileScreen() {
         >
           <View style={styles.column}>
             <Text style={styles.subTitle2}>Friends</Text>
-            <Text style={styles.subTitle}>12</Text>
+            <Text style={styles.subTitle}>{vm.numberOfFriends}</Text>
           </View>
         </TouchableHighlight>
         <View style={styles.columnDivider}></View>
@@ -45,7 +59,7 @@ export default function ProfileScreen() {
         >
           <View style={styles.column}>
             <Text style={styles.subTitle2}>Events</Text>
-            <Text style={styles.subTitle}>169</Text>
+            <Text style={styles.subTitle}>{vm.numberOfEvents}</Text>
           </View>
         </TouchableHighlight>
         <View style={styles.columnDivider}></View>
@@ -56,7 +70,7 @@ export default function ProfileScreen() {
         >
           <View style={styles.column}>
             <Text style={styles.subTitle2}>Groups</Text>
-            <Text style={styles.subTitle}>4</Text>
+            <Text style={styles.subTitle}>{vm.numberOfGroups}</Text>
           </View>
         </TouchableHighlight>
       </View>
