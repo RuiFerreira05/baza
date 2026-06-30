@@ -3,7 +3,7 @@ import { authClient } from "@/lib/auth";
 import { queryClient } from "@/lib/queryClient";
 import { ThemeMode, useSettingsStore } from "@/store/useSettingsStore";
 import { SettingsSchema, SettingsType } from "@/types/settingsTypes";
-import { Ok } from "@baza/shared-types";
+import { FailableOk } from "@baza/shared-types";
 import { router } from "expo-router";
 import { useState } from "react";
 import Toast from "react-native-toast-message";
@@ -29,7 +29,7 @@ export const useSettingsViewModel = (): SettingsSchema => {
           value: settingsStore.themeMode,
           onChangeFn: (value: string) => {
             settingsStore.setThemeMode(value as ThemeMode);
-            return Ok();
+            return FailableOk();
           },
         },
       ],
@@ -52,7 +52,7 @@ export const useSettingsViewModel = (): SettingsSchema => {
               position: "bottom",
               bottomOffset: 80,
             });
-            return Ok();
+            return FailableOk();
           },
         },
         {
@@ -70,7 +70,7 @@ export const useSettingsViewModel = (): SettingsSchema => {
               position: "bottom",
               bottomOffset: 80,
             });
-            return Ok();
+            return FailableOk();
           },
           defaultValue: testInput,
           placeholder: "Enter something...",
@@ -90,7 +90,7 @@ export const useSettingsViewModel = (): SettingsSchema => {
               position: "bottom",
               bottomOffset: 80,
             });
-            return Ok();
+            return FailableOk();
           },
           defaultValue: testToggle,
         },
@@ -110,7 +110,7 @@ export const useSettingsViewModel = (): SettingsSchema => {
               position: "bottom",
               bottomOffset: 80,
             });
-            return Ok();
+            return FailableOk();
           },
           defaultValue: hiddenSettingValue,
           placeholder: "Enter something...",
@@ -153,7 +153,7 @@ export const useSettingsViewModel = (): SettingsSchema => {
                   });
                 });
             }
-            return Ok();
+            return FailableOk();
           },
         },
       ],

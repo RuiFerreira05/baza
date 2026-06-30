@@ -68,7 +68,6 @@ describe("Authentication & Access Control Middleware", () => {
     expect(response.json().error.type).toBe("UnauthorizedError");
   });
 
-
   it("should allow profile creation when session is valid", async () => {
     const userId = "44444444-4444-4444-4444-444444444444";
     await db.insert(users).values({

@@ -4,6 +4,8 @@ import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthState } from "@/hooks/useAuthState";
 
+import { useCreateProfileViewModel } from "@/viewmodels/useCreateProfileViewModel";
+
 jest.mock("@/lib/env", () => ({
   env: {
     EXPO_PUBLIC_SERVER_URL: "http://mock-server.com",
@@ -52,8 +54,6 @@ jest.mock("@/hooks/useAuthState", () => ({
   })),
 }));
 
-import { useCreateProfileViewModel } from "@/viewmodels/useCreateProfileViewModel";
-
 const mockCreateProfile = jest.fn();
 jest.mock("@/viewmodels/useCreateProfileViewModel", () => ({
   useCreateProfileViewModel: jest.fn(() => ({
@@ -72,14 +72,20 @@ describe("CreateProfileScreen", () => {
 
   const wrapper = ({ children }: any) => {
     const queryClient = new QueryClient();
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    return (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
   };
 
   it("should render the screen components correctly", async () => {
     await render(<CreateProfileScreen />, { wrapper });
 
     expect(screen.getByText("Complete Setup")).toBeTruthy();
-    expect(screen.getByText("How would you like to be known? This will be your public username.")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "How would you like to be known? This will be your public username.",
+      ),
+    ).toBeTruthy();
     expect(screen.getByPlaceholderText("e.g. john_doe")).toBeTruthy();
   });
 
@@ -145,8 +151,10 @@ describe("CreateProfileScreen", () => {
       onCreateProfile: mockCreateProfile,
     });
     await render(<CreateProfileScreen />, { wrapper });
-    expect(screen.getByText("Username must be 3-20 characters long")).toBeTruthy();
-    
+    expect(
+      screen.getByText("Username must be 3-20 characters long"),
+    ).toBeTruthy();
+
     await act(async () => {
       fireEvent(screen.getByTestId("createProfileButton"), "pressIn");
     });
@@ -161,10 +169,10 @@ describe("CreateProfileScreen", () => {
       onCreateProfile: mockCreateProfile,
     });
     await render(<CreateProfileScreen />, { wrapper });
-    
+
     // The button should not have the "Create Profile" text
     expect(screen.queryByText("Create Profile")).toBeNull();
-    
+
     await act(async () => {
       fireEvent(screen.getByTestId("createProfileButton"), "pressIn");
     });
@@ -173,7 +181,7 @@ describe("CreateProfileScreen", () => {
   it("should apply pressed styles when button is pressed in", async () => {
     await render(<CreateProfileScreen />, { wrapper });
     const button = screen.getByTestId("createProfileButton");
-    
+
     await act(async () => {
       fireEvent(button, "pressIn");
     });
@@ -189,7 +197,11 @@ describe("CreateProfileScreen", () => {
       error: "This username is already taken. Please choose another one.",
     });
     await render(<CreateProfileScreen />, { wrapper });
-    
-    expect(screen.getByText("This username is already taken. Please choose another one.")).toBeTruthy();
+
+    expect(
+      screen.getByText(
+        "This username is already taken. Please choose another one.",
+      ),
+    ).toBeTruthy();
   });
 });
