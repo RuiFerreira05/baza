@@ -24,17 +24,19 @@ export function useAuthState() {
     retry: false,
   });
 
-  errorReporter.logMessage(`authState: session=${JSON.stringify(profileData)}`);
-  errorReporter.logMessage(`authState: isLoading=${profileLoading}`);
-  errorReporter.logMessage(
-    `authState: queryError=${JSON.stringify(queryError)}`,
-  );
-
   // 4. Derive boolean flags
   const isLoading =
     !bypassAuth && (sessionLoading || (!!session && profileLoading));
   const hasNoProfile =
     queryError?.error?.type === ErrorTypes.UnknownUsernameError;
+
+  if (!hasNoProfile) {
+    errorReporter.logMessage(
+      `useAuthState: profile successfully fetched for user: ${session?.user?.name}` +
+        `\nprofile: ${JSON.stringify(profileData)}`,
+      "info",
+    );
+  }
 
   return {
     session,

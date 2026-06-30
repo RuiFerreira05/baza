@@ -45,7 +45,6 @@ describe("Profile Routes", () => {
       method: "POST",
       url: "/v1/restricted/users",
       payload: {
-        userId: VALID_USER_ID,
         username: "johndoe",
       },
     });

@@ -28,18 +28,21 @@ export const useRegisterViewModel = () => {
       setLoading(false);
       return;
     }
-    authClient.signUp
-      .email({
+    try {
+      const { error: authError } = await authClient.signUp.email({
         name,
         email,
         password,
-      })
-      .catch((err) => {
-        setError(err.message || "An error occurred during registration.");
-      })
-      .finally(() => {
-        setLoading(false);
       });
+
+      if (authError) {
+        setError(authError.message || "An error occurred during registration.");
+      }
+    } catch (err: any) {
+      setError(err.message || "A network error occurred during registration.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {

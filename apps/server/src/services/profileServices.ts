@@ -1,10 +1,4 @@
-import {
-  friends,
-  groupMembers,
-  groups,
-  profiles,
-  users,
-} from "@baza/db/schemas";
+import { friends, groupMembers, groups, profiles } from "@baza/db/schemas";
 import {
   Err,
   ErrorTypes,
@@ -14,7 +8,6 @@ import {
   Ok,
   profileDTO,
   SentFriendRequestDTO,
-  type CreateProfileBody,
   type GroupDTO,
   type GroupMemberDTO,
   type ProfileDTO,
@@ -81,27 +74,23 @@ export const getUserByUsername = async (
  * @returns a promised result with the created profileDTO, or an error
  */
 export const createUserProfile = async (
-  userProfile: CreateProfileBody,
+  username: string,
+  userId: string,
 ): Promise<
   Result<
     ProfileDTO,
     | ErrorTypes.ConversionError
     | ErrorTypes.ResourceCreationError
     | ErrorTypes.UnknownIdError
+    | ErrorTypes.ExistingResourceError
   >
 > => {
-  //Verify if the user whose profile is being created, exists.
-  const user = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, userProfile.userId));
-
-  if (user.length == 1) {
+  try {
     const [newProfile] = await db
       .insert(profiles)
       .values({
-        username: userProfile.username,
-        userId: userProfile.userId,
+        username: username,
+        userId: userId,
         settings: {},
       })
       .returning();
@@ -123,8 +112,11 @@ export const createUserProfile = async (
     } else {
       return Err(ErrorTypes.ResourceCreationError);
     }
-  } else {
-    return Err(ErrorTypes.UnknownIdError);
+  } catch (error: any) {
+    app.log.error(
+      `Failed to create profile for user with id ${userId}: ${error.message}`,
+    );
+    return Err(ErrorTypes.ExistingResourceError);
   }
 };
 
