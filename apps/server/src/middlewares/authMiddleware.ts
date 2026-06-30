@@ -54,7 +54,9 @@ export const authPreHandler = async (
       req.session = {
         session: {} as any,
         user: {
-          id: (req.headers["x-test-user-id"] as string) || "11111111-1111-1111-1111-111111111111",
+          id:
+            (req.headers["x-test-user-id"] as string) ||
+            "11111111-1111-1111-1111-111111111111",
           name: "Test User",
           email: "test@example.com",
           emailVerified: true,

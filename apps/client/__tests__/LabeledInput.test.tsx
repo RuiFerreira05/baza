@@ -30,7 +30,7 @@ describe("LabeledInput", () => {
         value=""
         onChangeText={jest.fn()}
         placeholder="Test Placeholder"
-      />
+      />,
     );
 
     expect(screen.getByText("Test Label")).toBeTruthy();
@@ -44,7 +44,7 @@ describe("LabeledInput", () => {
         value=""
         onChangeText={jest.fn()}
         tip="Test Tip"
-      />
+      />,
     );
 
     expect(screen.getByText("Test Tip")).toBeTruthy();
@@ -57,14 +57,16 @@ describe("LabeledInput", () => {
         value=""
         onChangeText={jest.fn()}
         placeholder="Test Placeholder"
-      />
+      />,
     );
 
     let input = screen.getByPlaceholderText("Test Placeholder");
 
     // initially blur (border)
     expect(input.props.style).toEqual(
-      expect.arrayContaining([expect.objectContaining({ borderColor: "#border" })])
+      expect.arrayContaining([
+        expect.objectContaining({ borderColor: "#border" }),
+      ]),
     );
 
     // focus
@@ -73,7 +75,9 @@ describe("LabeledInput", () => {
     });
     input = screen.getByPlaceholderText("Test Placeholder");
     expect(input.props.style).toEqual(
-      expect.arrayContaining([expect.objectContaining({ borderColor: "#primary" })])
+      expect.arrayContaining([
+        expect.objectContaining({ borderColor: "#primary" }),
+      ]),
     );
 
     // blur
@@ -82,7 +86,9 @@ describe("LabeledInput", () => {
     });
     input = screen.getByPlaceholderText("Test Placeholder");
     expect(input.props.style).toEqual(
-      expect.arrayContaining([expect.objectContaining({ borderColor: "#border" })])
+      expect.arrayContaining([
+        expect.objectContaining({ borderColor: "#border" }),
+      ]),
     );
   });
 
@@ -94,19 +100,23 @@ describe("LabeledInput", () => {
         onChangeText={jest.fn()}
         placeholder="Test Placeholder"
         isCorrect={true}
-      />
+      />,
     );
 
     const input = screen.getByPlaceholderText("Test Placeholder");
 
     // should override focus/blur styles
     expect(input.props.style).toEqual(
-      expect.arrayContaining([expect.objectContaining({ borderColor: "#success" })])
+      expect.arrayContaining([
+        expect.objectContaining({ borderColor: "#success" }),
+      ]),
     );
 
     fireEvent(input, "focus");
     expect(input.props.style).toEqual(
-      expect.arrayContaining([expect.objectContaining({ borderColor: "#success" })])
+      expect.arrayContaining([
+        expect.objectContaining({ borderColor: "#success" }),
+      ]),
     );
   });
 });
