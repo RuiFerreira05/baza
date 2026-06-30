@@ -1,6 +1,5 @@
 import { useProfileStyles } from "@/constants/styles/useProfileStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { useSettingsStore } from "@/store/useSettingsStore";
 import { useRouter } from "expo-router";
 import { Image, Text, TouchableHighlight, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,7 +7,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function ProfileScreen() {
   const styles = useProfileStyles();
   const router = useRouter();
-  const settingsStore = useSettingsStore();
   const { colors } = useAppTheme();
 
   return (
@@ -28,7 +26,7 @@ export default function ProfileScreen() {
         <TouchableHighlight
           underlayColor={colors.background}
           activeOpacity={0.5}
-          // onPress={() => router.push("/(protected)/friends")}
+          onPress={() => router.push("/(protected)/friends")}
         >
           <View style={styles.column}>
             <Text style={styles.subTitle2}>Friends</Text>

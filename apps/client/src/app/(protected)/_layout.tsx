@@ -93,6 +93,8 @@ export default function ProtectedLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen name="friends" options={{ href: null }} />
     </Tabs>
   );
 }
