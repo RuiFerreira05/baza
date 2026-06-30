@@ -1,11 +1,11 @@
 import {
   CreateGroupBody,
+  createStatusError,
+  createStatusOK,
   EditGroupBody,
   ErrorTypes,
   SimpleIdParam,
   SimpleUsernameParam,
-  createStatusError,
-  createStatusOK,
   UpdateMemberRoleBody,
 } from "@baza/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
@@ -14,14 +14,14 @@ import { getAuthenticatedUsername } from "../lib/auth";
 import {
   createGroup,
   deleteGroup,
+  dismissUserAsAdmin,
   editGroup,
   editGroupPhoto,
   getGroupById,
   getGroupMembers,
   inviteUserToGroup,
-  removeUserFromGroup,
   promoteUserToAdmin,
-  dismissUserAsAdmin,
+  removeUserFromGroup,
 } from "../services/groupServices";
 import { app, fileUploadService } from "../setup";
 
