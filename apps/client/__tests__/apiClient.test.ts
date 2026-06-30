@@ -34,7 +34,7 @@ describe("apiClient", () => {
 
   it("should inject Cookie header if session cookies exist in SecureStore", async () => {
     const mockCookie = JSON.stringify({
-      "baza_session_token": { value: "mocked_token", expires: null }
+      baza_session_token: { value: "mocked_token", expires: null },
     });
     (SecureStore.getItem as jest.Mock).mockReturnValue(mockCookie);
     mockFetch.mockResolvedValue({

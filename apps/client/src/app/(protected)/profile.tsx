@@ -1,32 +1,36 @@
+/* eslint-disable prettier/prettier */
 import { useProfileStyles } from "@/constants/styles/useProfileStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { useRouter } from "expo-router";
+import { useAuthState } from "@/hooks/useAuthState";
+import { useProfileViewModel } from "@/viewmodels/useProfileViewModel";
 import { Image, Text, TouchableHighlight, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const styles = useProfileStyles();
-  const router = useRouter();
+  // const router = useRouter();
   const { colors } = useAppTheme();
+
+  const { profile, bypassAuth } = useAuthState();
+  const vm = useProfileViewModel("");
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <Text style={styles.title}>Profile Screen</Text> */}
-
       <View style={styles.profileView}>
         <Image
           style={styles.profileImage}
-          source={require("./../../assets/images/profileImg.png")}
+          source={
+            bypassAuth || !profile?.photo? require("./../../assets/images/profileImg.png") : { uri: 'data:image/png;base64,${profile?.photo}' }}
         />
       </View>
 
-      <Text style={styles.title}>Username</Text>
+      <Text style={styles.title}>{ bypassAuth ? "Developer" : profile?.username }</Text>
 
       <View style={styles.profileStats}>
         <TouchableHighlight
           underlayColor={colors.background}
           activeOpacity={0.5}
-          onPress={() => router.push("/(protected)/friends")}
+          onPress={vm.navigateToFriends}
         >
           <View style={styles.column}>
             <Text style={styles.subTitle2}>Friends</Text>
@@ -37,7 +41,7 @@ export default function ProfileScreen() {
         <TouchableHighlight
           underlayColor={colors.background}
           activeOpacity={0.5}
-          onPress={() => router.push("/(protected)/calendar")}
+          onPress={vm.navigateToCalendar}
         >
           <View style={styles.column}>
             <Text style={styles.subTitle2}>Events</Text>
@@ -48,7 +52,7 @@ export default function ProfileScreen() {
         <TouchableHighlight
           underlayColor={colors.background}
           activeOpacity={0.5}
-          onPress={() => router.push("/(protected)/groups")}
+          onPress={vm.navigateToGroups}
         >
           <View style={styles.column}>
             <Text style={styles.subTitle2}>Groups</Text>
@@ -59,7 +63,7 @@ export default function ProfileScreen() {
       <View style={styles.description}>
         <Text style={styles.subTitleOnPrimary}>About me</Text>
         <Text style={styles.textOnPrimary}>
-          Always available for a good hangout
+          {bypassAuth? "Just a developer profile" : profile?.description}
         </Text>
       </View>
 

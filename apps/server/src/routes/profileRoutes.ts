@@ -42,8 +42,10 @@ import {
 import {
   createUserProfileHandler,
   deleteUserProfileHandler,
+  editProfilePhotoHandler,
   editUserProfileHandler,
   getCurrentUserProfileHandler,
+  getProfilePhotoHandler,
   getUserByUsernameHandler,
 } from "../handlers/profileHandlers";
 import {
@@ -568,5 +570,62 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     updateUserSettingsHandler,
+  );
+
+  // PATCH /users/:username/photo
+  app.patch(
+    "/:username/photo",
+    {
+      schema: {
+        description: "This route allows editing a profile's photo",
+        tags: ["users"],
+        params: SimpleUsernameParam(
+          "The username of the profile whose photo is being edited",
+        ),
+        response: {
+          201: StatusOK(
+            profileDTO,
+            "if the profile photo was successfully updated and the updated profile data was successfully converted to the expected format before sending the response",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownUsernameError,
+            "if no profile with the provided username was found",
+          ),
+          500: StatusError(
+            ErrorTypes.ResourceCreationError,
+            "if there was an error saving the profile photo or updating the profile with the new photo",
+          ),
+        },
+      },
+    },
+    editProfilePhotoHandler,
+  );
+
+  // GET /groups/:id/photo
+  app.get(
+    "/:id/photo",
+    {
+      schema: {
+        description: "This route fetches a profile's photo",
+        tags: ["users"],
+        params: SimpleUsernameParam(
+          "The username of the profile whose photo is being fetched",
+        ),
+        response: {
+          200: Type.String({
+            description: "The profile photo as a stream",
+          }),
+          404: StatusError(
+            ErrorTypes.UnknownUsernameError,
+            "if no profile with the provided username was found or if the profile does not have a photo",
+          ),
+          500: StatusError(
+            ErrorTypes.ResourceCreationError,
+            "if there was an error fetching the profile photo",
+          ),
+        },
+      },
+    },
+    getProfilePhotoHandler,
   );
 };

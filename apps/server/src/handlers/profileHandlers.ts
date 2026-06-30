@@ -7,13 +7,15 @@ import {
   type SimpleUsernameParam,
 } from "@baza/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { FSUploadService } from "../lib/FSUploadService";
 import {
   createUserProfile,
   deleteUserProfile,
+  editProfilePhoto,
   editUserProfile,
   getUserByUsername,
 } from "../services/profileServices";
-import { app } from "../setup";
+import { app, fileUploadService } from "../setup";
 
 // GET /users/:username
 export const getUserByUsernameHandler = async (
@@ -253,5 +255,108 @@ export const getCurrentUserProfileHandler = async (
     }
   } else {
     return res.send(createStatusOK(data.value));
+  }
+};
+
+// PATCH users/:username/edit/photo
+export const editProfilePhotoHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  app.log.info("Received Edit Profile Photo request");
+  const { username } = req.params as SimpleUsernameParam;
+  const photo = await req.file();
+
+  if (!photo) {
+    return res
+      .status(400)
+      .send(
+        createStatusError(
+          ErrorTypes.MalformedRequestError,
+          "No photo file was provided in the request",
+        ),
+      );
+  }
+
+  const profile = await editProfilePhoto(username, photo);
+
+  if (!profile.ok) {
+    switch (profile.error) {
+      case ErrorTypes.UnknownUsernameError:
+        app.log.warn("Profile not found");
+
+        return res
+          .status(404)
+          .send(
+            createStatusError(
+              ErrorTypes.UnknownUsernameError,
+              "A profile with the provided username was not found",
+            ),
+          );
+      case ErrorTypes.ResourceCreationError:
+        app.log.error(
+          "Failed to save profile photo or update profile with new photo",
+        );
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.ResourceCreationError,
+              "An error occurred while saving the profile photo or updating the profile with the new photo",
+            ),
+          );
+      case ErrorTypes.ConversionError:
+        app.log.error("Failed to convert updated profile data");
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.ConversionError,
+              "An error occurred while converting the updated profile data",
+            ),
+          );
+    }
+  } else {
+    return res.status(201).send(createStatusOK(profile.value));
+  }
+};
+
+// users/:username/photo
+// This route does not use a service as it's essentially just a wrapper over Fastify's static file serving functionality
+export const getProfilePhotoHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  app.log.info("Received Get Profile Photo request");
+  const { username } = req.params as SimpleUsernameParam;
+
+  const result = await fileUploadService.getProfilePhoto(username);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownUsernameError:
+        app.log.warn("Profile photo not found");
+        return res
+          .status(404)
+          .send(
+            createStatusError(
+              ErrorTypes.UnknownUsernameError,
+              "A profile photo for a user with the provided username was not found",
+            ),
+          );
+    }
+  } else {
+    const photoResult = result.value;
+    switch (photoResult.type) {
+      case "static":
+        app.log.info(
+          `GetProfilePhotoHandler: Sending static file ${photoResult.filename} for user ${username}`,
+        );
+        return res.sendFile(
+          photoResult.filename,
+          FSUploadService.profilePhotoDir,
+        );
+      // other cases for different GetImageResult types
+    }
   }
 };

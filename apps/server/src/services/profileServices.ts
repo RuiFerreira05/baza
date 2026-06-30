@@ -13,11 +13,12 @@ import {
   type ProfileDTO,
   type Result,
 } from "@baza/shared-types";
+import type { MultipartFile } from "@fastify/multipart";
 import { and, eq, sql } from "drizzle-orm";
 import { Type } from "typebox";
 import { Value } from "typebox/value";
 import { db } from "../lib/db";
-import { app } from "../setup";
+import { app, fileUploadService } from "../setup";
 
 /**
  * This method fetches the profile data of a specific user from the database by their username,
@@ -952,5 +953,67 @@ export const getPendingSentFriendRequests = async (
       "Failed to fetch pending sent requests",
     );
     return Err(ErrorTypes.ConversionError);
+  }
+};
+
+/**
+ * This method updates the photo of a profile.
+ *
+ * @param username the username of the user whose profile photo is to be updated
+ * @param photo the new photo file
+ * @returns a promised result with the updated profileDTO, or an error
+ */
+export const editProfilePhoto = async (
+  username: string,
+  photo: MultipartFile,
+): Promise<
+  Result<
+    ProfileDTO,
+    | ErrorTypes.UnknownUsernameError
+    | ErrorTypes.ResourceCreationError
+    | ErrorTypes.ConversionError
+  >
+> => {
+  const profileExists = await db.query.profiles.findFirst({
+    where: {
+      username: username,
+    },
+    columns: {
+      photo: true,
+    },
+  });
+
+  if (!profileExists) {
+    app.log.warn(`Profile with username ${username} not found`);
+    return Err(ErrorTypes.UnknownUsernameError);
+  }
+
+  const result = await fileUploadService.saveProfilePhoto(
+    photo,
+    profileExists.photo,
+  );
+  if (!result.ok) {
+    return Err(ErrorTypes.ResourceCreationError);
+  }
+
+  const [profile] = await db
+    .update(profiles)
+    .set({
+      photo: result.value,
+      updatedAt: new Date(),
+    })
+    .where(eq(profiles.username, username))
+    .returning();
+
+  if (profile) {
+    const conv = Value.Convert(profileDTO, profile);
+    if (Value.Check(profileDTO, conv)) {
+      return Ok(conv);
+    } else {
+      app.log.error(Value.Errors(profileDTO, conv));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } else {
+    return Err(ErrorTypes.ResourceCreationError);
   }
 };

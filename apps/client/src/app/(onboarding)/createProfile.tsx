@@ -80,7 +80,13 @@ export default function CreateProfileScreen() {
                 )}
               </Pressable>
               {vm.error && (
-                <Text style={{ color: colors.error, marginTop: 8, textAlign: 'center' }}>
+                <Text
+                  style={{
+                    color: colors.error,
+                    marginTop: 8,
+                    textAlign: "center",
+                  }}
+                >
                   {vm.error}
                 </Text>
               )}

@@ -8,13 +8,13 @@ import { fromNodeHeaders } from "better-auth/node";
 import fastify from "fastify";
 import fs from "fs";
 import path from "path";
+import { auditLogger } from "./lib/auditLogger";
 import { auth } from "./lib/auth";
 import { env } from "./lib/env";
 import { FSUploadService } from "./lib/FSUploadService";
 import { authPreHandler } from "./middlewares/authMiddleware";
 import { groupRoutes } from "./routes/groupRoutes";
 import { userRoutes } from "./routes/profileRoutes";
-import { auditLogger } from "./lib/auditLogger";
 
 // ##### APP SETUP #####
 
