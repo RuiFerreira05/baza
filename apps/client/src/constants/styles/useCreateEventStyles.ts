@@ -25,11 +25,10 @@ export const CreateEventStyles = (colors: ThemeType) =>
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 6,
-      elevation: 6,
+      boxShadow: `0px 4px 6px rgba(0, 0, 0, 0.3)`,
     },
     modalContainer: {
       flex: 1,
-      backgroundColor: "rgba(0,0,0,0.5)",
       justifyContent: "flex-end",
     },
     modalContent: {

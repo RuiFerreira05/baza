@@ -1,11 +1,11 @@
-import EventCard from "@/components/EventCard";
 import CreateEventModal from "@/components/CreateEventModal";
+import EventCard from "@/components/EventCard";
 import { useCalendarStyles } from "@/constants/styles/useCalendarStyles";
 import { useCreateEventStyles } from "@/constants/styles/useCreateEventStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useCalendarViewModel } from "@/viewmodels/useCalendarViewModel";
-import { Ionicons } from "@expo/vector-icons";
 import { PersonalEventDTO } from "@baza/shared-types";
+import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
