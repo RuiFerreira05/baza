@@ -837,8 +837,8 @@ export const createPersonalEvent = async (
     let endTimeVal: Date;
 
     if (isAllDay) {
-      startTimeVal = body.startTime ? new Date(body.startTime) : new Date(`${body.date}T00:00:00.000Z`);
-      endTimeVal = body.endTime ? new Date(body.endTime) : new Date(`${body.date}T23:59:59.999Z`);
+      startTimeVal = new Date(`${body.date}T00:00:00.000Z`);
+      endTimeVal = new Date(`${body.date}T23:59:59.999Z`);
     } else {
       if (!body.startTime || !body.endTime) {
         app.log.warn("Create personal event: startTime and endTime are required when allDay is false");
@@ -959,31 +959,22 @@ export const editPersonalEvent = async (
     const isAllDay = body.allDay !== undefined ? body.allDay : existing.allDay;
     const eventDate = body.date !== undefined ? body.date : existing.date;
 
-    let startTimeStr = body.startTime;
-    let endTimeStr = body.endTime;
+    let startTimeVal: Date;
+    let endTimeVal: Date;
 
     if (isAllDay) {
-      if (startTimeStr === undefined) {
-        startTimeStr = existing.allDay ? existing.startTime.toISOString() : `${eventDate}T00:00:00.000Z`;
-      }
-      if (endTimeStr === undefined) {
-        endTimeStr = existing.allDay ? existing.endTime.toISOString() : `${eventDate}T23:59:59.999Z`;
-      }
+      startTimeVal = new Date(`${eventDate}T00:00:00.000Z`);
+      endTimeVal = new Date(`${eventDate}T23:59:59.999Z`);
     } else {
-      if (startTimeStr === undefined) {
-        startTimeStr = existing.startTime.toISOString();
-      }
-      if (endTimeStr === undefined) {
-        endTimeStr = existing.endTime.toISOString();
-      }
+      const startTimeStr = body.startTime !== undefined ? body.startTime : existing.startTime.toISOString();
+      const endTimeStr = body.endTime !== undefined ? body.endTime : existing.endTime.toISOString();
+      startTimeVal = new Date(startTimeStr);
+      endTimeVal = new Date(endTimeStr);
     }
-
-    const startTimeVal = new Date(startTimeStr);
-    const endTimeVal = new Date(endTimeStr);
 
     if (startTimeVal >= endTimeVal) {
       app.log.warn(
-        `Edit personal event constraint violated: startTime (${startTimeStr}) must be earlier than endTime (${endTimeStr})`,
+        `Edit personal event constraint violated: startTime (${startTimeVal.toISOString()}) must be earlier than endTime (${endTimeVal.toISOString()})`,
       );
       return Err(ErrorTypes.MalformedRequestError);
     }
