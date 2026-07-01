@@ -7,6 +7,7 @@ interface EventCardProps {
   description?: string | null;
   startTime: string;
   endTime: string;
+  allDay?: boolean;
   location?: string | null;
   repeat?: string;
   isPublic?: boolean;
@@ -18,6 +19,7 @@ export default function EventCard({
   description,
   startTime,
   endTime,
+  allDay,
   location,
   repeat,
   isPublic = false,
@@ -41,8 +43,11 @@ export default function EventCard({
 
   const startFormatted = formatTime(startTime);
   const endFormatted = formatTime(endTime);
-  const timeRange =
-    startFormatted && endFormatted ? `${startFormatted} - ${endFormatted}` : "";
+  const timeRange = allDay
+    ? "All day"
+    : startFormatted && endFormatted
+      ? `${startFormatted} - ${endFormatted}`
+      : "";
 
   return (
     <Pressable

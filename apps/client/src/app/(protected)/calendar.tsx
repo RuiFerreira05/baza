@@ -120,6 +120,7 @@ export default function CalendarScreen() {
               description={item.description}
               startTime={item.startTime}
               endTime={item.endTime}
+              allDay={item.allDay}
               location={item.location}
               repeat={item.repeat}
               isPublic={item.public}

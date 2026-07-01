@@ -80,6 +80,9 @@ export function useCreateEventViewModel({
   const [isPublic, setIsPublic] = useState(
     eventToEdit ? eventToEdit.public : false,
   );
+  const [allDay, setAllDay] = useState(
+    eventToEdit ? !!eventToEdit.allDay : false,
+  );
 
   // Picker visibility states
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -111,6 +114,7 @@ export function useCreateEventViewModel({
         baseEvent.repeatUntil ? parseDateString(baseEvent.repeatUntil) : null,
       );
       setIsPublic(baseEvent.public);
+      setAllDay(!!baseEvent.allDay);
     }
   }, [baseEvent]);
 
@@ -136,6 +140,7 @@ export function useCreateEventViewModel({
       setDescription("");
       setLocation("");
       setIsPublic(false);
+      setAllDay(false);
       setRepeat("never");
       setRepeatUntil(null);
       onSuccess();
@@ -165,6 +170,10 @@ export function useCreateEventViewModel({
       });
       // Invalidate the cache to trigger calendar refetch
       queryClient.invalidateQueries({ queryKey: ["personal-events"] });
+      // Invalidate single event detail query to prevent stale edit modals
+      queryClient.invalidateQueries({
+        queryKey: ["personal-event", username, eventToEdit!.id],
+      });
       onSuccess();
     },
     onError: (err) => {
@@ -197,15 +206,17 @@ export function useCreateEventViewModel({
       return false;
     }
 
-    // Verify startTime is earlier than endTime
-    const startHour = startTime.getHours();
-    const startMin = startTime.getMinutes();
-    const endHour = endTime.getHours();
-    const endMin = endTime.getMinutes();
+    // Verify startTime is earlier than endTime (only if not allDay)
+    if (!allDay) {
+      const startHour = startTime.getHours();
+      const startMin = startTime.getMinutes();
+      const endHour = endTime.getHours();
+      const endMin = endTime.getMinutes();
 
-    if (startHour > endHour || (startHour === endHour && startMin >= endMin)) {
-      setValidationError("Start time must be earlier than end time.");
-      return false;
+      if (startHour > endHour || (startHour === endHour && startMin >= endMin)) {
+        setValidationError("Start time must be earlier than end time.");
+        return false;
+      }
     }
 
     if (repeat !== "never" && repeatUntil) {
@@ -239,8 +250,22 @@ export function useCreateEventViewModel({
     }
 
     const dateStr = formatDateToString(eventDate);
-    const startISO = combineDateAndTime(eventDate, startTime);
-    const endISO = combineDateAndTime(eventDate, endTime);
+    
+    let startISO: string;
+    let endISO: string;
+
+    if (allDay) {
+      const startObj = new Date(eventDate);
+      startObj.setHours(0, 0, 0, 0);
+      startISO = startObj.toISOString();
+
+      const endObj = new Date(eventDate);
+      endObj.setHours(23, 59, 59, 999);
+      endISO = endObj.toISOString();
+    } else {
+      startISO = combineDateAndTime(eventDate, startTime);
+      endISO = combineDateAndTime(eventDate, endTime);
+    }
 
     const payload: CreatePersonalEventBody = {
       title: title.trim(),
@@ -249,6 +274,7 @@ export function useCreateEventViewModel({
       location: location.trim() || undefined,
       startTime: startISO,
       endTime: endISO,
+      allDay,
       repeat,
       repeatUntil:
         repeat !== "never" && repeatUntil
@@ -287,6 +313,8 @@ export function useCreateEventViewModel({
     setRepeatUntil,
     isPublic,
     setIsPublic,
+    allDay,
+    setAllDay,
     showDatePicker,
     setShowDatePicker,
     showStartPicker,

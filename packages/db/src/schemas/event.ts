@@ -22,6 +22,7 @@ export const personalEvents = pgTable("personal_events", {
   location: text("location"),
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time").notNull(),
+  allDay: boolean("all_day").default(false).notNull(),
   repeat: repeatEnum("repeat").notNull(),
   repeatUntil: date("repeat_until"),
   public: boolean("public").notNull(),

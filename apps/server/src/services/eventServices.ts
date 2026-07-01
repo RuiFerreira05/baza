@@ -575,6 +575,7 @@ export const getGroupCalendar = async (
           location: personalEvents.location,
           startTime: personalEvents.startTime,
           endTime: personalEvents.endTime,
+          allDay: personalEvents.allDay,
           repeat: personalEvents.repeat,
           repeatUntil: personalEvents.repeatUntil,
           public: personalEvents.public,
@@ -616,6 +617,7 @@ export const getGroupCalendar = async (
             location: null,
             startTime: formattedStartTime,
             endTime: formattedEndTime,
+            allDay: row.allDay,
             repeat: row.repeat,
             repeatUntil: row.repeatUntil,
             public: false,
@@ -633,6 +635,7 @@ export const getGroupCalendar = async (
             location: row.location,
             startTime: formattedStartTime,
             endTime: formattedEndTime,
+            allDay: row.allDay,
             repeat: row.repeat,
             repeatUntil: row.repeatUntil,
             public: row.public,
@@ -790,6 +793,7 @@ export const getPersonalEventById = async (
       location: record.location,
       startTime: record.startTime.toISOString(),
       endTime: record.endTime.toISOString(),
+      allDay: record.allDay,
       repeat: record.repeat,
       repeatUntil: record.repeatUntil,
       public: record.public,
@@ -828,12 +832,25 @@ export const createPersonalEvent = async (
   >
 > => {
   try {
-    const startTimeVal = new Date(body.startTime);
-    const endTimeVal = new Date(body.endTime);
+    const isAllDay = !!body.allDay;
+    let startTimeVal: Date;
+    let endTimeVal: Date;
+
+    if (isAllDay) {
+      startTimeVal = body.startTime ? new Date(body.startTime) : new Date(`${body.date}T00:00:00.000Z`);
+      endTimeVal = body.endTime ? new Date(body.endTime) : new Date(`${body.date}T23:59:59.999Z`);
+    } else {
+      if (!body.startTime || !body.endTime) {
+        app.log.warn("Create personal event: startTime and endTime are required when allDay is false");
+        return Err(ErrorTypes.MalformedRequestError);
+      }
+      startTimeVal = new Date(body.startTime);
+      endTimeVal = new Date(body.endTime);
+    }
 
     if (startTimeVal >= endTimeVal) {
       app.log.warn(
-        `Create personal event constraint violated: startTime (${body.startTime}) must be earlier than endTime (${body.endTime})`,
+        `Create personal event constraint violated: startTime (${body.startTime || startTimeVal.toISOString()}) must be earlier than endTime (${body.endTime || endTimeVal.toISOString()})`,
       );
       return Err(ErrorTypes.MalformedRequestError);
     }
@@ -865,6 +882,7 @@ export const createPersonalEvent = async (
           location: body.location ?? null,
           startTime: startTimeVal,
           endTime: endTimeVal,
+          allDay: isAllDay,
           repeat: body.repeat,
           repeatUntil: body.repeatUntil ?? null,
           public: body.public,
@@ -884,6 +902,7 @@ export const createPersonalEvent = async (
         location: newPersonalEvent.location,
         startTime: newPersonalEvent.startTime.toISOString(),
         endTime: newPersonalEvent.endTime.toISOString(),
+        allDay: newPersonalEvent.allDay,
         repeat: newPersonalEvent.repeat,
         repeatUntil: newPersonalEvent.repeatUntil,
         public: newPersonalEvent.public,
@@ -937,22 +956,38 @@ export const editPersonalEvent = async (
       return Err(ErrorTypes.UnknownIdError);
     }
 
-    const startTimeStr =
-      body.startTime !== undefined
-        ? body.startTime
-        : existing.startTime.toISOString();
-    const endTimeStr =
-      body.endTime !== undefined
-        ? body.endTime
-        : existing.endTime.toISOString();
-    if (new Date(startTimeStr) >= new Date(endTimeStr)) {
+    const isAllDay = body.allDay !== undefined ? body.allDay : existing.allDay;
+    const eventDate = body.date !== undefined ? body.date : existing.date;
+
+    let startTimeStr = body.startTime;
+    let endTimeStr = body.endTime;
+
+    if (isAllDay) {
+      if (startTimeStr === undefined) {
+        startTimeStr = existing.allDay ? existing.startTime.toISOString() : `${eventDate}T00:00:00.000Z`;
+      }
+      if (endTimeStr === undefined) {
+        endTimeStr = existing.allDay ? existing.endTime.toISOString() : `${eventDate}T23:59:59.999Z`;
+      }
+    } else {
+      if (startTimeStr === undefined) {
+        startTimeStr = existing.startTime.toISOString();
+      }
+      if (endTimeStr === undefined) {
+        endTimeStr = existing.endTime.toISOString();
+      }
+    }
+
+    const startTimeVal = new Date(startTimeStr);
+    const endTimeVal = new Date(endTimeStr);
+
+    if (startTimeVal >= endTimeVal) {
       app.log.warn(
         `Edit personal event constraint violated: startTime (${startTimeStr}) must be earlier than endTime (${endTimeStr})`,
       );
       return Err(ErrorTypes.MalformedRequestError);
     }
 
-    const eventDate = body.date !== undefined ? body.date : existing.date;
     const repeatUntilStr = body.repeatUntil !== undefined ? body.repeatUntil : existing.repeatUntil;
     if (repeatUntilStr && new Date(repeatUntilStr) < new Date(eventDate)) {
       app.log.warn(`Edit personal event constraint violated: repeatUntil (${repeatUntilStr}) cannot be earlier than event date (${eventDate})`);
@@ -974,10 +1009,11 @@ export const editPersonalEvent = async (
       const updateValues: Record<string, any> = {};
       if (body.date !== undefined) updateValues.date = body.date;
       if (body.location !== undefined) updateValues.location = body.location;
-      if (body.startTime !== undefined)
-        updateValues.startTime = new Date(body.startTime);
-      if (body.endTime !== undefined)
-        updateValues.endTime = new Date(body.endTime);
+      
+      updateValues.startTime = startTimeVal;
+      updateValues.endTime = endTimeVal;
+
+      if (body.allDay !== undefined) updateValues.allDay = body.allDay;
       if (body.repeat !== undefined) updateValues.repeat = body.repeat;
       if (body.repeatUntil !== undefined) updateValues.repeatUntil = body.repeatUntil;
       if (body.public !== undefined) updateValues.public = body.public;

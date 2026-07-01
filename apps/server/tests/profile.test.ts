@@ -202,19 +202,39 @@ describe("Profile Routes", () => {
     expect(getRes.statusCode).toBe(200);
     expect(getRes.json().data.title).toBe("Workout session");
 
-    // 5. Edit personal event
+    // 5. Edit personal event to be all-day
     const editRes = await app.inject({
       method: "PATCH",
       url: `/v1/restricted/users/johndoe/events/${eventId}`,
       payload: {
         title: "Hard Workout Session",
         location: "Home Gym",
+        allDay: true,
       },
     });
     expect(editRes.statusCode).toBe(200);
     const editBody = editRes.json();
     expect(editBody.data.title).toBe("Hard Workout Session");
     expect(editBody.data.location).toBe("Home Gym");
+    expect(editBody.data.allDay).toBe(true);
+
+    // 6. Create an all-day event without explicit start/end times
+    const allDayCreateRes = await app.inject({
+      method: "POST",
+      url: "/v1/restricted/users/johndoe/events",
+      payload: {
+        title: "All day meeting",
+        date: "2026-06-12",
+        allDay: true,
+        repeat: "never",
+        public: false,
+      },
+    });
+    expect(allDayCreateRes.statusCode).toBe(201);
+    const allDayBody = allDayCreateRes.json();
+    expect(allDayBody.data.allDay).toBe(true);
+    expect(allDayBody.data.startTime).toContain("2026-06-12T00:00:00");
+    expect(allDayBody.data.endTime).toContain("2026-06-12T23:59:59");
   });
 
   it("should handle settings retrieval and update", async () => {

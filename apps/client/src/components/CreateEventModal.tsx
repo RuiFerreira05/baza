@@ -175,94 +175,114 @@ export default function CreateEventModal({
               )}
             </View>
 
-            {/* Event Start & End Time selectors (Platform specific picker patterns) */}
-            <View style={formStyles.timeRow}>
-              {/* Start Time Field */}
-              <View style={formStyles.inputGroup}>
-                <Text style={formStyles.label}>Start Time</Text>
-                {Platform.OS === "ios" ? (
-                  <DateTimePicker
-                    value={formVm.startTime}
-                    mode="time"
-                    is24Hour={true}
-                    themeVariant={isDark ? "dark" : "light"}
-                    onChange={(_, date) => {
-                      if (date) formVm.setStartTime(date);
-                    }}
-                  />
-                ) : (
-                  <>
-                    <Pressable
-                      style={formStyles.timePickerButton}
-                      onPress={() => formVm.setShowStartPicker(true)}
-                    >
-                      <Text style={formStyles.timePickerText}>
-                        {formatTime(formVm.startTime)}
-                      </Text>
-                      <Ionicons
-                        name="time-outline"
-                        size={18}
-                        color={colors.onSurfaceVariant}
-                      />
-                    </Pressable>
-                    {formVm.showStartPicker && (
-                      <DateTimePicker
-                        value={formVm.startTime}
-                        mode="time"
-                        is24Hour={true}
-                        onChange={(_, date) => {
-                          formVm.setShowStartPicker(false);
-                          if (date) formVm.setStartTime(date);
-                        }}
-                      />
-                    )}
-                  </>
-                )}
+            {/* All-day Event switch toggle */}
+            <View style={formStyles.switchRow}>
+              <View style={formStyles.switchLabelContainer}>
+                <Text style={formStyles.switchLabel}>All-day Event</Text>
+                <Text style={formStyles.switchSub}>
+                  Set this event to run for the entire day
+                </Text>
               </View>
-
-              {/* End Time Field */}
-              <View style={formStyles.inputGroup}>
-                <Text style={formStyles.label}>End Time</Text>
-                {Platform.OS === "ios" ? (
-                  <DateTimePicker
-                    value={formVm.endTime}
-                    mode="time"
-                    is24Hour={true}
-                    themeVariant={isDark ? "dark" : "light"}
-                    onChange={(_, date) => {
-                      if (date) formVm.setEndTime(date);
-                    }}
-                  />
-                ) : (
-                  <>
-                    <Pressable
-                      style={formStyles.timePickerButton}
-                      onPress={() => formVm.setShowEndPicker(true)}
-                    >
-                      <Text style={formStyles.timePickerText}>
-                        {formatTime(formVm.endTime)}
-                      </Text>
-                      <Ionicons
-                        name="time-outline"
-                        size={18}
-                        color={colors.onSurfaceVariant}
-                      />
-                    </Pressable>
-                    {formVm.showEndPicker && (
-                      <DateTimePicker
-                        value={formVm.endTime}
-                        mode="time"
-                        is24Hour={true}
-                        onChange={(_, date) => {
-                          formVm.setShowEndPicker(false);
-                          if (date) formVm.setEndTime(date);
-                        }}
-                      />
-                    )}
-                  </>
-                )}
-              </View>
+              <Switch
+                value={formVm.allDay}
+                onValueChange={formVm.setAllDay}
+                trackColor={{ false: colors.border, true: colors.primary }}
+                thumbColor={
+                  formVm.allDay ? colors.onPrimary : colors.onSurfaceVariant
+                }
+              />
             </View>
+
+            {/* Event Start & End Time selectors (Platform specific picker patterns) */}
+            {!formVm.allDay && (
+              <View style={formStyles.timeRow}>
+                {/* Start Time Field */}
+                <View style={formStyles.inputGroup}>
+                  <Text style={formStyles.label}>Start Time</Text>
+                  {Platform.OS === "ios" ? (
+                    <DateTimePicker
+                      value={formVm.startTime}
+                      mode="time"
+                      is24Hour={true}
+                      themeVariant={isDark ? "dark" : "light"}
+                      onChange={(_, date) => {
+                        if (date) formVm.setStartTime(date);
+                      }}
+                    />
+                  ) : (
+                    <>
+                      <Pressable
+                        style={formStyles.timePickerButton}
+                        onPress={() => formVm.setShowStartPicker(true)}
+                      >
+                        <Text style={formStyles.timePickerText}>
+                          {formatTime(formVm.startTime)}
+                        </Text>
+                        <Ionicons
+                          name="time-outline"
+                          size={18}
+                          color={colors.onSurfaceVariant}
+                        />
+                      </Pressable>
+                      {formVm.showStartPicker && (
+                        <DateTimePicker
+                          value={formVm.startTime}
+                          mode="time"
+                          is24Hour={true}
+                          onChange={(_, date) => {
+                            formVm.setShowStartPicker(false);
+                            if (date) formVm.setStartTime(date);
+                          }}
+                        />
+                      )}
+                    </>
+                  )}
+                </View>
+
+                {/* End Time Field */}
+                <View style={formStyles.inputGroup}>
+                  <Text style={formStyles.label}>End Time</Text>
+                  {Platform.OS === "ios" ? (
+                    <DateTimePicker
+                      value={formVm.endTime}
+                      mode="time"
+                      is24Hour={true}
+                      themeVariant={isDark ? "dark" : "light"}
+                      onChange={(_, date) => {
+                        if (date) formVm.setEndTime(date);
+                      }}
+                    />
+                  ) : (
+                    <>
+                      <Pressable
+                        style={formStyles.timePickerButton}
+                        onPress={() => formVm.setShowEndPicker(true)}
+                      >
+                        <Text style={formStyles.timePickerText}>
+                          {formatTime(formVm.endTime)}
+                        </Text>
+                        <Ionicons
+                          name="time-outline"
+                          size={18}
+                          color={colors.onSurfaceVariant}
+                        />
+                      </Pressable>
+                      {formVm.showEndPicker && (
+                        <DateTimePicker
+                          value={formVm.endTime}
+                          mode="time"
+                          is24Hour={true}
+                          onChange={(_, date) => {
+                            formVm.setShowEndPicker(false);
+                            if (date) formVm.setEndTime(date);
+                          }}
+                        />
+                      )}
+                    </>
+                  )}
+                </View>
+              </View>
+            )}
 
             {/* Repeat rules selector capsules */}
             <View style={formStyles.inputGroup}>
