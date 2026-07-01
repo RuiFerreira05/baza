@@ -133,12 +133,22 @@ export function useCreateEventViewModel({
       setValidationError("Start time must be earlier than end time.");
       return false;
     }
-    
+
     if (repeat !== "never" && repeatUntil) {
-      const eventDateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
-      const repeatUntilOnly = new Date(repeatUntil.getFullYear(), repeatUntil.getMonth(), repeatUntil.getDate());
+      const eventDateOnly = new Date(
+        eventDate.getFullYear(),
+        eventDate.getMonth(),
+        eventDate.getDate(),
+      );
+      const repeatUntilOnly = new Date(
+        repeatUntil.getFullYear(),
+        repeatUntil.getMonth(),
+        repeatUntil.getDate(),
+      );
       if (repeatUntilOnly < eventDateOnly) {
-        setValidationError("Repeat Until date cannot be before the event date.");
+        setValidationError(
+          "Repeat Until date cannot be before the event date.",
+        );
         return false;
       }
     }
@@ -166,7 +176,10 @@ export function useCreateEventViewModel({
       startTime: startISO,
       endTime: endISO,
       repeat,
-      repeatUntil: repeat !== "never" && repeatUntil ? formatDateToString(repeatUntil) : undefined,
+      repeatUntil:
+        repeat !== "never" && repeatUntil
+          ? formatDateToString(repeatUntil)
+          : undefined,
       public: isPublic,
     };
 
