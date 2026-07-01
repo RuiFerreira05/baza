@@ -1,13 +1,15 @@
 import { useGlobalStyles } from "@/constants/styles/useGlobalStyles";
+import { useGroupListViewModel } from "@/viewmodels/useGroupListViewModel";
 import { Text } from "@react-navigation/elements";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View } from "react-native";
 
 export default function GroupList() {
   const styles = useGlobalStyles();
+  const vm = useGroupListViewModel();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text>Groups</Text>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text>Group List</Text>
+    </View>
   );
 }
