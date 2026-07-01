@@ -11,6 +11,7 @@ export function useProfileViewModel(profile: ProfileDTO) {
   const navigateToGroups = () => router.push("/(protected)/groups");
   const navigateToFriends = () => router.push("/(protected)/friends");
   const navigateToCalendar = () => router.push("/(protected)/calendar");
+  const navigateToEditProfile = () => router.push("/(protected)/editProfile");
 
   const friendsQuery = useAppQuery({
     queryKey: ["user-friends", profile.username],
@@ -39,6 +40,7 @@ export function useProfileViewModel(profile: ProfileDTO) {
     navigateToGroups,
     navigateToFriends,
     navigateToCalendar,
+    navigateToEditProfile,
     numberOfFriends,
     numberOfGroups,
     numberOfEvents,

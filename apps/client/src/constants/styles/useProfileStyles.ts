@@ -14,7 +14,7 @@ export const ProfileStyles = (colors: ThemeType) =>
     container: {
       flex: 1,
       alignItems: "center",
-      paddingTop: 60,
+      paddingTop: 10,
       gap: 16,
       backgroundColor: colors.background,
     },
@@ -91,5 +91,24 @@ export const ProfileStyles = (colors: ThemeType) =>
     },
     textOnPrimary: {
       color: colors.onPrimary,
+    },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      width: "100%",
+      paddingHorizontal: 20,
+      height: 50,
+    },
+    editButton: {
+      display: "flex",
+      backgroundColor: colors.background,
+      justifyContent: "center",
+      height: 40,
+      width: 40,
+    },
+    editicon: {
+      color: colors.primary,
+      marginRight: 0,
     },
   });

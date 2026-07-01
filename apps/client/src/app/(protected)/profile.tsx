@@ -3,6 +3,7 @@ import { useProfileStyles } from "@/constants/styles/useProfileStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuthState } from "@/hooks/useAuthState";
 import { useProfileViewModel } from "@/viewmodels/useProfileViewModel";
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useRouter } from "expo-router";
 import { Image, Text, TouchableHighlight, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,6 +29,10 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.row}>
+        <FontAwesome.Button name="edit" size={23}iconStyle={styles.editicon} style={styles.editButton} onPress={vm.navigateToEditProfile} />
+      </View>
+
       <View style={styles.profileView}>
         <Image
           style={styles.profileImage}
