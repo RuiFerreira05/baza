@@ -1,14 +1,20 @@
 import { useAppMutation } from "@/hooks/useAppMutation";
+import { useAppQuery } from "@/hooks/useAppQuery";
 import { useAuthState } from "@/hooks/useAuthState";
 import { queryClient } from "@/lib/queryClient";
 import { eventService } from "@/services/eventService";
-import { CreatePersonalEventBody } from "@baza/shared-types";
-import { useState } from "react";
+import {
+  CreatePersonalEventBody,
+  EditPersonalEventBody,
+  PersonalEventDTO,
+} from "@baza/shared-types";
+import { useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
 
 interface UseCreateEventViewModelProps {
   initialDate: string; // YYYY-MM-DD format from the calendar selection
   onSuccess: () => void;
+  eventToEdit?: PersonalEventDTO;
 }
 
 const parseDateString = (dateStr: string): Date => {
@@ -26,18 +32,23 @@ const formatDateToString = (date: Date): string => {
 export function useCreateEventViewModel({
   initialDate,
   onSuccess,
+  eventToEdit,
 }: UseCreateEventViewModelProps) {
   const { profile, bypassAuth } = useAuthState();
   const username = profile?.username || (bypassAuth ? "testuser" : "");
 
   // Form states
   const [eventDate, setEventDate] = useState<Date>(() =>
-    parseDateString(initialDate),
+    eventToEdit
+      ? parseDateString(eventToEdit.date)
+      : parseDateString(initialDate),
   );
   const [prevInitialDate, setPrevInitialDate] = useState(initialDate);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
+  const [title, setTitle] = useState(eventToEdit ? eventToEdit.title : "");
+  const [description, setDescription] = useState(
+    eventToEdit?.description ?? "",
+  );
+  const [location, setLocation] = useState(eventToEdit?.location ?? "");
 
   // Sync eventDate when the calendar's selected day changes (React render-time adjustment)
   if (initialDate !== prevInitialDate) {
@@ -54,13 +65,21 @@ export function useCreateEventViewModel({
   };
 
   const initialTimes = getInitialTimes();
-  const [startTime, setStartTime] = useState<Date>(initialTimes.start);
-  const [endTime, setEndTime] = useState<Date>(initialTimes.end);
+  const [startTime, setStartTime] = useState<Date>(() =>
+    eventToEdit ? new Date(eventToEdit.startTime) : initialTimes.start,
+  );
+  const [endTime, setEndTime] = useState<Date>(() =>
+    eventToEdit ? new Date(eventToEdit.endTime) : initialTimes.end,
+  );
   const [repeat, setRepeat] = useState<
     "day" | "week" | "month" | "year" | "never"
-  >("never");
-  const [repeatUntil, setRepeatUntil] = useState<Date | null>(null);
-  const [isPublic, setIsPublic] = useState(false);
+  >(() => (eventToEdit ? (eventToEdit.repeat as any) : "never"));
+  const [repeatUntil, setRepeatUntil] = useState<Date | null>(() =>
+    eventToEdit?.repeatUntil ? parseDateString(eventToEdit.repeatUntil) : null,
+  );
+  const [isPublic, setIsPublic] = useState(
+    eventToEdit ? eventToEdit.public : false,
+  );
 
   // Picker visibility states
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -68,6 +87,34 @@ export function useCreateEventViewModel({
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [showRepeatUntilPicker, setShowRepeatUntilPicker] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Query to fetch the master personal event if editing
+  const baseEventQuery = useAppQuery({
+    queryKey: ["personal-event", username, eventToEdit?.id],
+    queryFn: () => eventService.getPersonalEvent(username, eventToEdit!.id),
+    enabled: !!eventToEdit && !!username,
+  });
+
+  const baseEvent = baseEventQuery.data;
+
+  // Sync state when master event details are fetched
+  useEffect(() => {
+    if (baseEvent) {
+      setTitle(baseEvent.title);
+      setDescription(baseEvent.description ?? "");
+      setLocation(baseEvent.location ?? "");
+      setEventDate(parseDateString(baseEvent.date));
+      setStartTime(new Date(baseEvent.startTime));
+      setEndTime(new Date(baseEvent.endTime));
+      setRepeat(baseEvent.repeat as any);
+      setRepeatUntil(
+        baseEvent.repeatUntil ? parseDateString(baseEvent.repeatUntil) : null,
+      );
+      setIsPublic(baseEvent.public);
+    }
+  }, [baseEvent]);
+
+  const isFetchingBase = baseEventQuery.isLoading && !!eventToEdit;
 
   // Mutation for creating the personal event
   const createEventMutation = useAppMutation({
@@ -98,6 +145,33 @@ export function useCreateEventViewModel({
         type: "error",
         text1: "Error",
         text2: err.error.message || "Failed to create event.",
+        position: "bottom",
+        bottomOffset: 80,
+      });
+    },
+  });
+
+  // Mutation for editing the personal event
+  const editEventMutation = useAppMutation({
+    mutationFn: (body: EditPersonalEventBody) =>
+      eventService.editPersonalEvent(username, eventToEdit!.id, body),
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Event updated successfully!",
+        position: "bottom",
+        bottomOffset: 80,
+      });
+      // Invalidate the cache to trigger calendar refetch
+      queryClient.invalidateQueries({ queryKey: ["personal-events"] });
+      onSuccess();
+    },
+    onError: (err) => {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: err.error.message || "Failed to update event.",
         position: "bottom",
         bottomOffset: 80,
       });
@@ -183,7 +257,11 @@ export function useCreateEventViewModel({
       public: isPublic,
     };
 
-    createEventMutation.mutate(payload);
+    if (eventToEdit) {
+      editEventMutation.mutate(payload);
+    } else {
+      createEventMutation.mutate(payload);
+    }
   };
 
   return {
@@ -220,6 +298,10 @@ export function useCreateEventViewModel({
     validationError,
     setValidationError,
     handleCreateEvent,
-    isLoading: createEventMutation.isPending,
+    isFetchingBase,
+    isLoading:
+      createEventMutation.isPending ||
+      editEventMutation.isPending ||
+      isFetchingBase,
   };
 }

@@ -1,6 +1,6 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 interface EventCardProps {
   title: string;
@@ -10,6 +10,7 @@ interface EventCardProps {
   location?: string | null;
   repeat?: string;
   isPublic?: boolean;
+  onPress?: () => void;
 }
 
 export default function EventCard({
@@ -20,6 +21,7 @@ export default function EventCard({
   location,
   repeat,
   isPublic = false,
+  onPress,
 }: EventCardProps) {
   const { colors } = useAppTheme();
 
@@ -43,10 +45,16 @@ export default function EventCard({
     startFormatted && endFormatted ? `${startFormatted} - ${endFormatted}` : "";
 
   return (
-    <View
-      style={[
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      style={({ pressed }) => [
         styles.card,
-        { backgroundColor: colors.surface, borderColor: colors.border },
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          opacity: pressed ? 0.8 : 1,
+        },
       ]}
     >
       {/* Decorative vertical bar on the left */}
@@ -127,7 +135,7 @@ export default function EventCard({
           ) : null}
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

@@ -5,6 +5,7 @@ import { useCreateEventStyles } from "@/constants/styles/useCreateEventStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useCalendarViewModel } from "@/viewmodels/useCalendarViewModel";
 import { Ionicons } from "@expo/vector-icons";
+import { PersonalEventDTO } from "@baza/shared-types";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -24,6 +25,9 @@ export default function CalendarScreen() {
 
   // State to control modal visibility
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedEventForEdit, setSelectedEventForEdit] = useState<
+    PersonalEventDTO | undefined
+  >(undefined);
 
   // Map app theme colors to Wix Calendar styles dynamically
   const calendarTheme = useMemo(() => {
@@ -80,6 +84,7 @@ export default function CalendarScreen() {
           onDayPress={vm.onDayPress}
           onDayLongPress={(day: { dateString: string }) => {
             vm.onDayPress(day);
+            setSelectedEventForEdit(undefined);
             setIsCreateModalOpen(true);
           }}
           onMonthChange={vm.onMonthChange}
@@ -118,6 +123,10 @@ export default function CalendarScreen() {
               location={item.location}
               repeat={item.repeat}
               isPublic={item.public}
+              onPress={() => {
+                setSelectedEventForEdit(item);
+                setIsCreateModalOpen(true);
+              }}
             />
           )}
           contentContainerStyle={calendarStyles.listContent}
@@ -143,21 +152,31 @@ export default function CalendarScreen() {
       {/* Floating Action Button (FAB) */}
       <Pressable
         style={({ pressed }) => [formStyles.fab, pressed && { opacity: 0.8 }]}
-        onPress={() => setIsCreateModalOpen(true)}
+        onPress={() => {
+          setSelectedEventForEdit(undefined);
+          setIsCreateModalOpen(true);
+        }}
       >
         <Ionicons name="add" size={30} color={colors.onPrimary} />
       </Pressable>
 
       {/* Event Creation Bottom Sheet Modal */}
-      <CreateEventModal
-        visible={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={() => {
-          setIsCreateModalOpen(false);
-          vm.refetchEvents();
-        }}
-        initialDate={vm.selectedDate}
-      />
+      {isCreateModalOpen && (
+        <CreateEventModal
+          visible={isCreateModalOpen}
+          onClose={() => {
+            setIsCreateModalOpen(false);
+            setSelectedEventForEdit(undefined);
+          }}
+          onSuccess={() => {
+            setIsCreateModalOpen(false);
+            setSelectedEventForEdit(undefined);
+            vm.refetchEvents();
+          }}
+          initialDate={vm.selectedDate}
+          eventToEdit={selectedEventForEdit}
+        />
+      )}
     </SafeAreaView>
   );
 }

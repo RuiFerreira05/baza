@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 
+import { PersonalEventDTO } from "@baza/shared-types";
 import LabeledInput from "@/components/LabeledInput";
 import { useCreateEventStyles } from "@/constants/styles/useCreateEventStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
@@ -23,6 +24,7 @@ type CreateEventModalProps = {
   onClose: () => void;
   onSuccess: () => void;
   initialDate: string;
+  eventToEdit?: PersonalEventDTO;
 };
 
 export default function CreateEventModal({
@@ -30,6 +32,7 @@ export default function CreateEventModal({
   onClose,
   onSuccess,
   initialDate,
+  eventToEdit,
 }: CreateEventModalProps) {
   const { colors, isDark } = useAppTheme();
   const formStyles = useCreateEventStyles();
@@ -37,6 +40,7 @@ export default function CreateEventModal({
   const formVm = useCreateEventViewModel({
     initialDate,
     onSuccess,
+    eventToEdit,
   });
 
   const formatDateLong = (date: Date) => {
@@ -73,7 +77,7 @@ export default function CreateEventModal({
           {/* Sheet Header */}
           <View style={formStyles.modalHeader}>
             <Text style={formStyles.modalTitle} numberOfLines={1}>
-              Schedule Event
+              {eventToEdit ? "Edit Event" : "Schedule Event"}
             </Text>
             <Pressable
               style={formStyles.closeButton}
@@ -89,7 +93,15 @@ export default function CreateEventModal({
           </View>
 
           {/* Scrollable Form Body */}
-          <ScrollView
+          {formVm.isFetchingBase ? (
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center", minHeight: 200 }}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={{ marginTop: 12, color: colors.onSurfaceVariant, fontFamily: "Inter_500Medium" }}>
+                Loading event details...
+              </Text>
+            </View>
+          ) : (
+            <ScrollView
             contentContainerStyle={formStyles.formScroll}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
@@ -402,11 +414,14 @@ export default function CreateEventModal({
                 {formVm.isLoading ? (
                   <ActivityIndicator size="small" color={colors.onPrimary} />
                 ) : (
-                  <Text style={formStyles.submitButtonText}>Save Event</Text>
+                  <Text style={formStyles.submitButtonText}>
+                    {eventToEdit ? "Save Changes" : "Save Event"}
+                  </Text>
                 )}
               </Pressable>
             </View>
-          </ScrollView>
+            </ScrollView>
+          )}
         </View>
       </View>
     </Modal>
