@@ -30,7 +30,23 @@ export const createEventPlan = async (
   >
 > => {
   try {
-    if (body.startTime >= body.endTime) {
+    const isAllDay = !!body.allDay;
+    let startTimeVal: string;
+    let endTimeVal: string;
+
+    if (isAllDay) {
+      startTimeVal = "00:00:00";
+      endTimeVal = "23:59:59";
+    } else {
+      if (!body.startTime || !body.endTime) {
+        app.log.warn("Create event plan: startTime and endTime are required when allDay is false");
+        return Err(ErrorTypes.MalformedRequestError);
+      }
+      startTimeVal = body.startTime;
+      endTimeVal = body.endTime;
+    }
+
+    if (startTimeVal >= endTimeVal) {
       return Err(ErrorTypes.MalformedRequestError);
     }
 
@@ -81,8 +97,9 @@ export const createEventPlan = async (
         username: proposerUsername,
         title: body.title,
         date: body.date,
-        startTime: body.startTime,
-        endTime: body.endTime,
+        startTime: startTimeVal,
+        endTime: endTimeVal,
+        allDay: isAllDay,
         activity: body.activity ?? null,
         location: body.location,
         minBudget: body.minBudget ?? null,
@@ -99,6 +116,7 @@ export const createEventPlan = async (
         endTime: newPlan.endTime.includes("Z")
           ? newPlan.endTime
           : `${newPlan.endTime}Z`,
+        allDay: newPlan.allDay,
         votesCount: 0,
         createdAt: newPlan.createdAt.toISOString(),
         updatedAt: newPlan.updatedAt.toISOString(),
@@ -153,6 +171,7 @@ export const getEventPlans = async (
         date: plans.date,
         startTime: plans.startTime,
         endTime: plans.endTime,
+        allDay: plans.allDay,
         activity: plans.activity,
         location: plans.location,
         minBudget: plans.minBudget,
@@ -225,6 +244,7 @@ export const getEventPlanById = async (
         date: plans.date,
         startTime: plans.startTime,
         endTime: plans.endTime,
+        allDay: plans.allDay,
         activity: plans.activity,
         location: plans.location,
         minBudget: plans.minBudget,
@@ -320,12 +340,22 @@ export const editEventPlan = async (
       return Err(ErrorTypes.UpdateError);
     }
 
-    const mergedStartTime =
-      body.startTime !== undefined ? body.startTime : plan.startTime;
-    const mergedEndTime =
-      body.endTime !== undefined ? body.endTime : plan.endTime;
+    const isAllDay = body.allDay !== undefined ? body.allDay : plan.allDay;
 
-    if (mergedStartTime >= mergedEndTime) {
+    let startTimeVal: string;
+    let endTimeVal: string;
+
+    if (isAllDay) {
+      startTimeVal = "00:00:00";
+      endTimeVal = "23:59:59";
+    } else {
+      const rawStartTime = body.startTime !== undefined ? body.startTime : plan.startTime;
+      const rawEndTime = body.endTime !== undefined ? body.endTime : plan.endTime;
+      startTimeVal = rawStartTime.replace("Z", "");
+      endTimeVal = rawEndTime.replace("Z", "");
+    }
+
+    if (startTimeVal >= endTimeVal) {
       return Err(ErrorTypes.MalformedRequestError);
     }
 
@@ -347,8 +377,9 @@ export const editEventPlan = async (
       .set({
         title: body.title,
         date: body.date,
-        startTime: body.startTime,
-        endTime: body.endTime,
+        startTime: startTimeVal,
+        endTime: endTimeVal,
+        allDay: isAllDay,
         activity: body.activity,
         location: body.location,
         minBudget: body.minBudget,
