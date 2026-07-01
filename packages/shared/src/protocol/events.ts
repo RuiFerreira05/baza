@@ -23,6 +23,7 @@ export const personalEventDTO = Type.Object({
       description: "The date and time when the event was last updated",
       format: "date-time"
   }),
+  repeatUntil: Type.Optional(nullable(Type.String({ format: "date" }))),
 }, {
   description: "Personal event data.",
   title: "PersonalEventDTO",
@@ -141,6 +142,7 @@ export const CreatePersonalEventBody = Type.Object({
   startTime: Type.String({ format: "date-time" }),
   endTime: Type.String({ format: "date-time" }),
   repeat: Type.Union([Type.Literal("day"), Type.Literal("week"), Type.Literal("month"), Type.Literal("year"), Type.Literal("never")]),
+  repeatUntil: Type.Optional(Type.String({ format: "date" })),
   public: Type.Boolean(),
 });
 export type CreatePersonalEventBody = Type.Static<typeof CreatePersonalEventBody>;

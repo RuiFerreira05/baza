@@ -26,7 +26,7 @@ import {
   type PersonalEventDTO,
   type Result,
 } from "@baza/shared-types";
-import { and, eq, gte, inArray, lte, ne, or } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lte, ne, or } from "drizzle-orm";
 import { Type } from "typebox";
 import { Value } from "typebox/value";
 import { db } from "../lib/db";
@@ -557,7 +557,13 @@ export const getGroupCalendar = async (
             gte(personalEvents.date, startDate),
             lte(personalEvents.date, endDate),
           ),
-          ne(personalEvents.repeat, "never"),
+          and(
+            ne(personalEvents.repeat, "never"),
+            or(
+              isNull(personalEvents.repeatUntil),
+              gte(personalEvents.repeatUntil, startDate)
+            )
+          )
         ),
       ];
 
@@ -570,6 +576,7 @@ export const getGroupCalendar = async (
           startTime: personalEvents.startTime,
           endTime: personalEvents.endTime,
           repeat: personalEvents.repeat,
+          repeatUntil: personalEvents.repeatUntil,
           public: personalEvents.public,
           title: events.title,
           description: events.description,
@@ -610,6 +617,7 @@ export const getGroupCalendar = async (
             startTime: formattedStartTime,
             endTime: formattedEndTime,
             repeat: row.repeat,
+            repeatUntil: row.repeatUntil,
             public: false,
             title: "Busy",
             description: null,
@@ -626,6 +634,7 @@ export const getGroupCalendar = async (
             startTime: formattedStartTime,
             endTime: formattedEndTime,
             repeat: row.repeat,
+            repeatUntil: row.repeatUntil,
             public: row.public,
             title: row.title,
             description: row.description,
@@ -689,9 +698,15 @@ export const getUserEvents = async (
           },
         },
         {
-          repeat: {
-            ne: "never",
-          },
+          AND: [
+            { repeat: { ne: "never" } },
+            {
+              OR: [
+                { repeatUntil: { isNull: true } },
+                { repeatUntil: { gte: startDate } }
+              ]
+            }
+          ]
         },
       ],
     },
@@ -776,6 +791,7 @@ export const getPersonalEventById = async (
       startTime: record.startTime.toISOString(),
       endTime: record.endTime.toISOString(),
       repeat: record.repeat,
+      repeatUntil: record.repeatUntil,
       public: record.public,
       createdAt: record.events.createdAt.toISOString(),
       updatedAt: record.events.updatedAt.toISOString(),
@@ -821,6 +837,11 @@ export const createPersonalEvent = async (
       );
       return Err(ErrorTypes.MalformedRequestError);
     }
+    
+    if (body.repeatUntil && new Date(body.repeatUntil) < new Date(body.date)) {
+      app.log.warn(`Create personal event constraint violated: repeatUntil (${body.repeatUntil}) cannot be earlier than event date (${body.date})`);
+      return Err(ErrorTypes.MalformedRequestError);
+    }
 
     const created = await db.transaction(async (tx) => {
       const [newEvent] = await tx
@@ -845,6 +866,7 @@ export const createPersonalEvent = async (
           startTime: startTimeVal,
           endTime: endTimeVal,
           repeat: body.repeat,
+          repeatUntil: body.repeatUntil ?? null,
           public: body.public,
         })
         .returning();
@@ -863,6 +885,7 @@ export const createPersonalEvent = async (
         startTime: newPersonalEvent.startTime.toISOString(),
         endTime: newPersonalEvent.endTime.toISOString(),
         repeat: newPersonalEvent.repeat,
+        repeatUntil: newPersonalEvent.repeatUntil,
         public: newPersonalEvent.public,
         createdAt: newEvent.createdAt.toISOString(),
         updatedAt: newEvent.updatedAt.toISOString(),
@@ -929,6 +952,13 @@ export const editPersonalEvent = async (
       return Err(ErrorTypes.MalformedRequestError);
     }
 
+    const eventDate = body.date !== undefined ? body.date : existing.date;
+    const repeatUntilStr = body.repeatUntil !== undefined ? body.repeatUntil : existing.repeatUntil;
+    if (repeatUntilStr && new Date(repeatUntilStr) < new Date(eventDate)) {
+      app.log.warn(`Edit personal event constraint violated: repeatUntil (${repeatUntilStr}) cannot be earlier than event date (${eventDate})`);
+      return Err(ErrorTypes.MalformedRequestError);
+    }
+
     await db.transaction(async (tx) => {
       if (body.title !== undefined || body.description !== undefined) {
         await tx
@@ -949,6 +979,7 @@ export const editPersonalEvent = async (
       if (body.endTime !== undefined)
         updateValues.endTime = new Date(body.endTime);
       if (body.repeat !== undefined) updateValues.repeat = body.repeat;
+      if (body.repeatUntil !== undefined) updateValues.repeatUntil = body.repeatUntil;
       if (body.public !== undefined) updateValues.public = body.public;
 
       if (Object.keys(updateValues).length > 0) {

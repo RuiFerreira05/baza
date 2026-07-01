@@ -1,0 +1,1 @@
+ALTER TABLE "personal_events" ADD COLUMN "repeat_until" date;

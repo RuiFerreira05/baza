@@ -4,6 +4,7 @@ export function expandRepeatingEvents<
     startTime: string;
     endTime: string;
     repeat: string;
+    repeatUntil?: string | null;
   },
 >(event: T, startDateStr: string, endDateStr: string): T[] {
   if (event.repeat === "never") {
@@ -18,9 +19,15 @@ export function expandRepeatingEvents<
   const eventDate = new Date(event.date);
 
   const current = new Date(eventDate);
+  
+  const limitDate = event.repeatUntil ? new Date(event.repeatUntil) : end;
+  if (limitDate < start) return [];
+  
+  const loopEnd = new Date(Math.min(end.getTime(), limitDate.getTime()));
+
   let sanityCheck = 0; // Prevent infinite loops just in case
 
-  while (current <= end && sanityCheck < 1000) {
+  while (current <= loopEnd && sanityCheck < 1000) {
     if (current >= start) {
       const diffMs = current.getTime() - eventDate.getTime();
       const newStartTime = new Date(

@@ -407,6 +407,59 @@ export default function CalendarScreen() {
                     );
                   })}
                 </View>
+                {formVm.repeat !== "never" && (
+                  <View style={[formStyles.inputGroup, { marginTop: 16 }]}>
+                    <Text style={formStyles.label}>Repeat Until (Optional)</Text>
+                    {Platform.OS === "ios" ? (
+                      <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <DateTimePicker
+                          value={formVm.repeatUntil || formVm.eventDate}
+                          mode="date"
+                          themeVariant={isDark ? "dark" : "light"}
+                          onChange={(_, date) => {
+                            if (date) formVm.setRepeatUntil(date);
+                          }}
+                        />
+                        {formVm.repeatUntil && (
+                          <Pressable onPress={() => formVm.setRepeatUntil(null)} style={{ marginLeft: 8 }}>
+                            <Ionicons name="close-circle" size={20} color={colors.onSurfaceVariant} />
+                          </Pressable>
+                        )}
+                      </View>
+                    ) : (
+                      <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <Pressable
+                          style={[formStyles.timePickerButton, { flex: 1 }]}
+                          onPress={() => formVm.setShowRepeatUntilPicker(true)}
+                        >
+                          <Text style={formStyles.timePickerText}>
+                            {formVm.repeatUntil ? formatDateLong(formVm.repeatUntil) : "Forever"}
+                          </Text>
+                          <Ionicons
+                            name="calendar-outline"
+                            size={18}
+                            color={colors.onSurfaceVariant}
+                          />
+                        </Pressable>
+                        {formVm.repeatUntil && (
+                          <Pressable onPress={() => formVm.setRepeatUntil(null)} style={{ marginLeft: 8 }}>
+                            <Ionicons name="close-circle" size={24} color={colors.onSurfaceVariant} />
+                          </Pressable>
+                        )}
+                        {formVm.showRepeatUntilPicker && (
+                          <DateTimePicker
+                            value={formVm.repeatUntil || formVm.eventDate}
+                            mode="date"
+                            onChange={(_, date) => {
+                              formVm.setShowRepeatUntilPicker(false);
+                              if (date) formVm.setRepeatUntil(date);
+                            }}
+                          />
+                        )}
+                      </View>
+                    )}
+                  </View>
+                )}
               </View>
 
               {/* Public/Private switch toggle row */}

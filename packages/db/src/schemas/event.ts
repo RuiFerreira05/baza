@@ -23,6 +23,7 @@ export const personalEvents = pgTable("personal_events", {
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time").notNull(),
   repeat: repeatEnum("repeat").notNull(),
+  repeatUntil: date("repeat_until"),
   public: boolean("public").notNull(),
 },
   (t) => [

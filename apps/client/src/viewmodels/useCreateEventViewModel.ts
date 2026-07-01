@@ -59,12 +59,14 @@ export function useCreateEventViewModel({
   const [repeat, setRepeat] = useState<
     "day" | "week" | "month" | "year" | "never"
   >("never");
+  const [repeatUntil, setRepeatUntil] = useState<Date | null>(null);
   const [isPublic, setIsPublic] = useState(false);
 
   // Picker visibility states
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
+  const [showRepeatUntilPicker, setShowRepeatUntilPicker] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   // Mutation for creating the personal event
@@ -88,6 +90,7 @@ export function useCreateEventViewModel({
       setLocation("");
       setIsPublic(false);
       setRepeat("never");
+      setRepeatUntil(null);
       onSuccess();
     },
     onError: (err) => {
@@ -130,6 +133,15 @@ export function useCreateEventViewModel({
       setValidationError("Start time must be earlier than end time.");
       return false;
     }
+    
+    if (repeat !== "never" && repeatUntil) {
+      const eventDateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+      const repeatUntilOnly = new Date(repeatUntil.getFullYear(), repeatUntil.getMonth(), repeatUntil.getDate());
+      if (repeatUntilOnly < eventDateOnly) {
+        setValidationError("Repeat Until date cannot be before the event date.");
+        return false;
+      }
+    }
 
     setValidationError(null);
     return true;
@@ -154,6 +166,7 @@ export function useCreateEventViewModel({
       startTime: startISO,
       endTime: endISO,
       repeat,
+      repeatUntil: repeat !== "never" && repeatUntil ? formatDateToString(repeatUntil) : undefined,
       public: isPublic,
     };
 
@@ -175,7 +188,12 @@ export function useCreateEventViewModel({
     endTime,
     setEndTime,
     repeat,
-    setRepeat,
+    setRepeat: (val: "day" | "week" | "month" | "year" | "never") => {
+      setRepeat(val);
+      if (val === "never") setRepeatUntil(null);
+    },
+    repeatUntil,
+    setRepeatUntil,
     isPublic,
     setIsPublic,
     showDatePicker,
@@ -184,6 +202,8 @@ export function useCreateEventViewModel({
     setShowStartPicker,
     showEndPicker,
     setShowEndPicker,
+    showRepeatUntilPicker,
+    setShowRepeatUntilPicker,
     validationError,
     setValidationError,
     handleCreateEvent,
