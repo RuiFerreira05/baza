@@ -561,9 +561,9 @@ export const getGroupCalendar = async (
             ne(personalEvents.repeat, "never"),
             or(
               isNull(personalEvents.repeatUntil),
-              gte(personalEvents.repeatUntil, startDate)
-            )
-          )
+              gte(personalEvents.repeatUntil, startDate),
+            ),
+          ),
         ),
       ];
 
@@ -706,10 +706,10 @@ export const getUserEvents = async (
             {
               OR: [
                 { repeatUntil: { isNull: true } },
-                { repeatUntil: { gte: startDate } }
-              ]
-            }
-          ]
+                { repeatUntil: { gte: startDate } },
+              ],
+            },
+          ],
         },
       ],
     },
@@ -841,7 +841,9 @@ export const createPersonalEvent = async (
       endTimeVal = new Date(`${body.date}T23:59:59.999Z`);
     } else {
       if (!body.startTime || !body.endTime) {
-        app.log.warn("Create personal event: startTime and endTime are required when allDay is false");
+        app.log.warn(
+          "Create personal event: startTime and endTime are required when allDay is false",
+        );
         return Err(ErrorTypes.MalformedRequestError);
       }
       startTimeVal = new Date(body.startTime);
@@ -854,9 +856,11 @@ export const createPersonalEvent = async (
       );
       return Err(ErrorTypes.MalformedRequestError);
     }
-    
+
     if (body.repeatUntil && new Date(body.repeatUntil) < new Date(body.date)) {
-      app.log.warn(`Create personal event constraint violated: repeatUntil (${body.repeatUntil}) cannot be earlier than event date (${body.date})`);
+      app.log.warn(
+        `Create personal event constraint violated: repeatUntil (${body.repeatUntil}) cannot be earlier than event date (${body.date})`,
+      );
       return Err(ErrorTypes.MalformedRequestError);
     }
 
@@ -966,8 +970,14 @@ export const editPersonalEvent = async (
       startTimeVal = new Date(`${eventDate}T00:00:00.000Z`);
       endTimeVal = new Date(`${eventDate}T23:59:59.999Z`);
     } else {
-      const startTimeStr = body.startTime !== undefined ? body.startTime : existing.startTime.toISOString();
-      const endTimeStr = body.endTime !== undefined ? body.endTime : existing.endTime.toISOString();
+      const startTimeStr =
+        body.startTime !== undefined
+          ? body.startTime
+          : existing.startTime.toISOString();
+      const endTimeStr =
+        body.endTime !== undefined
+          ? body.endTime
+          : existing.endTime.toISOString();
       startTimeVal = new Date(startTimeStr);
       endTimeVal = new Date(endTimeStr);
     }
@@ -979,9 +989,12 @@ export const editPersonalEvent = async (
       return Err(ErrorTypes.MalformedRequestError);
     }
 
-    const repeatUntilStr = body.repeatUntil !== undefined ? body.repeatUntil : existing.repeatUntil;
+    const repeatUntilStr =
+      body.repeatUntil !== undefined ? body.repeatUntil : existing.repeatUntil;
     if (repeatUntilStr && new Date(repeatUntilStr) < new Date(eventDate)) {
-      app.log.warn(`Edit personal event constraint violated: repeatUntil (${repeatUntilStr}) cannot be earlier than event date (${eventDate})`);
+      app.log.warn(
+        `Edit personal event constraint violated: repeatUntil (${repeatUntilStr}) cannot be earlier than event date (${eventDate})`,
+      );
       return Err(ErrorTypes.MalformedRequestError);
     }
 
@@ -1000,13 +1013,14 @@ export const editPersonalEvent = async (
       const updateValues: Record<string, any> = {};
       if (body.date !== undefined) updateValues.date = body.date;
       if (body.location !== undefined) updateValues.location = body.location;
-      
+
       updateValues.startTime = startTimeVal;
       updateValues.endTime = endTimeVal;
 
       if (body.allDay !== undefined) updateValues.allDay = body.allDay;
       if (body.repeat !== undefined) updateValues.repeat = body.repeat;
-      if (body.repeatUntil !== undefined) updateValues.repeatUntil = body.repeatUntil;
+      if (body.repeatUntil !== undefined)
+        updateValues.repeatUntil = body.repeatUntil;
       if (body.public !== undefined) updateValues.public = body.public;
 
       if (Object.keys(updateValues).length > 0) {

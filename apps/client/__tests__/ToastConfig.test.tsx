@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { getToastConfig } from "@/components/ToastConfig";
 import { Theme } from "@/constants/theme";
 import { DefaultTheme } from "@react-navigation/native";

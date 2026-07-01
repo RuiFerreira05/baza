@@ -71,12 +71,12 @@ erDiagram
    * `groupMembers`: Composite Primary Key `(username, groupId)`. Tracks `admin`, `banned` (with custom date check), and `acceptedInvite` statuses. Cascades `{ onDelete: 'cascade' }` on both user deletion (`username`) and group deletion (`groupId`).
 4. **[event.ts](file:///c:/Users/rui/local-projects/baza/packages/db/src/schemas/event.ts)**:
    * `events`: Base table containing `id` (UUID), `title`, `description`.
-   * `personalEvents`: Links to `events` and `profiles` (`username` PK composite). Tracks calendar parameters: `date`, `location`, `startTime`, `endTime`, `repeat`, and `public`.
+   * `personalEvents`: Links to `events` and `profiles` (`username` PK composite). Tracks calendar parameters: `date` (date), `location` (text), `startTime` (timestamp), `endTime` (timestamp), `allDay` (boolean, default false), `repeat` (every: day, week, month, year, never), `repeatUntil` (date limit), and `public` (boolean). Has constraint checking `startTime < endTime`.
    * `groupEvents`: Links `events` to `groups` (cascading on group deletion). Contains scheduling date ranges (`startDate` / `endDate`), state (`finished` / `unfinished`), `votingEndTime`, and creator profile (`createdBy`).
    * `groupEventsFinal`: Connects `group_events` directly to a winning `plans.id` (cascading on both group and plan deletion).
    * `eventConfirmations`: Composite PK `(groupId, username)` storing confirmation status (cascading on both group and user profile deletion).
 5. **[plan.ts](file:///c:/Users/rui/local-projects/baza/packages/db/src/schemas/plan.ts)**:
-   * `plans`: Proposed plans for group events. Fields: `groupEventId`, `username` (proposer), `title`, `date`, `startTime`, `endTime`, `activity`, `location`, budget range (`minBudget` / `maxBudget`). Includes constraints checking `startTime < endTime` and `minBudget < maxBudget`. Cascades on event deletion (`groupEventId` references `groupEvents.id` with `cascade`).
+   * `plans`: Proposed plans for group events. Fields: `groupEventId`, `username` (proposer), `title`, `date`, `startTime`, `endTime`, `allDay` (boolean, default false), `activity`, `location`, budget range (`minBudget` / `maxBudget`). Includes constraints checking `startTime < endTime` and `minBudget < maxBudget`. Cascades on event deletion (`groupEventId` references `groupEvents.id` with `cascade`).
    * `votes`: Joint voting table mapping `planId` and `username`.
 6. **[preference.ts](file:///c:/Users/rui/local-projects/baza/packages/db/src/schemas/preference.ts)**:
    * `preferences`: Maps `(username, groupEventId)` to custom planning parameters via JSON `preference` object (with option for `private`). Cascades on event deletion (`groupEventId` references `groupEvents.id` with `cascade`).
@@ -96,18 +96,62 @@ An API server powered by **Fastify**, using **Typebox** for payload validation, 
 * **Linting & Code Quality**: Managed locally via [eslint.config.js](file:///c:/Users/rui/local-projects/baza/apps/server/eslint.config.js) using `typescript-eslint` and [tsconfig.eslint.json](file:///c:/Users/rui/local-projects/baza/apps/server/tsconfig.eslint.json) to cover source, tests, and config files.
 
 ### Route Registrations (`apps/server/src/routes/`)
-* **[profileRoutes.ts](file:///c:/Users/rui/local-projects/baza/apps/server/src/routes/profileRoutes.ts)** (`/v1/restricted/users`):
-  * `GET /:username`: Fetch public profile details (validates against `profileDTO`).
-  * `POST /create`: Initialize custom user profile.
-* **[groupRoutes.ts](file:///c:/Users/rui/local-projects/baza/apps/server/src/routes/groupRoutes.ts)** (`/v1/restricted/groups`):
+* **[profileRoutes.ts](file:///c:/Users/rui/local-projects/baza/apps/server/src/routes/profileRoutes.ts)** (Prefix: `/v1/restricted/users`):
+  * `POST /`: Create/initialize user profile.
+  * `GET /me`: Get current user's profile.
+  * `GET /:username`: Fetch profile details by username.
+  * `PATCH /:username`: Update profile details.
+  * `DELETE /:username`: Delete profile.
+  * `PATCH /:username/photo`: Upload/update profile photo.
+  * `GET /:username/photo`: Get user profile photo.
+  * `GET /:username/events`: Retrieve personal calendar events within a `startDate` to `endDate` window (supports expansion of recurring events).
+  * `POST /:username/events`: Create a personal calendar event (supports `allDay`, `repeat`, and `repeatUntil`).
+  * `GET /:username/events/:idEvent`: Get a specific personal calendar event.
+  * `PATCH /:username/events/:idEvent`: Edit a personal event (supports `allDay`, `repeat`, and `repeatUntil`).
+  * `GET /:username/groups`: List user's groups.
+  * `GET /:username/groups/invites`: List pending group invites for user.
+  * `PATCH /:username/groups/invites/:groupId`: Accept or reject a group invite.
+  * `GET /:username/friends`: List user's friends.
+  * `GET /:username/friends/:friendUsername`: Get specific friendship status.
+  * `DELETE /:username/friends/:friendUsername`: Remove a friend.
+  * `POST /:username/friends/requests`: Send a friend request.
+  * `GET /:username/friends/requests`: List incoming friend requests.
+  * `GET /:username/friends/requests/sent`: List outgoing friend requests.
+  * `PATCH /:username/friends/requests/:senderUsername`: Accept or reject a friend request.
+  * `POST /:username/blocks`: Block a user.
+  * `DELETE /:username/blocks/:blockedUsername`: Unblock a user.
+  * `GET /:username/settings`: Get user settings.
+  * `PATCH /:username/settings`: Update user settings.
+* **[groupRoutes.ts](file:///c:/Users/rui/local-projects/baza/apps/server/src/routes/groupRoutes.ts)** (Prefix: `/v1/restricted/groups`):
+  * `POST /`: Create a new group.
   * `GET /:id`: Retrieve group details.
-  * `POST /create`: Create a new group.
-  * `DELETE /:id/delete`: Delete a group.
-  * `PATCH /:id/edit`: Update details.
-  * `PATCH /:id/edit/photo`: Upload a new group icon.
-  * `POST /:id/group-members/invite-user`: Invite a profile by `username`.
-  * `POST /:id/group-members/remove-user`: Kick/remove a group member.
-  * `GET /:id/group-members`: List all group participants.
+  * `PATCH /:id`: Update group details (e.g. name, description).
+  * `DELETE /:id`: Delete a group.
+  * `PATCH /:id/photo`: Upload/update group icon photo.
+  * `GET /:id/photo`: Retrieve group icon photo.
+  * `POST /:id/group-members`: Invite a user to the group.
+  * `DELETE /:id/group-members/:username`: Remove/kick a user from the group.
+  * `GET /:id/group-members`: List all group members.
+  * `PATCH /:id/group-members/:username`: Update a member's role (promote to admin / dismiss admin status).
+  * `GET /:id/calendar`: Combined group calendar (retrieves group events and members' personal events with private masking).
+  * `POST /:id/events`: Create a new group event.
+  * `GET /:id/events`: List group events (optionally filtered by `startDate` and `endDate`).
+  * `GET /:id/events/:idevent`: Retrieve details of a specific group event.
+  * `PATCH /:id/events/:idevent`: Edit group event parameters.
+  * `POST /:id/events/:idevent/resolve-tie`: Resolve a winning plan tie-breaker.
+  * `POST /:id/events/:idevent/preferences`: Create or update member's planning preferences (upsert).
+  * `GET /:id/events/:idevent/preferences/group`: Get aggregated group preference report.
+  * `GET /:id/events/:idevent/preferences`: Retrieve all preferences submitted for the event.
+  * `GET /:id/events/:idevent/preferences/:username`: Get a specific member's preference profile.
+  * `GET /:id/events/:idevent/plans`: Fetch all proposed plans for the group event.
+  * `POST /:id/events/:idevent/plans`: Propose a new plan for the group event (supports `allDay`).
+  * `GET /:id/events/:idevent/plans/:idplan`: Fetch a specific proposed plan's details.
+  * `PATCH /:id/events/:idevent/plans/:idplan`: Edit a proposed plan's details.
+  * `POST /:id/events/:idevent/plans/:idplan/votes`: Submit a vote for a proposed plan.
+  * `DELETE /:id/events/:idevent/plans/:idplan/votes`: Revoke/remove a vote.
+  * `POST /:id/events/:idevent/confirmations`: Confirm attendance to a finalized group event.
+  * `DELETE /:id/events/:idevent/confirmations`: Revoke event confirmation.
+  * `GET /:id/events/:idevent/confirmations`: List attendance confirmations.
 
 ---
 
@@ -126,7 +170,7 @@ A modern mobile application built with **React Native** and **Expo (SDK 55)**.
 * **Storage**: Session persistence uses `expo-secure-store`.
 * **Fonts & Typography**: Standardized Google Fonts (*Inter* - Regular, Medium, SemiBold, Bold) loaded dynamically using `@expo-google-fonts/inter`. Hiding of the native splash screen is coordinated to delay until both fonts are loaded and session state has resolved.
 * **Global Notifications**: Standardized `react-native-toast-message` integration rendered in the root layout, supporting imperative alerts from anywhere (such as within apiClient error catch blocks).
-* **Aesthetics & Styling**: Simplified CSS-free layouts using a basic centering container (`GlobalStyles.container` in `global.ts`) with no colors or borders. Custom buttons replaced with built-in React Native `Button` components.
+* **Aesthetics & Styling**: Theme-aware custom layouts styled using stylesheet hooks (e.g. `useGlobalStyles`, `useCalendarStyles`, `useCreateEventStyles`, `useProfileStyles`) dynamically pulling variables from `useAppTheme()` which supports light and dark modes (defined in `constants/theme.ts`).
 * **Deep Linking**: Defined scheme `"baza"`.
 * **Authentication Guard**: Centralized in root [_layout.tsx](file:///c:/Users/rui/local-projects/baza/apps/client/src/app/_layout.tsx) using `useSegments()` and `authClient.useSession()`. Controlled by `EXPO_PUBLIC_BYPASS_AUTH` and strictly guarded by `__DEV__` to prevent accidental production leaks.
 * **Architecural Pattern**: Hook-based MVVM model.
@@ -140,9 +184,12 @@ A modern mobile application built with **React Native** and **Expo (SDK 55)**.
 * **`(protected)/`**: Navigation routing requiring active session.
   * `_layout.tsx`: Renders protected Stack layout; actual session check is deferred to the root layout guard.
   * `index.tsx`: Redirects automatically to `/(protected)/calendar`.
-  * `calendar.tsx`: Calendar entry-point/dashboard screen.
-  * `profile.tsx`: Profile details screen.
+  * `calendar.tsx`: Calendar entry-point/dashboard screen (lists events for the selected date, triggers event creation/edit modals on tap).
+  * `profile.tsx`: Profile details screen displaying user stats (friends, events, groups count).
+  * `editProfile.tsx`: User profile details editing screen.
+  * `friends.tsx`: User's friends list and management screen.
   * `groups.tsx`: Groups list screen.
+  * `settings.tsx`: App settings screen (e.g. Theme selection via button groups).
 
 ---
 
@@ -160,34 +207,32 @@ Centralized Typebox validation schemas that ensure strong endpoint and data cont
 
 All of the remaining route handlers and services specified in [README.md](file:///c:/Users/rui/local-projects/baza/README.md) have been fully implemented on the backend:
 
-### 1. Group Member Management & Promotion
-* `[x]` `/groups/:idgroup/groupMembers/:username/promoteToAdmin/` (Promote member to group admin status)
-* `[x]` `/groups/:idgroup/groupMembers/:username/dismissAdmin/` (Remove admin status from member)
+### 1. Group Member Role Management
+* `[x]` `PATCH /v1/restricted/groups/:id/group-members/:username` (Promote member to group admin status / dismiss admin status)
 
 ### 2. Group Events
-* `[x]` `/groups/:idgroup/events/` (List all events for a group)
-* `[x]` `/groups/:idgroup/events?startDate,endDate/` (List group events filtered by a date window)
-* `[x]` `/groups/:idgroup/events/create/` (Create a new group event schedule)
-* `[x]` `/groups/:idgroup/events/:idevent/` (Fetch details of a specific group event)
-* `[x]` `/groups/:idgroup/events/:idevent/edit/` (Modify group event parameters)
+* `[x]` `POST /v1/restricted/groups/:id/events` (Create a new group event schedule)
+* `[x]` `GET /v1/restricted/groups/:id/events` (List all events for a group, optionally filtered by `startDate` / `endDate` query window)
+* `[x]` `GET /v1/restricted/groups/:id/events/:idevent` (Fetch details of a specific group event)
+* `[x]` `PATCH /v1/restricted/groups/:id/events/:idevent` (Modify group event parameters)
+* `[x]` `POST /v1/restricted/groups/:id/events/:idevent/resolve-tie` (Resolve a winning plan tie-breaker)
 
 ### 3. Event Planning Preferences
-* `[x]` `/groups/:idgroup/events/:idevent/preferences/group/` (Retrieve aggregated group preference report)
-* `[x]` `/groups/:idgroup/events/:idevent/preferences/all/` (Retrieve all preferences submitted for the event)
-* `[x]` `/groups/:idgroup/events/:idevent/preferences/:username/` (Get a specific member's preference profile)
-* `[x]` `/groups/:idgroup/events/:idevent/preferences/:username/edit/` (Modify a specific member's preference settings)
-* `[x]` `/groups/:idgroup/events/:idevent/preferences/create/` (Add new planning preference guidelines for a user)
+* `[x]` `POST /v1/restricted/groups/:id/events/:idevent/preferences` (Create or update member planning preferences - upsert)
+* `[x]` `GET /v1/restricted/groups/:id/events/:idevent/preferences/group` (Retrieve aggregated group preference report)
+* `[x]` `GET /v1/restricted/groups/:id/events/:idevent/preferences` (Retrieve all preferences submitted for the event)
+* `[x]` `GET /v1/restricted/groups/:id/events/:idevent/preferences/:username` (Get a specific member's preference profile)
 
 ### 4. Group Plans & Voting
-* `[x]` `/groups/:idgroup/events/:idevent/plans/` (Fetch all proposed plans for an event)
-* `[x]` `/groups/:idgroup/events/:idevent/plans/create/` (Propose a new plan for the event)
-* `[x]` `/groups/:idgroup/events/:idevent/plans/:idplan/` (Fetch specific plan proposal details)
-* `[x]` `/groups/:idgroup/events/:idevent/plans/:idplan/edit/` (Edit a proposed plan details)
-* `[x]` `/groups/:idgroup/events/:idevent/plans/:idplan/vote/` (Submit a vote for a proposed plan)
-* `[x]` `/groups/:idgroup/events/:idevent/plans/:idplan/removeVote/` (Revoke/remove a vote from a proposed plan)
+* `[x]` `GET /v1/restricted/groups/:id/events/:idevent/plans` (Fetch all proposed plans for an event)
+* `[x]` `POST /v1/restricted/groups/:id/events/:idevent/plans` (Propose a new plan for the event, supports `allDay`)
+* `[x]` `GET /v1/restricted/groups/:id/events/:idevent/plans/:idplan` (Fetch specific plan proposal details)
+* `[x]` `PATCH /v1/restricted/groups/:id/events/:idevent/plans/:idplan` (Edit proposed plan details, supports `allDay`)
+* `[x]` `POST /v1/restricted/groups/:id/events/:idevent/plans/:idplan/votes` (Submit a vote for a proposed plan)
+* `[x]` `DELETE /v1/restricted/groups/:id/events/:idevent/plans/:idplan/votes` (Revoke/remove a vote from a proposed plan)
 
 ### 5. Combined Group Calendar
-* `[x]` `/groups/:id/calendar` (Retrieve combined group events and members' personal events with private event masking)
+* `[x]` `GET /v1/restricted/groups/:id/calendar` (Retrieve combined group events and members' personal events with private event masking)
 
 ---
 
@@ -237,6 +282,6 @@ Tests run sequentially against separate test setups:
 13. **Preserving Nulls in Shared Types**: When constructing results in services, ensure `null` values are preserved when operations succeed with no payload (e.g., `Ok(null)`). The `Ok` constructor is designed to preserve `null` rather than converting it to `undefined`, which is critical for satisfying Fastify serialization schemas (e.g., `Type.Null()` or `Type.Union([..., Type.Null()])`) and preventing `500 Internal Server Error` serialization failures.
 14. **Personal Calendar Layout & Fetching (Approach C)**: The personal calendar (`calendar.tsx`) uses a split layout: Wix's `<Calendar>` component sits on top, and a custom React Native `<FlatList>` with `<EventCard>` items sits at the bottom. This prevents scroll conflicts and optimizes styling via the dynamic `useAppTheme` hook. Dates are queried using a month window dynamically calculated in `useCalendarViewModel.ts` to cover adjacent month overlap grids (padding buffer of 7 days around the visible month).
 15. **Drizzle Relational Queries v2 Filter Syntax**: When utilizing the `db.query.<table_name>.findMany` or `findFirst` methods (Relational Query API), the `where` configuration option expects a declarative object structure of type `RelationsFilter` (not a callback function). Construct logical filters using properties like `OR`, `AND`, `NOT`, and field comparison operators (e.g. `{ date: { gte: startDate } }`). Using callback functions will trigger typescript compilation errors because Drizzle's v1.0.0-beta Relational Query API uses this declarative object format.
-
-
-
+16. **Event Creation/Editing Modal Consolidation**: The event creation and editing logic is unified in `CreateEventModal.tsx` and driven by `useCreateEventViewModel.ts`. The modal hydrates and validates the form, and manages the edit workflow seamlessly if `eventToEdit` is supplied.
+17. **All-Day Event Temporal Normalization**: When `allDay` is set to true (for personal events or group plans), both the client and server force the event boundaries to cover the entire day (start time at `00:00:00`/`00:00:00.000Z` and end time at `23:59:59`/`23:59:59.999Z`), ensuring clean database constraint validations and timezone parity.
+18. **Repeat-Until Boundaries**: For repeating events with a set limit, `repeatUntil` (saved in YYYY-MM-DD date format) enforces bounds during expansion, preventing infinite loop hazards. During database queries or local event expansions (via `expandRepeatingEvents`), events are constrained to stop at `repeatUntil`.

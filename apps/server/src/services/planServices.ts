@@ -39,7 +39,9 @@ export const createEventPlan = async (
       endTimeVal = "23:59:59";
     } else {
       if (!body.startTime || !body.endTime) {
-        app.log.warn("Create event plan: startTime and endTime are required when allDay is false");
+        app.log.warn(
+          "Create event plan: startTime and endTime are required when allDay is false",
+        );
         return Err(ErrorTypes.MalformedRequestError);
       }
       startTimeVal = body.startTime;
@@ -349,8 +351,10 @@ export const editEventPlan = async (
       startTimeVal = "00:00:00";
       endTimeVal = "23:59:59";
     } else {
-      const rawStartTime = body.startTime !== undefined ? body.startTime : plan.startTime;
-      const rawEndTime = body.endTime !== undefined ? body.endTime : plan.endTime;
+      const rawStartTime =
+        body.startTime !== undefined ? body.startTime : plan.startTime;
+      const rawEndTime =
+        body.endTime !== undefined ? body.endTime : plan.endTime;
       startTimeVal = rawStartTime.replace("Z", "");
       endTimeVal = rawEndTime.replace("Z", "");
     }

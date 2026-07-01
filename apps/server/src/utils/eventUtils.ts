@@ -19,10 +19,10 @@ export function expandRepeatingEvents<
   const eventDate = new Date(event.date);
 
   const current = new Date(eventDate);
-  
+
   const limitDate = event.repeatUntil ? new Date(event.repeatUntil) : end;
   if (limitDate < start) return [];
-  
+
   const loopEnd = new Date(Math.min(end.getTime(), limitDate.getTime()));
 
   let sanityCheck = 0; // Prevent infinite loops just in case

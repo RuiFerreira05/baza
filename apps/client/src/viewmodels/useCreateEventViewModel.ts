@@ -8,7 +8,7 @@ import {
   EditPersonalEventBody,
   PersonalEventDTO,
 } from "@baza/shared-types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Toast from "react-native-toast-message";
 
 interface UseCreateEventViewModelProps {
@@ -99,24 +99,26 @@ export function useCreateEventViewModel({
   });
 
   const baseEvent = baseEventQuery.data;
+  const [prevBaseEventId, setPrevBaseEventId] = useState<string | null>(null);
 
-  // Sync state when master event details are fetched
-  useEffect(() => {
-    if (baseEvent) {
-      setTitle(baseEvent.title);
-      setDescription(baseEvent.description ?? "");
-      setLocation(baseEvent.location ?? "");
-      setEventDate(parseDateString(baseEvent.date));
-      setStartTime(new Date(baseEvent.startTime));
-      setEndTime(new Date(baseEvent.endTime));
-      setRepeat(baseEvent.repeat as any);
-      setRepeatUntil(
-        baseEvent.repeatUntil ? parseDateString(baseEvent.repeatUntil) : null,
-      );
-      setIsPublic(baseEvent.public);
-      setAllDay(!!baseEvent.allDay);
-    }
-  }, [baseEvent]);
+  // Sync state when master event details are fetched (React render-time adjustment)
+  if (baseEvent && baseEvent.id !== prevBaseEventId) {
+    setPrevBaseEventId(baseEvent.id);
+    setTitle(baseEvent.title);
+    setDescription(baseEvent.description ?? "");
+    setLocation(baseEvent.location ?? "");
+    setEventDate(parseDateString(baseEvent.date));
+    setStartTime(new Date(baseEvent.startTime));
+    setEndTime(new Date(baseEvent.endTime));
+    setRepeat(baseEvent.repeat as any);
+    setRepeatUntil(
+      baseEvent.repeatUntil ? parseDateString(baseEvent.repeatUntil) : null,
+    );
+    setIsPublic(baseEvent.public);
+    setAllDay(!!baseEvent.allDay);
+  } else if (!baseEvent && prevBaseEventId !== null) {
+    setPrevBaseEventId(null);
+  }
 
   const isFetchingBase = baseEventQuery.isLoading && !!eventToEdit;
 
@@ -213,7 +215,10 @@ export function useCreateEventViewModel({
       const endHour = endTime.getHours();
       const endMin = endTime.getMinutes();
 
-      if (startHour > endHour || (startHour === endHour && startMin >= endMin)) {
+      if (
+        startHour > endHour ||
+        (startHour === endHour && startMin >= endMin)
+      ) {
         setValidationError("Start time must be earlier than end time.");
         return false;
       }
@@ -250,7 +255,7 @@ export function useCreateEventViewModel({
     }
 
     const dateStr = formatDateToString(eventDate);
-    
+
     let startISO: string;
     let endISO: string;
 

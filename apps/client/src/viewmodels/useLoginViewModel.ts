@@ -1,5 +1,4 @@
 import { authClient } from "@/lib/auth";
-import { useRouter } from "expo-router";
 import { useState } from "react";
 
 export const useLoginViewModel = () => {
@@ -7,7 +6,6 @@ export const useLoginViewModel = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const isIdentifierValid = identifier.length > 0;
   const isPasswordValid = password.length > 8;
