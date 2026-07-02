@@ -1,15 +1,26 @@
+import CreateGroupModal from "@/components/CreateGroupModal";
 import GroupCard from "@/components/GroupCard";
+import { useCreateEventStyles } from "@/constants/styles/useCreateEventStyles";
 import { useGroupListStyles } from "@/constants/styles/useGroupListStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useGroupListViewModel } from "@/viewmodels/useGroupListViewModel";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 
 export default function GroupList() {
   const { colors } = useAppTheme();
   const styles = useGroupListStyles();
+  const formStyles = useCreateEventStyles();
   const vm = useGroupListViewModel();
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   if (vm.isLoading && vm.groups.length === 0) {
     return (
@@ -63,6 +74,26 @@ export default function GroupList() {
           </View>
         }
       />
+
+      {/* Floating Action Button (FAB) */}
+      <Pressable
+        style={({ pressed }) => [formStyles.fab, pressed && { opacity: 0.8 }]}
+        onPress={() => setIsCreateModalOpen(true)}
+      >
+        <Ionicons name="add" size={30} color={colors.onPrimary} />
+      </Pressable>
+
+      {/* Create Group Modal */}
+      {isCreateModalOpen && (
+        <CreateGroupModal
+          visible={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onSuccess={() => {
+            setIsCreateModalOpen(false);
+            vm.refetch();
+          }}
+        />
+      )}
     </View>
   );
 }
