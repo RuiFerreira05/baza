@@ -90,6 +90,8 @@ export default function CalendarScreen() {
           onMonthChange={vm.onMonthChange}
           theme={calendarTheme}
           enableSwipeMonths={true}
+          firstDay={1} // Set Monday as the first day of the week cause i'm biased like that
+          markingType="multi-dot"
         />
       </View>
 
