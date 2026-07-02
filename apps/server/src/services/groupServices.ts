@@ -61,29 +61,52 @@ export const getGroupById = async (
  */
 export const createGroup = async (
   groupName: string,
+  creatorUsername: string,
 ): Promise<
   Result<
     GroupDTO,
     ErrorTypes.ConversionError | ErrorTypes.ResourceCreationError
   >
 > => {
-  // have to do this destructuring cause drizzle returns an array with returning()
-  const [group] = await db
-    .insert(groups)
-    .values({
-      groupname: groupName,
-    })
-    .returning();
+  try {
+    const group = await db.transaction(async (tx) => {
+      const [newGroup] = await tx
+        .insert(groups)
+        .values({
+          groupname: groupName,
+        })
+        .returning();
 
-  if (group) {
-    const conv = Value.Convert(groupDTO, group);
-    if (Value.Check(groupDTO, conv)) {
-      return Ok(conv);
+      if (!newGroup) {
+        throw new Error("Failed to insert group");
+      }
+
+      await tx.insert(groupMembers).values({
+        username: creatorUsername,
+        groupId: newGroup.id,
+        admin: true,
+        banned: false,
+        acceptedInvite: true,
+        acceptedAt: new Date(),
+        invitedAt: new Date(),
+      });
+
+      return newGroup;
+    });
+
+    if (group) {
+      const conv = Value.Convert(groupDTO, group);
+      if (Value.Check(groupDTO, conv)) {
+        return Ok(conv);
+      } else {
+        app.log.error(Value.Errors(groupDTO, conv));
+        return Err(ErrorTypes.ConversionError);
+      }
     } else {
-      app.log.error(Value.Errors(groupDTO, conv));
-      return Err(ErrorTypes.ConversionError);
+      return Err(ErrorTypes.ResourceCreationError);
     }
-  } else {
+  } catch (err) {
+    app.log.error(err);
     return Err(ErrorTypes.ResourceCreationError);
   }
 };

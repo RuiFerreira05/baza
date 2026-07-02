@@ -74,8 +74,11 @@ export const createGroupHandler = async (
   res: FastifyReply,
 ) => {
   app.log.info("Received Create Group request");
+  const username = await getAuthenticatedUsername(req, res);
+  if (!username) return;
+
   const { groupName } = req.body as CreateGroupBody;
-  const result = await createGroup(groupName);
+  const result = await createGroup(groupName, username);
 
   if (!result.ok) {
     switch (result.error) {

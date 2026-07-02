@@ -14,6 +14,7 @@ import { app } from "../src/setup";
 import { db } from "../src/lib/db";
 import { users, profiles, groups, groupMembers } from "@baza/db/schemas";
 import { clearDatabase } from "./helpers/dbHelper";
+import { eq } from "drizzle-orm";
 import fs from "fs";
 import path from "path";
 
@@ -39,7 +40,7 @@ describe("Group Routes", () => {
     await app.close();
   });
 
-  it("POST /v1/restricted/groups/create should create a group", async () => {
+  it("POST /v1/restricted/groups/create should create a group and add creator as member/admin", async () => {
     const response = await app.inject({
       method: "POST",
       url: "/v1/restricted/groups",
@@ -53,6 +54,16 @@ describe("Group Routes", () => {
     expect(body.status).toBe("OK");
     expect(body.data.groupname).toBe("test_group");
     expect(body.data.id).toBeDefined();
+
+    // Verify creator is automatically added as member and admin
+    const members = await db
+      .select()
+      .from(groupMembers)
+      .where(eq(groupMembers.groupId, body.data.id));
+    expect(members).toHaveLength(1);
+    expect(members[0].username).toBe("testrequester");
+    expect(members[0].admin).toBe(true);
+    expect(members[0].acceptedInvite).toBe(true);
   });
 
   it("GET /v1/restricted/groups/:id should retrieve group details if user is a member", async () => {

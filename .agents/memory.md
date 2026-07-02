@@ -124,7 +124,7 @@ An API server powered by **Fastify**, using **Typebox** for payload validation, 
   * `GET /:username/settings`: Get user settings.
   * `PATCH /:username/settings`: Update user settings.
 * **[groupRoutes.ts](file:///c:/Users/rui/local-projects/baza/apps/server/src/routes/groupRoutes.ts)** (Prefix: `/v1/restricted/groups`):
-  * `POST /`: Create a new group.
+  * `POST /`: Create a new group (automatically adds the creator as an accepted admin member).
   * `GET /:id`: Retrieve group details.
   * `PATCH /:id`: Update group details (e.g. name, description).
   * `DELETE /:id`: Delete a group.
