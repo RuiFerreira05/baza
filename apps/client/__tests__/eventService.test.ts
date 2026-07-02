@@ -77,7 +77,10 @@ describe("eventService", () => {
         Ok({ status: "OK", data: mockPersonalEvent }),
       );
 
-      const result = await eventService.getPersonalEvent("johndoe", "event-123");
+      const result = await eventService.getPersonalEvent(
+        "johndoe",
+        "event-123",
+      );
 
       expect(apiClient).toHaveBeenCalledWith(
         "/v1/restricted/users/johndoe/events/event-123",
@@ -134,7 +137,9 @@ describe("eventService", () => {
     });
 
     it("should delete a personal event successfully", async () => {
-      (apiClient as jest.Mock).mockResolvedValue(Ok({ status: "OK", data: null }));
+      (apiClient as jest.Mock).mockResolvedValue(
+        Ok({ status: "OK", data: null }),
+      );
 
       const result = await eventService.deletePersonalEvent(
         "johndoe",
@@ -264,7 +269,9 @@ describe("eventService", () => {
     });
 
     it("should delete a group event successfully", async () => {
-      (apiClient as jest.Mock).mockResolvedValue(Ok({ status: "OK", data: null }));
+      (apiClient as jest.Mock).mockResolvedValue(
+        Ok({ status: "OK", data: null }),
+      );
 
       const result = await eventService.deleteGroupEvent(
         "group-456",
@@ -343,7 +350,9 @@ describe("eventService", () => {
     });
 
     it("should revoke event attendance", async () => {
-      (apiClient as jest.Mock).mockResolvedValue(Ok({ status: "OK", data: null }));
+      (apiClient as jest.Mock).mockResolvedValue(
+        Ok({ status: "OK", data: null }),
+      );
 
       const result = await eventService.revokeEventAttendance(
         "group-456",

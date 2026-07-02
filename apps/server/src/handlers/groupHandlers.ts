@@ -7,6 +7,7 @@ import {
   SimpleIdParam,
   SimpleUsernameParam,
   UpdateMemberRoleBody,
+  BatchInviteBody,
 } from "@baza/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { FSUploadService } from "../lib/FSUploadService";
@@ -20,6 +21,7 @@ import {
   getGroupById,
   getGroupMembers,
   inviteUserToGroup,
+  batchInviteUsersToGroup,
   promoteUserToAdmin,
   removeUserFromGroup,
 } from "../services/groupServices";
@@ -77,8 +79,8 @@ export const createGroupHandler = async (
   const username = await getAuthenticatedUsername(req, res);
   if (!username) return;
 
-  const { groupName } = req.body as CreateGroupBody;
-  const result = await createGroup(groupName, username);
+  const { groupName, description } = req.body as CreateGroupBody;
+  const result = await createGroup(groupName, username, description);
 
   if (!result.ok) {
     switch (result.error) {
@@ -335,6 +337,65 @@ export const inviteUsersToGroupHandler = async (
             createStatusError(
               ErrorTypes.ResourceCreationError,
               "An error occurred while creating the group invitation",
+            ),
+          );
+    }
+  } else {
+    return res.status(201).send(createStatusOK(result.value));
+  }
+};
+
+// POST /groups/:id/group-members/batch
+export const batchInviteUsersToGroupHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  const username = await getAuthenticatedUsername(req, res);
+  if (!username) return;
+
+  const { id: groupId } = req.params as SimpleIdParam;
+  const { usernames } = req.body as BatchInviteBody;
+
+  const result = await batchInviteUsersToGroup(groupId, usernames, username);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnauthorizedError:
+        return res
+          .status(403)
+          .send(
+            createStatusError(
+              ErrorTypes.UnauthorizedError,
+              "Action forbidden: Caller is not a group admin",
+            ),
+          );
+      case ErrorTypes.UnknownIdError:
+        return res
+          .status(404)
+          .send(
+            createStatusError(
+              ErrorTypes.UnknownIdError,
+              "A group with the provided id was not found",
+            ),
+          );
+      case ErrorTypes.ConversionError:
+        app.log.error("Failed to convert batch group invitation data");
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.ConversionError,
+              "An error occurred while converting the batch group invitation data",
+            ),
+          );
+      case ErrorTypes.ResourceCreationError:
+        app.log.error("Failed to create batch group invitations");
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.ResourceCreationError,
+              "An error occurred while creating the batch group invitations",
             ),
           );
     }

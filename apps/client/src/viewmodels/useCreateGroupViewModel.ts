@@ -10,11 +10,14 @@ interface UseCreateGroupViewModelProps {
   onSuccess: () => void;
 }
 
-export function useCreateGroupViewModel({ onSuccess }: UseCreateGroupViewModelProps) {
+export function useCreateGroupViewModel({
+  onSuccess,
+}: UseCreateGroupViewModelProps) {
   const { profile, bypassAuth } = useAuthState();
   const username = profile?.username || (bypassAuth ? "alice_smith" : "");
 
   const [groupName, setGroupName] = useState("");
+  const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   // Group name validation regex: ^[A-Za-z0-9_\-\.]{3,64}$
@@ -26,6 +29,7 @@ export function useCreateGroupViewModel({ onSuccess }: UseCreateGroupViewModelPr
       setError(null);
       return groupService.createGroup({
         groupName: groupName.trim(),
+        description: description.trim() || undefined,
       });
     },
     onSuccess: () => {
@@ -48,14 +52,16 @@ export function useCreateGroupViewModel({ onSuccess }: UseCreateGroupViewModelPr
         setError("A group with this name already exists.");
         return;
       }
-      setError(err.error.message || "Failed to create group. Please try again.");
+      setError(
+        err.error.message || "Failed to create group. Please try again.",
+      );
     },
   });
 
   const handleCreateGroup = async () => {
     if (!isGroupNameValid) {
       setError(
-        "Group name must be between 3 and 64 characters and contain only letters, numbers, underscores, hyphens, or dots."
+        "Group name must be between 3 and 64 characters and contain only letters, numbers, underscores, hyphens, or dots.",
       );
       return;
     }
@@ -69,6 +75,8 @@ export function useCreateGroupViewModel({ onSuccess }: UseCreateGroupViewModelPr
   return {
     groupName,
     setGroupName,
+    description,
+    setDescription,
     isGroupNameValid,
     isCreating,
     handleCreateGroup,

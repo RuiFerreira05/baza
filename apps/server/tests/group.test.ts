@@ -12,7 +12,7 @@ vi.mock("../src/lib/auth", async (importOriginal) => {
 import { getAuthenticatedUsername } from "../src/lib/auth";
 import { app } from "../src/setup";
 import { db } from "../src/lib/db";
-import { users, profiles, groups, groupMembers } from "@baza/db/schemas";
+import { users, profiles, groups, groupMembers, friends } from "@baza/db/schemas";
 import { clearDatabase } from "./helpers/dbHelper";
 import { eq } from "drizzle-orm";
 import fs from "fs";
@@ -53,6 +53,7 @@ describe("Group Routes", () => {
     const body = response.json();
     expect(body.status).toBe("OK");
     expect(body.data.groupname).toBe("test_group");
+    expect(body.data.description).toBeNull();
     expect(body.data.id).toBeDefined();
 
     // Verify creator is automatically added as member and admin
@@ -64,6 +65,32 @@ describe("Group Routes", () => {
     expect(members[0].username).toBe("testrequester");
     expect(members[0].admin).toBe(true);
     expect(members[0].acceptedInvite).toBe(true);
+  });
+
+  it("POST /v1/restricted/groups should create a group with a description", async () => {
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/restricted/groups",
+      payload: {
+        groupName: "test_group_with_desc",
+        description: "This is a test group description",
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body.status).toBe("OK");
+    expect(body.data.groupname).toBe("test_group_with_desc");
+    expect(body.data.description).toBe("This is a test group description");
+    expect(body.data.id).toBeDefined();
+
+    // Verify creator is automatically added as member and admin
+    const members = await db
+      .select()
+      .from(groupMembers)
+      .where(eq(groupMembers.groupId, body.data.id));
+    expect(members).toHaveLength(1);
+    expect(members[0].username).toBe("testrequester");
   });
 
   it("GET /v1/restricted/groups/:id should retrieve group details if user is a member", async () => {
@@ -196,6 +223,98 @@ describe("Group Routes", () => {
     const usernames = listBody.data.map((m: any) => m.username);
     expect(usernames).toContain("testrequester");
     expect(usernames).toContain("userone");
+  });
+
+  it("POST /v1/restricted/groups/:id/group-members/batch should invite friends if caller is admin", async () => {
+    const friend1Id = "33333333-3333-3333-3333-333333333333";
+    const friend2Id = "44444444-4444-4444-4444-444444444444";
+    const notFriendId = "55555555-5555-5555-5555-555555555555";
+    
+    await db.insert(users).values([
+      { id: friend1Id, name: "Friend 1", email: "f1@example.com" },
+      { id: friend2Id, name: "Friend 2", email: "f2@example.com" },
+      { id: notFriendId, name: "Not Friend", email: "nf@example.com" },
+    ]);
+    await db.insert(profiles).values([
+      { userId: friend1Id, username: "friend1", settings: {} },
+      { userId: friend2Id, username: "friend2", settings: {} },
+      { userId: notFriendId, username: "notfriend", settings: {} },
+    ]);
+
+    // testrequester is friends with friend1 and friend2
+    await db.insert(friends).values([
+      { sentBy: "testrequester", receivedBy: "friend1", friendStatus: "accepted", requestAcceptedAt: new Date(), requestSentAt: new Date() },
+      { sentBy: "testrequester", receivedBy: "friend2", friendStatus: "accepted", requestAcceptedAt: new Date(), requestSentAt: new Date() },
+    ]);
+
+    const [group] = await db.insert(groups).values({ groupname: "batch_invite_group" }).returning();
+
+    // testrequester is admin
+    await db.insert(groupMembers).values({
+      groupId: group.id,
+      username: "testrequester",
+      admin: true,
+      banned: false,
+      acceptedInvite: true,
+      acceptedAt: new Date(),
+      invitedAt: new Date(),
+    });
+
+    const batchInviteRes = await app.inject({
+      method: "POST",
+      url: `/v1/restricted/groups/${group.id}/group-members/batch`,
+      payload: {
+        usernames: ["friend1", "friend2", "notfriend"]
+      },
+    });
+
+    expect(batchInviteRes.statusCode).toBe(201);
+    const body = batchInviteRes.json();
+    expect(body.status).toBe("OK");
+    expect(body.data).toHaveLength(2); // Only friends should be invited
+
+    const invitedUsernames = body.data.map((m: any) => m.username);
+    expect(invitedUsernames).toContain("friend1");
+    expect(invitedUsernames).toContain("friend2");
+    expect(invitedUsernames).not.toContain("notfriend");
+  });
+
+  it("POST /v1/restricted/groups/:id/group-members/batch should fail if caller is not admin", async () => {
+    const friend1Id = "33333333-3333-3333-3333-333333333334";
+    await db.insert(users).values([
+      { id: friend1Id, name: "Friend 1", email: "f14@example.com" },
+    ]);
+    await db.insert(profiles).values([
+      { userId: friend1Id, username: "friend14", settings: {} },
+    ]);
+    await db.insert(friends).values([
+      { sentBy: "testrequester", receivedBy: "friend14", friendStatus: "accepted", requestAcceptedAt: new Date(), requestSentAt: new Date() },
+    ]);
+
+    const [group] = await db.insert(groups).values({ groupname: "batch_invite_group2" }).returning();
+
+    // testrequester is NOT admin
+    await db.insert(groupMembers).values({
+      groupId: group.id,
+      username: "testrequester",
+      admin: false,
+      banned: false,
+      acceptedInvite: true,
+      acceptedAt: new Date(),
+      invitedAt: new Date(),
+    });
+
+    const batchInviteRes = await app.inject({
+      method: "POST",
+      url: `/v1/restricted/groups/${group.id}/group-members/batch`,
+      payload: {
+        usernames: ["friend14"]
+      },
+    });
+
+    expect(batchInviteRes.statusCode).toBe(403);
+    expect(batchInviteRes.json().status).toBe("ERROR");
+    expect(batchInviteRes.json().error.type).toBe("UnauthorizedError");
   });
 
   it("PATCH /v1/restricted/groups/:id/group-members/:username/promote-to-admin and dismiss-admin should work", async () => {

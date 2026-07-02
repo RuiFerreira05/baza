@@ -21,6 +21,7 @@ import {
   groupCalendarDTO,
   eventConfirmationDTO,
   UpdateMemberRoleBody,
+  BatchInviteBody,
 } from "@baza/shared-types";
 import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
@@ -33,6 +34,7 @@ import {
   getGroupMembersHandler,
   getGroupPhotoHandler,
   inviteUsersToGroupHandler,
+  batchInviteUsersToGroupHandler,
   removeUserFromGroupHandler,
   updateUserGroupRoleHandler,
 } from "../handlers/groupHandlers";
@@ -262,6 +264,40 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     inviteUsersToGroupHandler,
+  );
+
+  // POST /groups/:id/group-members/batch
+  app.post(
+    "/:id/group-members/batch",
+    {
+      schema: {
+        description: "This route allows a moderator to batch invite friends to a group",
+        tags: ["groups"],
+        params: SimpleIdParam(
+          "The UUID of the group to which users are being invited",
+        ),
+        body: BatchInviteBody,
+        response: {
+          201: StatusOK(
+            Type.Array(groupMemberDTO),
+            "Indicates that the users were successfully invited to the group",
+          ),
+          403: StatusError(
+            ErrorTypes.UnauthorizedError,
+            "if the caller is not a group admin",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "if no group with the provided id was found",
+          ),
+          500: StatusError(
+            ErrorTypes.ResourceCreationError,
+            "if there was an error creating the group invitations",
+          ),
+        },
+      },
+    },
+    batchInviteUsersToGroupHandler,
   );
 
   // DELETE /groups/:id/group-members/:username

@@ -29,6 +29,12 @@ export default function GroupListLayout() {
       })}
     >
       <Tabs.Screen
+        name="create"
+        options={{
+          title: "Create",
+        }}
+      />
+      <Tabs.Screen
         name="groups"
         options={{
           title: "Groups",

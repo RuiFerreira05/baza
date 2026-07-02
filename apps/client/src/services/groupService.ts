@@ -50,6 +50,16 @@ export const groupService = {
       json: { username },
     }).then(unwrapResult<GroupMemberDTO>),
 
+  // POST /v1/restricted/groups/:id/group-members/batch
+  batchInviteUsers: (
+    groupId: string,
+    usernames: string[],
+  ): Promise<Result<GroupMemberDTO[], StatusError>> =>
+    apiClient(`/v1/restricted/groups/${groupId}/group-members/batch`, {
+      method: "POST",
+      json: { usernames },
+    }).then(unwrapResult<GroupMemberDTO[]>),
+
   // DELETE /v1/restricted/groups/:id/group-members/:username
   removeUser: (
     groupId: string,
