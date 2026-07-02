@@ -10,10 +10,6 @@ import Toast from "react-native-toast-message";
 
 export const useSettingsViewModel = (): SettingsSchema => {
   const settingsStore = useSettingsStore();
-  const [testInput, setTestInput] = useState("Test Value");
-  const [testToggle, setTestToggle] = useState(false);
-  const [hiddenSetting, setHiddenSetting] = useState(true);
-  const [hiddenSettingValue, setHiddenSettingValue] = useState("Hidden Value");
   const { bypassAuth } = useAuthState();
   const authState = useAuthState();
   const [showDebugInfo, setShowDebugInfo] = useState(false);
