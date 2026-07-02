@@ -6,6 +6,7 @@ export default function GroupListLayout() {
 
   return (
     <Tabs
+      initialRouteName="groups"
       screenOptions={({ navigation }) => ({
         headerShown: false,
         animation: "fade",

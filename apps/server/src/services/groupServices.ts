@@ -583,13 +583,15 @@ export const batchInviteUsersToGroup = async (
         and(
           eq(groupMembers.groupId, groupId),
           eq(groupMembers.username, inviterUsername),
-          eq(groupMembers.admin, true)
-        )
+          eq(groupMembers.admin, true),
+        ),
       )
       .limit(1);
 
     if (!inviterMembership) {
-      app.log.warn(`User ${inviterUsername} is not an admin of group ${groupId}`);
+      app.log.warn(
+        `User ${inviterUsername} is not an admin of group ${groupId}`,
+      );
       return Err(ErrorTypes.UnauthorizedError);
     }
 
@@ -599,20 +601,22 @@ export const batchInviteUsersToGroup = async (
       .from(friends)
       .where(
         and(
-          eq(friends.friendStatus, 'accepted'),
+          eq(friends.friendStatus, "accepted"),
           or(
             eq(friends.sentBy, inviterUsername),
-            eq(friends.receivedBy, inviterUsername)
-          )
-        )
+            eq(friends.receivedBy, inviterUsername),
+          ),
+        ),
       );
 
     const friendUsernames = new Set(
-      userFriends.map(f => f.sentBy === inviterUsername ? f.receivedBy : f.sentBy)
+      userFriends.map((f) =>
+        f.sentBy === inviterUsername ? f.receivedBy : f.sentBy,
+      ),
     );
 
     // 3. Filter requested usernames to only valid friends
-    const validUsernames = usernames.filter(u => friendUsernames.has(u));
+    const validUsernames = usernames.filter((u) => friendUsernames.has(u));
 
     if (validUsernames.length === 0) {
       // Return empty success if no valid friends to invite
@@ -626,19 +630,19 @@ export const batchInviteUsersToGroup = async (
       .where(
         and(
           eq(groupMembers.groupId, groupId),
-          inArray(groupMembers.username, validUsernames)
-        )
+          inArray(groupMembers.username, validUsernames),
+        ),
       );
 
-    const existingUsernames = new Set(existingMembers.map(m => m.username));
-    const toInvite = validUsernames.filter(u => !existingUsernames.has(u));
+    const existingUsernames = new Set(existingMembers.map((m) => m.username));
+    const toInvite = validUsernames.filter((u) => !existingUsernames.has(u));
 
     if (toInvite.length === 0) {
       return Ok([]);
     }
 
     // 5. Bulk insert invites
-    const newMembersData = toInvite.map(u => ({
+    const newMembersData = toInvite.map((u) => ({
       username: u,
       groupId: groupId,
       admin: false,
@@ -651,7 +655,7 @@ export const batchInviteUsersToGroup = async (
       .insert(groupMembers)
       .values(newMembersData)
       .returning();
-      
+
     if (insertedMembers.length > 0) {
       updateGroupTimestamp(groupId);
     }
