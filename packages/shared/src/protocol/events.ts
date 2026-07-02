@@ -13,6 +13,7 @@ export const personalEventDTO = Type.Object({
   location: Type.Union([ Type.String({description: "location where the event is going to take place", example: "My house"}), Type.Null() ]),
   startTime: Type.String({format: "date-time", description: "start time of the event"}),
   endTime: Type.String({format: "date-time", description: "end time of the event"}),
+  allDay: Type.Boolean({description: "expresses if this is an all day event"}),
   repeat: Type.String({description: "frequency which an event should be repeated in the calendar. Can only be on of these: day, week, month, year, never"}),
   public: Type.Boolean({description: "expresses if an event should be public to the user's friends"}),
   createdAt: Type.String({
@@ -23,6 +24,7 @@ export const personalEventDTO = Type.Object({
       description: "The date and time when the event was last updated",
       format: "date-time"
   }),
+  repeatUntil: Type.Optional(nullable(Type.String({ format: "date" }))),
 }, {
   description: "Personal event data.",
   title: "PersonalEventDTO",
@@ -138,9 +140,11 @@ export const CreatePersonalEventBody = Type.Object({
   description: Type.Optional(Type.String()),
   date: Type.String({ format: "date" }),
   location: Type.Optional(Type.String()),
-  startTime: Type.String({ format: "date-time" }),
-  endTime: Type.String({ format: "date-time" }),
+  startTime: Type.Optional(Type.String({ format: "date-time" })),
+  endTime: Type.Optional(Type.String({ format: "date-time" })),
+  allDay: Type.Optional(Type.Boolean()),
   repeat: Type.Union([Type.Literal("day"), Type.Literal("week"), Type.Literal("month"), Type.Literal("year"), Type.Literal("never")]),
+  repeatUntil: Type.Optional(Type.String({ format: "date" })),
   public: Type.Boolean(),
 });
 export type CreatePersonalEventBody = Type.Static<typeof CreatePersonalEventBody>;
@@ -161,9 +165,10 @@ export type GroupCalendarDTO = Type.Static<typeof groupCalendarDTO>;
 
 // Event confirmation DTO
 export const eventConfirmationDTO = Type.Object({
+  eventId: Type.String({ format: "uuid" }),
   groupId: Type.String({ format: "uuid" }),
   username: Type.String(),
-  confirmedAt: Type.String(),
+  confirmedAt: Type.String({ format: "date-time" }),
 }, {
   description: "Group member attendance confirmation details",
   title: "EventConfirmationDTO",

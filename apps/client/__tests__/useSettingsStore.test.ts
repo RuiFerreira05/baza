@@ -1,5 +1,6 @@
 import { ThemeMode, useSettingsStore } from "@/store/useSettingsStore";
 import { useAppTheme as useTheme } from "@/hooks/useAppTheme";
+import { errorReporter } from "@/lib/errorReporter";
 import { act, renderHook } from "@testing-library/react-native";
 import * as SecureStore from "expo-secure-store";
 import { Appearance } from "react-native";
@@ -143,7 +144,6 @@ describe("useTheme hook", () => {
     try {
       const { result } = await renderHook(() => useTheme());
 
-      const { errorReporter } = require("@/lib/errorReporter");
       expect(errorReporter.logError).toHaveBeenCalledWith(testError, {
         message: "Error loading fonts",
       });

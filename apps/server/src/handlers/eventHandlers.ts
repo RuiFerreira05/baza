@@ -10,6 +10,8 @@ import {
   createPersonalEvent,
   editPersonalEvent,
   getPersonalEventById,
+  deletePersonalEvent,
+  deleteGroupEvent,
 } from "../services/eventServices";
 import { resolveTie } from "../services/finalizationService";
 import {
@@ -486,6 +488,95 @@ export const editPersonalEventHandler = async (
             createStatusError(
               ErrorTypes.UpdateError,
               "An error occurred while updating the personal event",
+            ),
+          );
+    }
+  } else {
+    return res.status(200).send(createStatusOK(result.value));
+  }
+};
+
+// DELETE /users/:username/events/:idEvent
+export const deletePersonalEventHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  app.log.info("Received Delete Personal Event request");
+  const username = await getAuthenticatedUsername(req, res);
+  if (!username) return;
+
+  const { idEvent, username: reqUsername } = req.params as {
+    username: string;
+    idEvent: string;
+  };
+
+  if (username !== reqUsername) {
+    return res
+      .status(403)
+      .send(
+        createStatusError(
+          ErrorTypes.UnauthorizedError,
+          "You can only delete your own personal events.",
+        ),
+      );
+  }
+
+  const result = await deletePersonalEvent(idEvent, username);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownIdError:
+        return res
+          .status(404)
+          .send(
+            createStatusError(ErrorTypes.UnknownIdError, "Event not found"),
+          );
+      default:
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.DeleteError,
+              "An error occurred while deleting the personal event.",
+            ),
+          );
+    }
+  } else {
+    return res.status(200).send(createStatusOK(result.value));
+  }
+};
+
+// DELETE /groups/:id/events/:idevent
+export const deleteGroupEventHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  app.log.info("Received Delete Group Event request");
+  const username = await getAuthenticatedUsername(req, res);
+  if (!username) return;
+
+  const { id: groupId, idevent } = req.params as {
+    id: string;
+    idevent: string;
+  };
+
+  const result = await deleteGroupEvent(idevent, groupId);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownIdError:
+        return res
+          .status(404)
+          .send(
+            createStatusError(ErrorTypes.UnknownIdError, "Event not found"),
+          );
+      default:
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.DeleteError,
+              "An error occurred while deleting the group event.",
             ),
           );
     }

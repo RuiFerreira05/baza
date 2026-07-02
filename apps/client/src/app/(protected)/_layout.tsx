@@ -29,6 +29,9 @@ export default function ProtectedLayout() {
       screenOptions={{
         headerShown: false,
         animation: "fade",
+        tabBarStyle: {
+          height: 70,
+        },
       }}
     >
       <Tabs.Screen
@@ -81,7 +84,7 @@ export default function ProtectedLayout() {
       />
 
       <Tabs.Screen
-        name="groups"
+        name="groupList"
         options={{
           title: "Groups",
           tabBarIcon: ({ color, focused }) => (
@@ -95,7 +98,6 @@ export default function ProtectedLayout() {
       />
 
       <Tabs.Screen name="friends" options={{ href: null }} />
-
       <Tabs.Screen name="editProfile" options={{ href: null }} />
     </Tabs>
   );

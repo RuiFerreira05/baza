@@ -1,22 +1,16 @@
+import CreateEventModal from "@/components/CreateEventModal";
 import EventCard from "@/components/EventCard";
-import LabeledInput from "@/components/LabeledInput";
 import { useCalendarStyles } from "@/constants/styles/useCalendarStyles";
 import { useCreateEventStyles } from "@/constants/styles/useCreateEventStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useCalendarViewModel } from "@/viewmodels/useCalendarViewModel";
-import { useCreateEventViewModel } from "@/viewmodels/useCreateEventViewModel";
+import { PersonalEventDTO } from "@baza/shared-types";
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Modal,
-  Platform,
   Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
   Text,
   View,
 } from "react-native";
@@ -31,15 +25,9 @@ export default function CalendarScreen() {
 
   // State to control modal visibility
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-  // Initialize event creation ViewModel
-  const formVm = useCreateEventViewModel({
-    initialDate: vm.selectedDate,
-    onSuccess: () => {
-      setIsCreateModalOpen(false);
-      vm.refetchEvents(); // Refresh schedule view
-    },
-  });
+  const [selectedEventForEdit, setSelectedEventForEdit] = useState<
+    PersonalEventDTO | undefined
+  >(undefined);
 
   // Map app theme colors to Wix Calendar styles dynamically
   const calendarTheme = useMemo(() => {
@@ -80,25 +68,6 @@ export default function CalendarScreen() {
     }
   };
 
-  const formatDateLong = (date: Date) => {
-    return date.toLocaleDateString([], {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
-  const formatTime = (time: Date) => {
-    return time.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-  };
-
-  const repeatOptions = ["never", "day", "week", "month", "year"] as const;
-
   return (
     <SafeAreaView style={calendarStyles.container} edges={["top"]}>
       {/* Page Header */}
@@ -115,6 +84,7 @@ export default function CalendarScreen() {
           onDayPress={vm.onDayPress}
           onDayLongPress={(day: { dateString: string }) => {
             vm.onDayPress(day);
+            setSelectedEventForEdit(undefined);
             setIsCreateModalOpen(true);
           }}
           onMonthChange={vm.onMonthChange}
@@ -150,9 +120,14 @@ export default function CalendarScreen() {
               description={item.description}
               startTime={item.startTime}
               endTime={item.endTime}
+              allDay={item.allDay}
               location={item.location}
               repeat={item.repeat}
               isPublic={item.public}
+              onPress={() => {
+                setSelectedEventForEdit(item);
+                setIsCreateModalOpen(true);
+              }}
             />
           )}
           contentContainerStyle={calendarStyles.listContent}
@@ -178,296 +153,31 @@ export default function CalendarScreen() {
       {/* Floating Action Button (FAB) */}
       <Pressable
         style={({ pressed }) => [formStyles.fab, pressed && { opacity: 0.8 }]}
-        onPress={() => setIsCreateModalOpen(true)}
+        onPress={() => {
+          setSelectedEventForEdit(undefined);
+          setIsCreateModalOpen(true);
+        }}
       >
         <Ionicons name="add" size={30} color={colors.onPrimary} />
       </Pressable>
 
       {/* Event Creation Bottom Sheet Modal */}
-      <Modal
-        visible={isCreateModalOpen}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setIsCreateModalOpen(false)}
-      >
-        <View style={formStyles.modalContainer}>
-          {/* Backdrop Dismiss trigger */}
-          <Pressable
-            style={StyleSheet.absoluteFill}
-            onPress={() => setIsCreateModalOpen(false)}
-          />
-
-          <View style={formStyles.modalContent}>
-            {/* Sheet Header */}
-            <View style={formStyles.modalHeader}>
-              <Text style={formStyles.modalTitle} numberOfLines={1}>
-                Schedule Event
-              </Text>
-              <Pressable
-                style={formStyles.closeButton}
-                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                onPress={() => setIsCreateModalOpen(false)}
-              >
-                <Ionicons
-                  name="close"
-                  size={18}
-                  color={colors.onSurfaceVariant}
-                />
-              </Pressable>
-            </View>
-
-            {/* Scrollable Form Body */}
-            <ScrollView
-              contentContainerStyle={formStyles.formScroll}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-            >
-              {/* Event Title */}
-              <LabeledInput
-                label="Event Title *"
-                value={formVm.title}
-                onChangeText={formVm.setTitle}
-                placeholder="e.g. Weekly Standup"
-                autoCapitalize="sentences"
-                isCorrect={formVm.title.trim().length > 0}
-              />
-
-              {/* Event Location */}
-              <LabeledInput
-                label="Location"
-                value={formVm.location}
-                onChangeText={formVm.setLocation}
-                placeholder="e.g. Conference Room B or Zoom link"
-                autoCapitalize="sentences"
-              />
-
-              {/* Event Description */}
-              <LabeledInput
-                label="Description"
-                value={formVm.description}
-                onChangeText={formVm.setDescription}
-                placeholder="Add optional notes..."
-                autoCapitalize="sentences"
-              />
-
-              {/* Event Date selector */}
-              <View style={formStyles.inputGroup}>
-                <Text style={formStyles.label}>Date</Text>
-                {Platform.OS === "ios" ? (
-                  <DateTimePicker
-                    value={formVm.eventDate}
-                    mode="date"
-                    themeVariant={isDark ? "dark" : "light"}
-                    onChange={(_, date) => {
-                      if (date) formVm.setEventDate(date);
-                    }}
-                  />
-                ) : (
-                  <>
-                    <Pressable
-                      style={formStyles.timePickerButton}
-                      onPress={() => formVm.setShowDatePicker(true)}
-                    >
-                      <Text style={formStyles.timePickerText}>
-                        {formatDateLong(formVm.eventDate)}
-                      </Text>
-                      <Ionicons
-                        name="calendar-outline"
-                        size={18}
-                        color={colors.onSurfaceVariant}
-                      />
-                    </Pressable>
-                    {formVm.showDatePicker && (
-                      <DateTimePicker
-                        value={formVm.eventDate}
-                        mode="date"
-                        onChange={(_, date) => {
-                          formVm.setShowDatePicker(false);
-                          if (date) formVm.setEventDate(date);
-                        }}
-                      />
-                    )}
-                  </>
-                )}
-              </View>
-
-              {/* Event Start & End Time selectors (Platform specific picker patterns) */}
-              <View style={formStyles.timeRow}>
-                {/* Start Time Field */}
-                <View style={formStyles.inputGroup}>
-                  <Text style={formStyles.label}>Start Time</Text>
-                  {Platform.OS === "ios" ? (
-                    <DateTimePicker
-                      value={formVm.startTime}
-                      mode="time"
-                      is24Hour={true}
-                      themeVariant={isDark ? "dark" : "light"}
-                      onChange={(_, date) => {
-                        if (date) formVm.setStartTime(date);
-                      }}
-                    />
-                  ) : (
-                    <>
-                      <Pressable
-                        style={formStyles.timePickerButton}
-                        onPress={() => formVm.setShowStartPicker(true)}
-                      >
-                        <Text style={formStyles.timePickerText}>
-                          {formatTime(formVm.startTime)}
-                        </Text>
-                        <Ionicons
-                          name="time-outline"
-                          size={18}
-                          color={colors.onSurfaceVariant}
-                        />
-                      </Pressable>
-                      {formVm.showStartPicker && (
-                        <DateTimePicker
-                          value={formVm.startTime}
-                          mode="time"
-                          is24Hour={true}
-                          onChange={(_, date) => {
-                            formVm.setShowStartPicker(false);
-                            if (date) formVm.setStartTime(date);
-                          }}
-                        />
-                      )}
-                    </>
-                  )}
-                </View>
-
-                {/* End Time Field */}
-                <View style={formStyles.inputGroup}>
-                  <Text style={formStyles.label}>End Time</Text>
-                  {Platform.OS === "ios" ? (
-                    <DateTimePicker
-                      value={formVm.endTime}
-                      mode="time"
-                      is24Hour={true}
-                      themeVariant={isDark ? "dark" : "light"}
-                      onChange={(_, date) => {
-                        if (date) formVm.setEndTime(date);
-                      }}
-                    />
-                  ) : (
-                    <>
-                      <Pressable
-                        style={formStyles.timePickerButton}
-                        onPress={() => formVm.setShowEndPicker(true)}
-                      >
-                        <Text style={formStyles.timePickerText}>
-                          {formatTime(formVm.endTime)}
-                        </Text>
-                        <Ionicons
-                          name="time-outline"
-                          size={18}
-                          color={colors.onSurfaceVariant}
-                        />
-                      </Pressable>
-                      {formVm.showEndPicker && (
-                        <DateTimePicker
-                          value={formVm.endTime}
-                          mode="time"
-                          is24Hour={true}
-                          onChange={(_, date) => {
-                            formVm.setShowEndPicker(false);
-                            if (date) formVm.setEndTime(date);
-                          }}
-                        />
-                      )}
-                    </>
-                  )}
-                </View>
-              </View>
-
-              {/* Repeat rules selector capsules */}
-              <View style={formStyles.inputGroup}>
-                <Text style={formStyles.repeatLabel}>Repeat Schedule</Text>
-                <View style={formStyles.repeatRow}>
-                  {repeatOptions.map((opt) => {
-                    const isActive = formVm.repeat === opt;
-                    return (
-                      <Pressable
-                        key={opt}
-                        style={[
-                          formStyles.repeatCapsule,
-                          isActive && formStyles.repeatCapsuleActive,
-                        ]}
-                        onPress={() => formVm.setRepeat(opt)}
-                      >
-                        <Text
-                          style={[
-                            formStyles.repeatText,
-                            isActive && formStyles.repeatTextActive,
-                          ]}
-                        >
-                          {opt.toUpperCase()}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
-
-              {/* Public/Private switch toggle row */}
-              <View style={formStyles.switchRow}>
-                <View style={formStyles.switchLabelContainer}>
-                  <Text style={formStyles.switchLabel}>Public Event</Text>
-                  <Text style={formStyles.switchSub}>
-                    Allow friends to see details of this event
-                  </Text>
-                </View>
-                <Switch
-                  value={formVm.isPublic}
-                  onValueChange={formVm.setIsPublic}
-                  trackColor={{ false: colors.border, true: colors.primary }}
-                  thumbColor={
-                    formVm.isPublic ? colors.onPrimary : colors.onSurfaceVariant
-                  }
-                />
-              </View>
-
-              {/* Validation Warning Alert */}
-              {formVm.validationError && (
-                <Text
-                  style={{
-                    color: colors.error,
-                    fontSize: 13,
-                    fontFamily: "Inter_500Medium",
-                  }}
-                >
-                  {formVm.validationError}
-                </Text>
-              )}
-
-              {/* Modal action Buttons row */}
-              <View style={formStyles.buttonRow}>
-                <Pressable
-                  style={formStyles.cancelButton}
-                  onPress={() => setIsCreateModalOpen(false)}
-                >
-                  <Text style={formStyles.cancelButtonText}>Cancel</Text>
-                </Pressable>
-
-                <Pressable
-                  style={[
-                    formStyles.submitButton,
-                    formVm.isLoading && formStyles.disabledButton,
-                  ]}
-                  disabled={formVm.isLoading}
-                  onPress={formVm.handleCreateEvent}
-                >
-                  {formVm.isLoading ? (
-                    <ActivityIndicator size="small" color={colors.onPrimary} />
-                  ) : (
-                    <Text style={formStyles.submitButtonText}>Save Event</Text>
-                  )}
-                </Pressable>
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
+      {isCreateModalOpen && (
+        <CreateEventModal
+          visible={isCreateModalOpen}
+          onClose={() => {
+            setIsCreateModalOpen(false);
+            setSelectedEventForEdit(undefined);
+          }}
+          onSuccess={() => {
+            setIsCreateModalOpen(false);
+            setSelectedEventForEdit(undefined);
+            vm.refetchEvents();
+          }}
+          initialDate={vm.selectedDate}
+          eventToEdit={selectedEventForEdit}
+        />
+      )}
     </SafeAreaView>
   );
 }

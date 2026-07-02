@@ -26,7 +26,7 @@ import {
   type PersonalEventDTO,
   type Result,
 } from "@baza/shared-types";
-import { and, eq, gte, inArray, lte, ne, or } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lte, ne, or } from "drizzle-orm";
 import { Type } from "typebox";
 import { Value } from "typebox/value";
 import { db } from "../lib/db";
@@ -557,7 +557,13 @@ export const getGroupCalendar = async (
             gte(personalEvents.date, startDate),
             lte(personalEvents.date, endDate),
           ),
-          ne(personalEvents.repeat, "never"),
+          and(
+            ne(personalEvents.repeat, "never"),
+            or(
+              isNull(personalEvents.repeatUntil),
+              gte(personalEvents.repeatUntil, startDate),
+            ),
+          ),
         ),
       ];
 
@@ -569,7 +575,9 @@ export const getGroupCalendar = async (
           location: personalEvents.location,
           startTime: personalEvents.startTime,
           endTime: personalEvents.endTime,
+          allDay: personalEvents.allDay,
           repeat: personalEvents.repeat,
+          repeatUntil: personalEvents.repeatUntil,
           public: personalEvents.public,
           title: events.title,
           description: events.description,
@@ -609,7 +617,9 @@ export const getGroupCalendar = async (
             location: null,
             startTime: formattedStartTime,
             endTime: formattedEndTime,
+            allDay: row.allDay,
             repeat: row.repeat,
+            repeatUntil: row.repeatUntil,
             public: false,
             title: "Busy",
             description: null,
@@ -625,7 +635,9 @@ export const getGroupCalendar = async (
             location: row.location,
             startTime: formattedStartTime,
             endTime: formattedEndTime,
+            allDay: row.allDay,
             repeat: row.repeat,
+            repeatUntil: row.repeatUntil,
             public: row.public,
             title: row.title,
             description: row.description,
@@ -689,9 +701,15 @@ export const getUserEvents = async (
           },
         },
         {
-          repeat: {
-            ne: "never",
-          },
+          AND: [
+            { repeat: { ne: "never" } },
+            {
+              OR: [
+                { repeatUntil: { isNull: true } },
+                { repeatUntil: { gte: startDate } },
+              ],
+            },
+          ],
         },
       ],
     },
@@ -775,7 +793,9 @@ export const getPersonalEventById = async (
       location: record.location,
       startTime: record.startTime.toISOString(),
       endTime: record.endTime.toISOString(),
+      allDay: record.allDay,
       repeat: record.repeat,
+      repeatUntil: record.repeatUntil,
       public: record.public,
       createdAt: record.events.createdAt.toISOString(),
       updatedAt: record.events.updatedAt.toISOString(),
@@ -812,12 +832,34 @@ export const createPersonalEvent = async (
   >
 > => {
   try {
-    const startTimeVal = new Date(body.startTime);
-    const endTimeVal = new Date(body.endTime);
+    const isAllDay = !!body.allDay;
+    let startTimeVal: Date;
+    let endTimeVal: Date;
+
+    if (isAllDay) {
+      startTimeVal = new Date(`${body.date}T00:00:00.000Z`);
+      endTimeVal = new Date(`${body.date}T23:59:59.999Z`);
+    } else {
+      if (!body.startTime || !body.endTime) {
+        app.log.warn(
+          "Create personal event: startTime and endTime are required when allDay is false",
+        );
+        return Err(ErrorTypes.MalformedRequestError);
+      }
+      startTimeVal = new Date(body.startTime);
+      endTimeVal = new Date(body.endTime);
+    }
 
     if (startTimeVal >= endTimeVal) {
       app.log.warn(
-        `Create personal event constraint violated: startTime (${body.startTime}) must be earlier than endTime (${body.endTime})`,
+        `Create personal event constraint violated: startTime (${body.startTime || startTimeVal.toISOString()}) must be earlier than endTime (${body.endTime || endTimeVal.toISOString()})`,
+      );
+      return Err(ErrorTypes.MalformedRequestError);
+    }
+
+    if (body.repeatUntil && new Date(body.repeatUntil) < new Date(body.date)) {
+      app.log.warn(
+        `Create personal event constraint violated: repeatUntil (${body.repeatUntil}) cannot be earlier than event date (${body.date})`,
       );
       return Err(ErrorTypes.MalformedRequestError);
     }
@@ -844,7 +886,9 @@ export const createPersonalEvent = async (
           location: body.location ?? null,
           startTime: startTimeVal,
           endTime: endTimeVal,
+          allDay: isAllDay,
           repeat: body.repeat,
+          repeatUntil: body.repeatUntil ?? null,
           public: body.public,
         })
         .returning();
@@ -862,7 +906,9 @@ export const createPersonalEvent = async (
         location: newPersonalEvent.location,
         startTime: newPersonalEvent.startTime.toISOString(),
         endTime: newPersonalEvent.endTime.toISOString(),
+        allDay: newPersonalEvent.allDay,
         repeat: newPersonalEvent.repeat,
+        repeatUntil: newPersonalEvent.repeatUntil,
         public: newPersonalEvent.public,
         createdAt: newEvent.createdAt.toISOString(),
         updatedAt: newEvent.updatedAt.toISOString(),
@@ -914,17 +960,40 @@ export const editPersonalEvent = async (
       return Err(ErrorTypes.UnknownIdError);
     }
 
-    const startTimeStr =
-      body.startTime !== undefined
-        ? body.startTime
-        : existing.startTime.toISOString();
-    const endTimeStr =
-      body.endTime !== undefined
-        ? body.endTime
-        : existing.endTime.toISOString();
-    if (new Date(startTimeStr) >= new Date(endTimeStr)) {
+    const isAllDay = body.allDay !== undefined ? body.allDay : existing.allDay;
+    const eventDate = body.date !== undefined ? body.date : existing.date;
+
+    let startTimeVal: Date;
+    let endTimeVal: Date;
+
+    if (isAllDay) {
+      startTimeVal = new Date(`${eventDate}T00:00:00.000Z`);
+      endTimeVal = new Date(`${eventDate}T23:59:59.999Z`);
+    } else {
+      const startTimeStr =
+        body.startTime !== undefined
+          ? body.startTime
+          : existing.startTime.toISOString();
+      const endTimeStr =
+        body.endTime !== undefined
+          ? body.endTime
+          : existing.endTime.toISOString();
+      startTimeVal = new Date(startTimeStr);
+      endTimeVal = new Date(endTimeStr);
+    }
+
+    if (startTimeVal >= endTimeVal) {
       app.log.warn(
-        `Edit personal event constraint violated: startTime (${startTimeStr}) must be earlier than endTime (${endTimeStr})`,
+        `Edit personal event constraint violated: startTime (${startTimeVal.toISOString()}) must be earlier than endTime (${endTimeVal.toISOString()})`,
+      );
+      return Err(ErrorTypes.MalformedRequestError);
+    }
+
+    const repeatUntilStr =
+      body.repeatUntil !== undefined ? body.repeatUntil : existing.repeatUntil;
+    if (repeatUntilStr && new Date(repeatUntilStr) < new Date(eventDate)) {
+      app.log.warn(
+        `Edit personal event constraint violated: repeatUntil (${repeatUntilStr}) cannot be earlier than event date (${eventDate})`,
       );
       return Err(ErrorTypes.MalformedRequestError);
     }
@@ -944,11 +1013,14 @@ export const editPersonalEvent = async (
       const updateValues: Record<string, any> = {};
       if (body.date !== undefined) updateValues.date = body.date;
       if (body.location !== undefined) updateValues.location = body.location;
-      if (body.startTime !== undefined)
-        updateValues.startTime = new Date(body.startTime);
-      if (body.endTime !== undefined)
-        updateValues.endTime = new Date(body.endTime);
+
+      updateValues.startTime = startTimeVal;
+      updateValues.endTime = endTimeVal;
+
+      if (body.allDay !== undefined) updateValues.allDay = body.allDay;
       if (body.repeat !== undefined) updateValues.repeat = body.repeat;
+      if (body.repeatUntil !== undefined)
+        updateValues.repeatUntil = body.repeatUntil;
       if (body.public !== undefined) updateValues.public = body.public;
 
       if (Object.keys(updateValues).length > 0) {
@@ -978,6 +1050,7 @@ export const editPersonalEvent = async (
  * Confirms a member's attendance to a group event.
  */
 export const confirmEventAttendance = async (
+  eventId: string,
   groupId: string,
   username: string,
   confirmedAt: string,
@@ -991,13 +1064,14 @@ export const confirmEventAttendance = async (
     const [inserted] = await db
       .insert(eventConfirmations)
       .values({
+        eventId,
         groupId,
         username,
-        confirmedAt,
+        confirmedAt: new Date(confirmedAt),
       })
       .onConflictDoUpdate({
-        target: [eventConfirmations.groupId, eventConfirmations.username],
-        set: { confirmedAt },
+        target: [eventConfirmations.eventId, eventConfirmations.username],
+        set: { confirmedAt: new Date(confirmedAt) },
       })
       .returning();
 
@@ -1005,7 +1079,12 @@ export const confirmEventAttendance = async (
       return Err(ErrorTypes.ResourceCreationError);
     }
 
-    const conv = Value.Convert(eventConfirmationDTO, inserted);
+    const formatted = {
+      ...inserted,
+      confirmedAt: inserted.confirmedAt.toISOString(),
+    };
+
+    const conv = Value.Convert(eventConfirmationDTO, formatted);
     if (Value.Check(eventConfirmationDTO, conv)) {
       return Ok(conv);
     } else {
@@ -1025,7 +1104,7 @@ export const confirmEventAttendance = async (
  * Revokes a member's attendance confirmation.
  */
 export const revokeEventAttendance = async (
-  groupId: string,
+  eventId: string,
   username: string,
 ): Promise<
   Result<null, ErrorTypes.DeleteError | ErrorTypes.UnknownIdError>
@@ -1035,7 +1114,7 @@ export const revokeEventAttendance = async (
       .delete(eventConfirmations)
       .where(
         and(
-          eq(eventConfirmations.groupId, groupId),
+          eq(eventConfirmations.eventId, eventId),
           eq(eventConfirmations.username, username),
         ),
       )
@@ -1059,15 +1138,23 @@ export const revokeEventAttendance = async (
  * Lists all attendance confirmations for a group event.
  */
 export const getEventConfirmations = async (
-  groupId: string,
+  eventId: string,
 ): Promise<Result<EventConfirmationDTO[], ErrorTypes.ConversionError>> => {
   try {
     const rows = await db
       .select()
       .from(eventConfirmations)
-      .where(eq(eventConfirmations.groupId, groupId));
+      .where(eq(eventConfirmations.eventId, eventId));
 
-    const checkSchema = Value.Convert(Type.Array(eventConfirmationDTO), rows);
+    const formattedRows = rows.map((r) => ({
+      ...r,
+      confirmedAt: r.confirmedAt.toISOString(),
+    }));
+
+    const checkSchema = Value.Convert(
+      Type.Array(eventConfirmationDTO),
+      formattedRows,
+    );
     if (Value.Check(Type.Array(eventConfirmationDTO), checkSchema)) {
       return Ok(checkSchema as EventConfirmationDTO[]);
     } else {
@@ -1082,5 +1169,82 @@ export const getEventConfirmations = async (
       "Failed to retrieve event confirmations",
     );
     return Err(ErrorTypes.ConversionError);
+  }
+};
+
+/**
+ * Deletes a personal event.
+ */
+export const deletePersonalEvent = async (
+  idEvent: string,
+  username: string,
+): Promise<
+  Result<null, ErrorTypes.DeleteError | ErrorTypes.UnknownIdError>
+> => {
+  try {
+    const deleted = await db.transaction(async (tx) => {
+      const deletedPersonal = await tx
+        .delete(personalEvents)
+        .where(
+          and(
+            eq(personalEvents.id, idEvent),
+            eq(personalEvents.username, username),
+          ),
+        )
+        .returning();
+
+      if (deletedPersonal.length === 0) return null;
+
+      await tx.delete(events).where(eq(events.id, idEvent));
+      return deletedPersonal;
+    });
+
+    if (!deleted) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+    return Ok(null);
+  } catch (error) {
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to delete personal event",
+    );
+    return Err(ErrorTypes.DeleteError);
+  }
+};
+
+/**
+ * Deletes a group event.
+ */
+export const deleteGroupEvent = async (
+  idEvent: string,
+  groupId: string,
+): Promise<
+  Result<null, ErrorTypes.DeleteError | ErrorTypes.UnknownIdError>
+> => {
+  try {
+    const deleted = await db.transaction(async (tx) => {
+      const deletedGroupEvent = await tx
+        .delete(groupEvents)
+        .where(
+          and(eq(groupEvents.id, idEvent), eq(groupEvents.groupId, groupId)),
+        )
+        .returning();
+
+      if (deletedGroupEvent.length === 0) return null;
+
+      await tx.delete(events).where(eq(events.id, idEvent));
+      return deletedGroupEvent;
+    });
+
+    if (!deleted) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+    return Ok(null);
+  } catch (error) {
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to delete group event",
+    );
+    return Err(ErrorTypes.DeleteError);
   }
 };

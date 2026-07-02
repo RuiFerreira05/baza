@@ -43,6 +43,7 @@ import {
   editGroupEventHandler,
   resolveTieHandler,
   getGroupCalendarHandler,
+  deleteGroupEventHandler,
 } from "../handlers/eventHandlers";
 import {
   createEventPlanHandler,
@@ -484,6 +485,27 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     editGroupEventHandler,
+  );
+
+  // DELETE /groups/:id/events/:idevent
+  app.delete(
+    "/:id/events/:idevent",
+    {
+      schema: {
+        description: "Delete an existing group event",
+        tags: ["events"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid", description: "Group UUID" }),
+          idevent: Type.String({ format: "uuid", description: "Event UUID" }),
+        }),
+        response: {
+          200: StatusOK(Type.Null(), "Event deleted successfully"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Event not found"),
+          500: StatusError(ErrorTypes.DeleteError, "Database execution failed"),
+        },
+      },
+    },
+    deleteGroupEventHandler,
   );
 
   // POST /groups/:id/events/:idevent/resolve-tie

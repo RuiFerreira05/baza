@@ -61,6 +61,15 @@ export const eventService = {
       json: body,
     }).then(unwrapResult<PersonalEventDTO>),
 
+  // DELETE /v1/restricted/users/:username/events/:idEvent
+  deletePersonalEvent: (
+    username: string,
+    idEvent: string,
+  ): Promise<Result<null, StatusError>> =>
+    apiClient(`/v1/restricted/users/${username}/events/${idEvent}`, {
+      method: "DELETE",
+    }).then(unwrapResult<null>),
+
   // ==========================================
   // Group Events (from /groups/:id/events)
   // ==========================================
@@ -112,6 +121,15 @@ export const eventService = {
       method: "PATCH",
       json: body,
     }).then(unwrapResult<GroupEventDTO>),
+
+  // DELETE /v1/restricted/groups/:id/events/:idevent
+  deleteGroupEvent: (
+    groupId: string,
+    idEvent: string,
+  ): Promise<Result<null, StatusError>> =>
+    apiClient(`/v1/restricted/groups/${groupId}/events/${idEvent}`, {
+      method: "DELETE",
+    }).then(unwrapResult<null>),
 
   // POST /v1/restricted/groups/:id/events/:idevent/resolve-tie
   resolveTie: (

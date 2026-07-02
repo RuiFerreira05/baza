@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, date, time, integer, primaryKey, check, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, date, time, integer, boolean, primaryKey, check, uuid } from "drizzle-orm/pg-core";
 import { profiles } from "./profile";
 import { groupEvents } from "./event";
 
@@ -11,6 +11,7 @@ export const plans = pgTable("plans", {
   date: date("date").notNull(),
   startTime: time("start_time").notNull(),
   endTime: time("end_time").notNull(),
+  allDay: boolean("all_day").default(false).notNull(),
   activity: text("activity"),
   location: text("location").notNull(),
   minBudget: integer("min_budget"),

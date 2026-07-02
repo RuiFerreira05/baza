@@ -1,15 +1,17 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 interface EventCardProps {
   title: string;
   description?: string | null;
   startTime: string;
   endTime: string;
+  allDay?: boolean;
   location?: string | null;
   repeat?: string;
   isPublic?: boolean;
+  onPress?: () => void;
 }
 
 export default function EventCard({
@@ -17,9 +19,11 @@ export default function EventCard({
   description,
   startTime,
   endTime,
+  allDay,
   location,
   repeat,
   isPublic = false,
+  onPress,
 }: EventCardProps) {
   const { colors } = useAppTheme();
 
@@ -39,14 +43,23 @@ export default function EventCard({
 
   const startFormatted = formatTime(startTime);
   const endFormatted = formatTime(endTime);
-  const timeRange =
-    startFormatted && endFormatted ? `${startFormatted} - ${endFormatted}` : "";
+  const timeRange = allDay
+    ? "All day"
+    : startFormatted && endFormatted
+      ? `${startFormatted} - ${endFormatted}`
+      : "";
 
   return (
-    <View
-      style={[
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      style={({ pressed }) => [
         styles.card,
-        { backgroundColor: colors.surface, borderColor: colors.border },
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          opacity: pressed ? 0.8 : 1,
+        },
       ]}
     >
       {/* Decorative vertical bar on the left */}
@@ -127,7 +140,7 @@ export default function EventCard({
           ) : null}
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -143,7 +156,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 2,
+    boxShadow: `0px 2px 8px rgba(0, 0, 0, 0.15)`,
   },
   indicator: {
     width: 5,

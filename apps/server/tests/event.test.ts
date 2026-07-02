@@ -423,4 +423,63 @@ describe("Event Routes", () => {
     expect(getConfirmationsRes2.statusCode).toBe(200);
     expect(getConfirmationsRes2.json().data).toHaveLength(0);
   });
+
+  it("DELETE /v1/restricted/groups/:id/events/:idevent should delete a group event", async () => {
+    await db.insert(users).values({
+      id: VALID_USER_ID,
+      name: "Creator",
+      email: "creator@example.com",
+    });
+    await db
+      .insert(profiles)
+      .values({ userId: VALID_USER_ID, username: "testcreator", settings: {} });
+    const [group] = await db
+      .insert(groups)
+      .values({ groupname: "test_group" })
+      .returning();
+    await db.insert(groupMembers).values({
+      groupId: group.id,
+      username: "testcreator",
+      admin: false,
+      acceptedInvite: true,
+      banned: false,
+      invitedAt: new Date(),
+      acceptedAt: new Date(),
+    });
+
+    const [baseEvent] = await db
+      .insert(events)
+      .values({
+        title: "Test Event",
+        description: "Test Desc",
+      })
+      .returning();
+    const [event] = await db
+      .insert(groupEvents)
+      .values({
+        id: baseEvent.id,
+        groupId: group.id,
+        startDate: "2026-08-01",
+        endDate: "2026-08-02",
+        votingEndTime: new Date("2026-07-31T23:59:59.000Z"),
+        createdBy: "testcreator",
+        state: "unfinished",
+      })
+      .returning();
+
+    // 1. Delete the event
+    const deleteRes = await app.inject({
+      method: "DELETE",
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}`,
+    });
+    expect(deleteRes.statusCode).toBe(200);
+    expect(deleteRes.json().status).toBe("OK");
+
+    // 2. Verify it's gone
+    const getRes = await app.inject({
+      method: "GET",
+      url: `/v1/restricted/groups/${group.id}/events/${event.id}`,
+    });
+    expect(getRes.statusCode).toBe(404);
+  });
 });

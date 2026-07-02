@@ -30,7 +30,7 @@ const Colors = {
   Slate700: "#475569",
   Slate800: "#334155",
   Slate900: "#1E293B",
-  Slate950: "#090D16",
+  Slate950: "#121928",
 
   // Semantic error palette (Red-based)
   Red500: "#EF4444",
