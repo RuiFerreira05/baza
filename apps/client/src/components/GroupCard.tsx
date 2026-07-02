@@ -1,5 +1,4 @@
 import { useGroupListStyles } from "@/constants/styles/useGroupListStyles";
-import { useAppTheme } from "@/hooks/useAppTheme";
 import { authClient } from "@/lib/auth";
 import { groupService } from "@/services/groupService";
 import React from "react";
@@ -23,7 +22,6 @@ export default function GroupCard({
   description,
   photo,
 }: GroupCardProps) {
-  const { colors } = useAppTheme();
   const styles = useGroupListStyles();
 
   return (
