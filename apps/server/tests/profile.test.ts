@@ -18,6 +18,8 @@ import {
   friends,
   groups,
   groupMembers,
+  events,
+  personalEvents,
 } from "@baza/db/schemas";
 import { clearDatabase } from "./helpers/dbHelper";
 import { and, eq } from "drizzle-orm";
@@ -589,6 +591,57 @@ describe("Profile Routes", () => {
       expect(response.statusCode).toBe(404);
       expect(response.json().status).toBe("ERROR");
       expect(response.json().error.type).toBe("UnknownUsernameError");
+    });
+  });
+
+  describe("DELETE /v1/restricted/users/:username/events/:idEvent", () => {
+    it("should delete a personal event successfully", async () => {
+      vi.mocked(getAuthenticatedUsername).mockResolvedValue("testcreator");
+
+      await db.insert(users).values({
+        id: VALID_USER_ID,
+        name: "Creator",
+        email: "creator@example.com",
+      });
+      await db.insert(profiles).values({
+        userId: VALID_USER_ID,
+        username: "testcreator",
+        settings: {},
+      });
+
+      const [baseEvent] = await db
+        .insert(events)
+        .values({
+          title: "My Event",
+          description: "My Desc",
+        })
+        .returning();
+
+      const [pEvent] = await db
+        .insert(personalEvents)
+        .values({
+          id: baseEvent.id,
+          username: "testcreator",
+          date: "2026-08-01",
+          startTime: new Date("2026-08-01T10:00:00Z"),
+          endTime: new Date("2026-08-01T11:00:00Z"),
+          repeat: "never",
+          public: false,
+        })
+        .returning();
+
+      const deleteRes = await app.inject({
+        method: "DELETE",
+        url: `/v1/restricted/users/testcreator/events/${pEvent.id}`,
+      });
+      expect(deleteRes.statusCode).toBe(200);
+      expect(deleteRes.json().status).toBe("OK");
+
+      const getRes = await app.inject({
+        method: "GET",
+        url: `/v1/restricted/users/testcreator/events/${pEvent.id}`,
+      });
+      expect(getRes.statusCode).toBe(404);
     });
   });
 });

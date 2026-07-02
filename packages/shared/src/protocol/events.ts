@@ -165,9 +165,10 @@ export type GroupCalendarDTO = Type.Static<typeof groupCalendarDTO>;
 
 // Event confirmation DTO
 export const eventConfirmationDTO = Type.Object({
+  eventId: Type.String({ format: "uuid" }),
   groupId: Type.String({ format: "uuid" }),
   username: Type.String(),
-  confirmedAt: Type.String(),
+  confirmedAt: Type.String({ format: "date-time" }),
 }, {
   description: "Group member attendance confirmation details",
   title: "EventConfirmationDTO",

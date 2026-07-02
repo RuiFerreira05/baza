@@ -108,6 +108,7 @@ An API server powered by **Fastify**, using **Typebox** for payload validation, 
   * `POST /:username/events`: Create a personal calendar event (supports `allDay`, `repeat`, and `repeatUntil`).
   * `GET /:username/events/:idEvent`: Get a specific personal calendar event.
   * `PATCH /:username/events/:idEvent`: Edit a personal event (supports `allDay`, `repeat`, and `repeatUntil`).
+  * `DELETE /:username/events/:idEvent`: Delete a personal calendar event.
   * `GET /:username/groups`: List user's groups.
   * `GET /:username/groups/invites`: List pending group invites for user.
   * `PATCH /:username/groups/invites/:groupId`: Accept or reject a group invite.
@@ -138,6 +139,7 @@ An API server powered by **Fastify**, using **Typebox** for payload validation, 
   * `GET /:id/events`: List group events (optionally filtered by `startDate` and `endDate`).
   * `GET /:id/events/:idevent`: Retrieve details of a specific group event.
   * `PATCH /:id/events/:idevent`: Edit group event parameters.
+  * `DELETE /:id/events/:idevent`: Delete a group event.
   * `POST /:id/events/:idevent/resolve-tie`: Resolve a winning plan tie-breaker.
   * `POST /:id/events/:idevent/preferences`: Create or update member's planning preferences (upsert).
   * `GET /:id/events/:idevent/preferences/group`: Get aggregated group preference report.

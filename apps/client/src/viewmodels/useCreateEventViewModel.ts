@@ -189,6 +189,43 @@ export function useCreateEventViewModel({
     },
   });
 
+  // Mutation for deleting the personal event
+  const deleteEventMutation = useAppMutation({
+    mutationFn: () =>
+      eventService.deletePersonalEvent(username, eventToEdit!.id),
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Event deleted successfully!",
+        position: "bottom",
+        bottomOffset: 80,
+      });
+      // Invalidate the cache to trigger calendar refetch
+      queryClient.invalidateQueries({ queryKey: ["personal-events"] });
+      // Invalidate single event detail query
+      queryClient.invalidateQueries({
+        queryKey: ["personal-event", username, eventToEdit!.id],
+      });
+      onSuccess();
+    },
+    onError: (err) => {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: err.error.message || "Failed to delete event.",
+        position: "bottom",
+        bottomOffset: 80,
+      });
+    },
+  });
+
+  const handleDeleteEvent = () => {
+    if (eventToEdit) {
+      deleteEventMutation.mutate();
+    }
+  };
+
   const combineDateAndTime = (date: Date, time: Date) => {
     const combined = new Date(date);
     combined.setHours(time.getHours());
@@ -331,10 +368,13 @@ export function useCreateEventViewModel({
     validationError,
     setValidationError,
     handleCreateEvent,
+    handleDeleteEvent,
     isFetchingBase,
+    isDeleting: deleteEventMutation.isPending,
     isLoading:
       createEventMutation.isPending ||
       editEventMutation.isPending ||
+      deleteEventMutation.isPending ||
       isFetchingBase,
   };
 }

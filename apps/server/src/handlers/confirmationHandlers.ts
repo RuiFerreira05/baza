@@ -21,10 +21,18 @@ export const confirmEventAttendanceHandler = async (
   const username = await getAuthenticatedUsername(req, res);
   if (!username) return;
 
-  const { id: groupId } = req.params as { id: string; idevent: string };
+  const { id: groupId, idevent } = req.params as {
+    id: string;
+    idevent: string;
+  };
   const confirmedAt = new Date().toISOString();
 
-  const result = await confirmEventAttendance(groupId, username, confirmedAt);
+  const result = await confirmEventAttendance(
+    idevent,
+    groupId,
+    username,
+    confirmedAt,
+  );
 
   if (!result.ok) {
     switch (result.error) {
@@ -61,9 +69,12 @@ export const revokeEventAttendanceHandler = async (
   const username = await getAuthenticatedUsername(req, res);
   if (!username) return;
 
-  const { id: groupId } = req.params as { id: string; idevent: string };
+  const { idevent } = req.params as {
+    id: string;
+    idevent: string;
+  };
 
-  const result = await revokeEventAttendance(groupId, username);
+  const result = await revokeEventAttendance(idevent, username);
 
   if (!result.ok) {
     switch (result.error) {
@@ -101,9 +112,12 @@ export const getEventConfirmationsHandler = async (
   const username = await getAuthenticatedUsername(req, res);
   if (!username) return;
 
-  const { id: groupId } = req.params as { id: string; idevent: string };
+  const { idevent } = req.params as {
+    id: string;
+    idevent: string;
+  };
 
-  const result = await getEventConfirmations(groupId);
+  const result = await getEventConfirmations(idevent);
 
   if (!result.ok) {
     return res

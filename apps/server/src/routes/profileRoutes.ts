@@ -27,6 +27,7 @@ import {
   editPersonalEventHandler,
   getPersonalEventByIdHandler,
   getPersonalEventsHandler,
+  deletePersonalEventHandler,
 } from "../handlers/eventHandlers";
 import {
   blockUserHandler,
@@ -297,6 +298,28 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     editPersonalEventHandler,
+  );
+
+  // DELETE /users/:username/events/:idEvent
+  app.delete(
+    "/:username/events/:idEvent",
+    {
+      schema: {
+        description: "This route deletes an existing personal event.",
+        tags: ["users"],
+        params: Type.Object({
+          username: Type.String({ description: "The username" }),
+          idEvent: Type.String({ format: "uuid" }),
+        }),
+        response: {
+          200: StatusOK(Type.Null(), "Deleted"),
+          403: StatusError(ErrorTypes.UnauthorizedError, "Forbidden"),
+          404: StatusError(ErrorTypes.UnknownIdError, "Not found"),
+          500: StatusError(ErrorTypes.DeleteError, "Error"),
+        },
+      },
+    },
+    deletePersonalEventHandler,
   );
 
   // GET /users/:username/groups

@@ -3,6 +3,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import React from "react";
 import {
   ActivityIndicator,
+  Alert,
   Modal,
   Platform,
   Pressable,
@@ -13,11 +14,11 @@ import {
   View,
 } from "react-native";
 
-import { PersonalEventDTO } from "@baza/shared-types";
 import LabeledInput from "@/components/LabeledInput";
 import { useCreateEventStyles } from "@/constants/styles/useCreateEventStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useCreateEventViewModel } from "@/viewmodels/useCreateEventViewModel";
+import { PersonalEventDTO } from "@baza/shared-types";
 
 type CreateEventModalProps = {
   visible: boolean;
@@ -79,17 +80,53 @@ export default function CreateEventModal({
             <Text style={formStyles.modalTitle} numberOfLines={1}>
               {eventToEdit ? "Edit Event" : "Schedule Event"}
             </Text>
-            <Pressable
-              style={formStyles.closeButton}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-              onPress={onClose}
-            >
-              <Ionicons
-                name="close"
-                size={18}
-                color={colors.onSurfaceVariant}
-              />
-            </Pressable>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              {eventToEdit && (
+                <Pressable
+                  style={[
+                    formStyles.closeButton,
+                    { marginRight: 8, backgroundColor: colors.error + "15" },
+                  ]}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  onPress={() => {
+                    Alert.alert(
+                      "Delete Event",
+                      "Are you sure you want to delete this event?",
+                      [
+                        { text: "Cancel", style: "cancel" },
+                        {
+                          text: "Delete",
+                          style: "destructive",
+                          onPress: () => formVm.handleDeleteEvent(),
+                        },
+                      ],
+                    );
+                  }}
+                  disabled={formVm.isLoading}
+                >
+                  {formVm.isDeleting ? (
+                    <ActivityIndicator size="small" color={colors.error} />
+                  ) : (
+                    <Ionicons
+                      name="trash-outline"
+                      size={18}
+                      color={colors.error}
+                    />
+                  )}
+                </Pressable>
+              )}
+              <Pressable
+                style={formStyles.closeButton}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                onPress={onClose}
+              >
+                <Ionicons
+                  name="close"
+                  size={18}
+                  color={colors.onSurfaceVariant}
+                />
+              </Pressable>
+            </View>
           </View>
 
           {/* Scrollable Form Body */}

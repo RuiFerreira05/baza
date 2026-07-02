@@ -1050,6 +1050,7 @@ export const editPersonalEvent = async (
  * Confirms a member's attendance to a group event.
  */
 export const confirmEventAttendance = async (
+  eventId: string,
   groupId: string,
   username: string,
   confirmedAt: string,
@@ -1063,13 +1064,14 @@ export const confirmEventAttendance = async (
     const [inserted] = await db
       .insert(eventConfirmations)
       .values({
+        eventId,
         groupId,
         username,
-        confirmedAt,
+        confirmedAt: new Date(confirmedAt),
       })
       .onConflictDoUpdate({
-        target: [eventConfirmations.groupId, eventConfirmations.username],
-        set: { confirmedAt },
+        target: [eventConfirmations.eventId, eventConfirmations.username],
+        set: { confirmedAt: new Date(confirmedAt) },
       })
       .returning();
 
@@ -1077,7 +1079,12 @@ export const confirmEventAttendance = async (
       return Err(ErrorTypes.ResourceCreationError);
     }
 
-    const conv = Value.Convert(eventConfirmationDTO, inserted);
+    const formatted = {
+      ...inserted,
+      confirmedAt: inserted.confirmedAt.toISOString(),
+    };
+
+    const conv = Value.Convert(eventConfirmationDTO, formatted);
     if (Value.Check(eventConfirmationDTO, conv)) {
       return Ok(conv);
     } else {
@@ -1097,7 +1104,7 @@ export const confirmEventAttendance = async (
  * Revokes a member's attendance confirmation.
  */
 export const revokeEventAttendance = async (
-  groupId: string,
+  eventId: string,
   username: string,
 ): Promise<
   Result<null, ErrorTypes.DeleteError | ErrorTypes.UnknownIdError>
@@ -1107,7 +1114,7 @@ export const revokeEventAttendance = async (
       .delete(eventConfirmations)
       .where(
         and(
-          eq(eventConfirmations.groupId, groupId),
+          eq(eventConfirmations.eventId, eventId),
           eq(eventConfirmations.username, username),
         ),
       )
@@ -1131,15 +1138,23 @@ export const revokeEventAttendance = async (
  * Lists all attendance confirmations for a group event.
  */
 export const getEventConfirmations = async (
-  groupId: string,
+  eventId: string,
 ): Promise<Result<EventConfirmationDTO[], ErrorTypes.ConversionError>> => {
   try {
     const rows = await db
       .select()
       .from(eventConfirmations)
-      .where(eq(eventConfirmations.groupId, groupId));
+      .where(eq(eventConfirmations.eventId, eventId));
 
-    const checkSchema = Value.Convert(Type.Array(eventConfirmationDTO), rows);
+    const formattedRows = rows.map((r) => ({
+      ...r,
+      confirmedAt: r.confirmedAt.toISOString(),
+    }));
+
+    const checkSchema = Value.Convert(
+      Type.Array(eventConfirmationDTO),
+      formattedRows,
+    );
     if (Value.Check(Type.Array(eventConfirmationDTO), checkSchema)) {
       return Ok(checkSchema as EventConfirmationDTO[]);
     } else {
@@ -1154,5 +1169,82 @@ export const getEventConfirmations = async (
       "Failed to retrieve event confirmations",
     );
     return Err(ErrorTypes.ConversionError);
+  }
+};
+
+/**
+ * Deletes a personal event.
+ */
+export const deletePersonalEvent = async (
+  idEvent: string,
+  username: string,
+): Promise<
+  Result<null, ErrorTypes.DeleteError | ErrorTypes.UnknownIdError>
+> => {
+  try {
+    const deleted = await db.transaction(async (tx) => {
+      const deletedPersonal = await tx
+        .delete(personalEvents)
+        .where(
+          and(
+            eq(personalEvents.id, idEvent),
+            eq(personalEvents.username, username),
+          ),
+        )
+        .returning();
+
+      if (deletedPersonal.length === 0) return null;
+
+      await tx.delete(events).where(eq(events.id, idEvent));
+      return deletedPersonal;
+    });
+
+    if (!deleted) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+    return Ok(null);
+  } catch (error) {
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to delete personal event",
+    );
+    return Err(ErrorTypes.DeleteError);
+  }
+};
+
+/**
+ * Deletes a group event.
+ */
+export const deleteGroupEvent = async (
+  idEvent: string,
+  groupId: string,
+): Promise<
+  Result<null, ErrorTypes.DeleteError | ErrorTypes.UnknownIdError>
+> => {
+  try {
+    const deleted = await db.transaction(async (tx) => {
+      const deletedGroupEvent = await tx
+        .delete(groupEvents)
+        .where(
+          and(eq(groupEvents.id, idEvent), eq(groupEvents.groupId, groupId)),
+        )
+        .returning();
+
+      if (deletedGroupEvent.length === 0) return null;
+
+      await tx.delete(events).where(eq(events.id, idEvent));
+      return deletedGroupEvent;
+    });
+
+    if (!deleted) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+    return Ok(null);
+  } catch (error) {
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to delete group event",
+    );
+    return Err(ErrorTypes.DeleteError);
   }
 };
