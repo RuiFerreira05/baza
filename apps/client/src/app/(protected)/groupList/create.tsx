@@ -1,6 +1,8 @@
 import LabeledInput from "@/components/LabeledInput";
 import { useCreateGroupScreenStyles } from "@/constants/styles/useCreateGroupScreenStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { authClient } from "@/lib/auth";
+import { userService } from "@/services/userService";
 import { useCreateGroupScreenViewModel } from "@/viewmodels/useCreateGroupScreenViewModel";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
@@ -135,9 +137,23 @@ export default function CreateGroupScreen() {
                   <View key={friend.username} style={styles.friendRow}>
                     <View style={styles.friendInfo}>
                       <View style={styles.friendAvatar}>
-                        <Text style={styles.friendAvatarText}>
-                          {friend.username.charAt(0).toUpperCase()}
-                        </Text>
+                        {friend.photo ? (
+                          <Image
+                            source={{
+                              uri: friend.photo.startsWith("http")
+                                ? friend.photo
+                                : userService.getUserPhotoUrl(friend.username),
+                              headers: {
+                                Cookie: authClient.getCookie() || "",
+                              },
+                            }}
+                            style={styles.friendAvatarImage}
+                          />
+                        ) : (
+                          <Text style={styles.friendAvatarText}>
+                            {friend.username.charAt(0).toUpperCase()}
+                          </Text>
+                        )}
                       </View>
                       <Text style={styles.friendUsernameText}>
                         {friend.username}
@@ -249,9 +265,23 @@ export default function CreateGroupScreen() {
                     >
                       <View style={styles.friendInfo}>
                         <View style={styles.friendAvatar}>
-                          <Text style={styles.friendAvatarText}>
-                            {item.username.charAt(0).toUpperCase()}
-                          </Text>
+                          {item.photo ? (
+                            <Image
+                              source={{
+                                uri: item.photo.startsWith("http")
+                                  ? item.photo
+                                  : userService.getUserPhotoUrl(item.username),
+                                headers: {
+                                  Cookie: authClient.getCookie() || "",
+                                },
+                              }}
+                              style={styles.friendAvatarImage}
+                            />
+                          ) : (
+                            <Text style={styles.friendAvatarText}>
+                              {item.username.charAt(0).toUpperCase()}
+                            </Text>
+                          )}
                         </View>
                         <Text style={styles.friendUsernameText}>
                           {item.username}

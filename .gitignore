@@ -148,3 +148,5 @@ vite.config.ts.timestamp-*
 
 # Postman local config
 .postman/
+
+uploads/

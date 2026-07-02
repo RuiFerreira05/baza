@@ -81,7 +81,6 @@ export const CreateGroupScreenStyles = (colors: ThemeType) =>
       gap: 16,
     },
     friendsSection: {
-      marginTop: 8,
       gap: 12,
     },
     friendsHeader: {
@@ -108,7 +107,7 @@ export const CreateGroupScreenStyles = (colors: ThemeType) =>
       borderRadius: 12,
       backgroundColor: colors.surface,
       padding: 16,
-      minHeight: 120,
+      minHeight: 170,
     },
     friendRow: {
       flexDirection: "row",
@@ -136,6 +135,11 @@ export const CreateGroupScreenStyles = (colors: ThemeType) =>
       fontFamily: "Inter_600SemiBold",
       color: colors.primary,
     },
+    friendAvatarImage: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+    },
     friendUsernameText: {
       fontSize: 15,
       fontFamily: "Inter_500Medium",
@@ -159,7 +163,7 @@ export const CreateGroupScreenStyles = (colors: ThemeType) =>
     },
     footer: {
       flexDirection: "row",
-      justifyContent: "flex-end",
+      justifyContent: "center",
       marginTop: 24,
       paddingBottom: 24,
     },

@@ -24,10 +24,10 @@ import type { FastifyPluginAsync } from "fastify";
 import Type from "typebox";
 import {
   createPersonalEventHandler,
+  deletePersonalEventHandler,
   editPersonalEventHandler,
   getPersonalEventByIdHandler,
   getPersonalEventsHandler,
-  deletePersonalEventHandler,
 } from "../handlers/eventHandlers";
 import {
   blockUserHandler,
@@ -624,9 +624,9 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     editProfilePhotoHandler,
   );
 
-  // GET /groups/:id/photo
+  // GET /profile/:id/photo
   app.get(
-    "/:id/photo",
+    "/:username/photo",
     {
       schema: {
         description: "This route fetches a profile's photo",
