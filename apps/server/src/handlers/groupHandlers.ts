@@ -15,6 +15,7 @@ import { getAuthenticatedUsername } from "../lib/auth";
 import {
   createGroup,
   deleteGroup,
+  deleteGroupPhoto,
   dismissUserAsAdmin,
   editGroup,
   editGroupPhoto,
@@ -522,6 +523,42 @@ export const updateUserGroupRoleHandler = async (
             createStatusError(
               ErrorTypes.UpdateError,
               "An error occurred while updating the user's role",
+            ),
+          );
+    }
+  } else {
+    return res.status(200).send(createStatusOK(result.value));
+  }
+};
+
+// groups/:id/photo
+export const deleteGroupPhotoHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  app.log.info("Received Delete Group Photo request");
+  const { id } = req.params as SimpleIdParam;
+  const result = await deleteGroupPhoto(id);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownIdError:
+        return res
+          .status(404)
+          .send(
+            createStatusError(
+              ErrorTypes.UnknownIdError,
+              "A group with the provided id was not found",
+            ),
+          );
+      case ErrorTypes.ConversionError:
+        app.log.error("Failed to convert group removal result data");
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.ConversionError,
+              "An error occurred while converting the group removal result data",
             ),
           );
     }

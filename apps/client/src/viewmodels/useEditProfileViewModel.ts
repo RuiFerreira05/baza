@@ -7,13 +7,19 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import Toast from "react-native-toast-message";
 
-export function useEditProfileViewModel(profile: ProfileDTO) {
+export function useEditProfileViewModel(
+  profile: ProfileDTO,
+  bypassAuth: boolean,
+) {
   const router = useRouter();
 
   const [usernameInput, setUsernameInput] = useState(profile.username);
   const [descriptionInput, setDescriptionInput] = useState(profile.description);
   const [photoInput, setPhotoInput] = useState(profile.photo);
   const [error, setError] = useState<string | null>(null);
+  const [image, setImage] = useState(
+    bypassAuth || !profile?.photo ? null : profile?.photo,
+  );
 
   const isUsernameValid =
     usernameInput.length >= 3 && usernameInput.length <= 20;
@@ -49,6 +55,34 @@ export function useEditProfileViewModel(profile: ProfileDTO) {
     },
   });
 
+  const { mutateAsync: editPhoto, isPending: isEditingPhoto } = useAppMutation({
+    mutationFn: () => {
+      setError(null);
+      if (image) {
+        return userService.editProfilePhoto(profile.username, image);
+      } else {
+        return userService.deleteProfilePhoto(profile.username);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["current-profile-photo"] });
+      Toast.show({
+        type: "success",
+        text1: "Profile photo Updated!",
+        text2: "Your profile photo has been updated successfully.",
+        position: "bottom",
+        bottomOffset: 80,
+      });
+    },
+    onError: (err) => {
+      if (err.error.type === ErrorTypes.UpdateError) {
+        setError("Couldn't update photo.");
+        return;
+      }
+      setError(err.error.message);
+    },
+  });
+
   return {
     usernameInput,
     setUsernameInput,
@@ -60,5 +94,9 @@ export function useEditProfileViewModel(profile: ProfileDTO) {
     error,
     editProfile,
     isEditing,
+    image,
+    setImage,
+    editPhoto,
+    isEditingPhoto,
   };
 }

@@ -1,4 +1,4 @@
-import { groupMembers, groups, friends } from "@baza/db/schemas";
+import { friends, groupMembers, groups } from "@baza/db/schemas";
 import {
   Err,
   ErrorTypes,
@@ -547,6 +547,57 @@ export const verifyGroupMembership = async (
       "Failed to verify group membership",
     );
     return false;
+  }
+};
+
+export const deleteGroupPhoto = async (
+  groupId: string,
+): Promise<
+  Result<
+    GroupDTO,
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.DeleteError
+    | ErrorTypes.ConversionError
+  >
+> => {
+  app.log.info(`Received delete group request for group with id ${groupId}`);
+  try {
+    const groupExists = await db.query.groups.findFirst({
+      where: {
+        id: groupId,
+      },
+    });
+
+    if (!groupExists) {
+      app.log.warn(`Group with id ${groupId} not found`);
+      return Err(ErrorTypes.UnknownIdError);
+    }
+
+    const [updatedGroup] = await db
+      .update(groups)
+      .set({
+        photo: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(groups.id, groupId))
+      .returning();
+
+    if (updatedGroup) {
+      const conv = Value.Convert(groupDTO, updatedGroup);
+      if (Value.Check(groupDTO, conv)) {
+        return Ok(conv);
+      } else {
+        app.log.error(Value.Errors(groupDTO, conv));
+        return Err(ErrorTypes.ConversionError);
+      }
+    } else {
+      return Err(ErrorTypes.DeleteError);
+    }
+  } catch (error) {
+    app.log.error(
+      `Failed to delete group photo with id ${groupId}: ${(error as Error).message}`,
+    );
+    return Err(ErrorTypes.DeleteError);
   }
 };
 

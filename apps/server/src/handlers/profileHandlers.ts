@@ -10,6 +10,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { FSUploadService } from "../lib/FSUploadService";
 import {
   createUserProfile,
+  deleteProfilePhoto,
   deleteUserProfile,
   editProfilePhoto,
   editUserProfile,
@@ -358,5 +359,41 @@ export const getProfilePhotoHandler = async (
         );
       // other cases for different GetImageResult types
     }
+  }
+};
+
+// users/:username/photo
+export const deleteProfilePhotoHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  app.log.info("Received Delete Profile Photo request");
+  const { username } = req.params as SimpleUsernameParam;
+  const result = await deleteProfilePhoto(username);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownUsernameError:
+        return res
+          .status(404)
+          .send(
+            createStatusError(
+              ErrorTypes.UnknownUsernameError,
+              "A User with the provided username was not found",
+            ),
+          );
+      case ErrorTypes.ConversionError:
+        app.log.error("Failed to convert user removal result data");
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.ConversionError,
+              "An error occurred while converting the user removal result data",
+            ),
+          );
+    }
+  } else {
+    return res.status(200).send(createStatusOK(result.value));
   }
 };

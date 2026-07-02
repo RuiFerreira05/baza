@@ -52,7 +52,7 @@ export default function UploadModal({
                 style={styles.columnOptions}
               >
                 <FontAwesome name="photo" size={30} color={colors.secondary} />
-                <Text>Gallery</Text>
+                <Text style={styles.text}>Gallery</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -60,7 +60,7 @@ export default function UploadModal({
                 style={styles.columnOptions}
               >
                 <FontAwesome name="trash" size={30} color={colors.secondary} />
-                <Text>Remove</Text>
+                <Text style={styles.text}>Remove</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -42,6 +42,7 @@ import {
 } from "../handlers/friendHandlers";
 import {
   createUserProfileHandler,
+  deleteProfilePhotoHandler,
   deleteUserProfileHandler,
   editProfilePhotoHandler,
   editUserProfileHandler,
@@ -650,5 +651,34 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     getProfilePhotoHandler,
+  );
+
+  // DELETE /users/:username/photo
+  app.delete(
+    "/:username/photo",
+    {
+      schema: {
+        description: "This route deletes a profile's photo",
+        tags: ["users"],
+        params: SimpleUsernameParam(
+          "The username of the profile whose photo is being deleted",
+        ),
+        response: {
+          200: StatusOK(
+            profileDTO,
+            "if the profile photo was successfully deleted and the updated profile data was successfully converted to the expected format before sending the response",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownUsernameError,
+            "if no profile with the provided username was found or if the profile does not have a photo",
+          ),
+          500: StatusError(
+            ErrorTypes.DeleteError,
+            "if there was an error deleting the profile photo",
+          ),
+        },
+      },
+    },
+    deleteProfilePhotoHandler,
   );
 };
