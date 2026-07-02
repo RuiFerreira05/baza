@@ -27,8 +27,9 @@ export default function EditProfileScreen() {
   const { profile, bypassAuth } = useAuthState();
 
   if (!profile && !bypassAuth) {
-    router.push("../(onboarding)/createProfile");
+    router.push("/(onboarding)/createProfile");
   }
+
   const vm = useEditProfileViewModel(
     profile ?? {
       username: "Developer",

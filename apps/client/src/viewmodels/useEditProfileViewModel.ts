@@ -18,8 +18,6 @@ export function useEditProfileViewModel(profile: ProfileDTO) {
   const isUsernameValid =
     usernameInput.length >= 3 && usernameInput.length <= 20;
 
-  console.log("Username: ", usernameInput);
-
   const { mutateAsync: editProfile, isPending: isEditing } = useAppMutation({
     mutationFn: () => {
       setError(null);

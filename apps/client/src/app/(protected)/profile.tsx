@@ -16,7 +16,7 @@ export default function ProfileScreen() {
   const { profile, bypassAuth } = useAuthState();
 
   if(!profile && !bypassAuth) {
-    router.push("../(onboarding)/createProfile");
+    router.push("/(onboarding)/createProfile");
   }
   const vm = useProfileViewModel(profile ?? {
     username: "Developer", 
@@ -39,8 +39,7 @@ export default function ProfileScreen() {
         <Image
           style={styles.profileImage}
           source={
-            // bypassAuth || !profile?.photo? require("./../../../../client/assets/images/profileImg.png") :  }}
-            require("./../../../../client/assets/images/profileImg.png")
+            require("@/assets/images/profileImg.png")
           }
         />
       </View>
