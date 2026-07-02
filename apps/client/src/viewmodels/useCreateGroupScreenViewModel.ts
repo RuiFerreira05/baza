@@ -5,8 +5,9 @@ import { queryClient } from "@/lib/queryClient";
 import { groupService } from "@/services/groupService";
 import { userService } from "@/services/userService";
 import { ErrorTypes, ProfileDTO } from "@baza/shared-types";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import Toast from "react-native-toast-message";
 
 export function useCreateGroupScreenViewModel() {
@@ -21,6 +22,7 @@ export function useCreateGroupScreenViewModel() {
   const [isFriendsModalVisible, setIsFriendsModalVisible] = useState(false);
   const [tempSelectedFriendUsernames, setTempSelectedFriendUsernames] =
     useState<Set<string>>(new Set());
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Group name validation regex: ^[A-Za-z0-9_\-\.]{3,64}$
@@ -70,6 +72,30 @@ export function useCreateGroupScreenViewModel() {
     setIsFriendsModalVisible(true);
   };
 
+  const pickPhoto = async () => {
+    try {
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setPhotoUri(result.assets[0].uri);
+      }
+    } catch (err: any) {
+      Toast.show({
+        type: "error",
+        text1: "Error picking photo",
+        text2: err.message,
+        position: "bottom",
+        bottomOffset: 80,
+      });
+    }
+  };
+
   const toggleFriendSelection = (friendUsername: string) => {
     const nextSet = new Set(tempSelectedFriendUsernames);
     if (nextSet.has(friendUsername)) {
@@ -113,7 +139,37 @@ export function useCreateGroupScreenViewModel() {
       const newGroup = await createGroup();
       const groupId = newGroup.id;
 
-      // 2. Batch Invite selected friends
+      // 2. Upload Group Photo if selected
+      if (photoUri) {
+        const formData = new FormData();
+        const filename = photoUri.split("/").pop() || "group_photo.jpg";
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : `image/jpeg`;
+
+        formData.append("photo", {
+          uri: photoUri,
+          name: filename,
+          type: type,
+        } as any);
+
+        const photoResult = await groupService.uploadGroupPhoto(
+          groupId,
+          formData,
+        );
+        if (!photoResult.ok) {
+          Toast.show({
+            type: "error",
+            text1: "Photo Upload Failed",
+            text2:
+              photoResult.error.error.message ||
+              "Failed to upload group photo.",
+            position: "bottom",
+            bottomOffset: 80,
+          });
+        }
+      }
+
+      // 3. Batch Invite selected friends
       if (selectedFriends.length > 0) {
         const inviteUsernames = selectedFriends.map((f) => f.username);
         const inviteResult = await groupService.batchInviteUsers(
@@ -126,7 +182,7 @@ export function useCreateGroupScreenViewModel() {
             type: "error",
             text1: "Invitations Failed",
             text2:
-              inviteResult.error.message ||
+              inviteResult.error.error.message ||
               "Failed to invite selected friends.",
             position: "bottom",
             bottomOffset: 80,
@@ -170,6 +226,7 @@ export function useCreateGroupScreenViewModel() {
       setGroupName("");
       setDescription("");
       setSelectedFriends([]);
+      setPhotoUri(null);
 
       // Redirect back to groups tab
       router.replace("/groupList/groups");
@@ -195,6 +252,9 @@ export function useCreateGroupScreenViewModel() {
     friends,
     isFriendsLoading: friendsQuery.isLoading,
     isFriendsError: friendsQuery.isError,
+    photoUri,
+    setPhotoUri,
+    pickPhoto,
     openFriendsModal,
     toggleFriendSelection,
     confirmFriendSelection,

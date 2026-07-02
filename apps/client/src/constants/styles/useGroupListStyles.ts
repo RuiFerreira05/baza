@@ -69,6 +69,11 @@ export const GroupListStyles = (colors: ThemeType) =>
       fontSize: 14,
       fontFamily: "Inter_600SemiBold",
     },
+    avatarImage: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+    },
     title: {
       fontSize: 16,
       fontFamily: "Inter_600SemiBold",

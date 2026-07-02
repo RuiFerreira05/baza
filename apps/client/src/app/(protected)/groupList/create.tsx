@@ -7,6 +7,7 @@ import React from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -32,11 +33,45 @@ export default function CreateGroupScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Circular Initials Header */}
+          {/* Circular Photo Header */}
           <View style={styles.photoSection}>
-            <View style={styles.circlePlaceholder}>
-              <Text style={styles.initialsText}>{displayInitials}</Text>
-            </View>
+            <Pressable
+              style={({ pressed }) => [
+                styles.photoWrapper,
+                pressed && { opacity: 0.8 },
+              ]}
+              onPress={vm.pickPhoto}
+            >
+              {vm.photoUri ? (
+                <Image
+                  source={{ uri: vm.photoUri }}
+                  style={styles.photoImage}
+                />
+              ) : (
+                <View style={styles.circlePlaceholder}>
+                  <Text style={styles.initialsText}>{displayInitials}</Text>
+                </View>
+              )}
+              <View style={styles.editButtonContainer}>
+                <Ionicons name="camera" size={16} color={colors.onPrimary} />
+              </View>
+              {vm.photoUri && (
+                <Pressable
+                  style={styles.removePhotoButton}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    vm.setPhotoUri(null);
+                  }}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons
+                    name="close"
+                    size={14}
+                    color={colors.onSurfaceVariant}
+                  />
+                </Pressable>
+              )}
+            </Pressable>
           </View>
 
           {/* Form Inputs */}

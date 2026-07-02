@@ -1,31 +1,46 @@
 import {
+  BatchInviteBody,
+  CreateEventBody,
   CreateGroupBody,
+  CreatePlanBody,
+  CreatePreferenceBody,
+  EditEventBody,
   EditGroupBody,
+  EditPlanBody,
   ErrorTypes,
+  eventConfirmationDTO,
+  groupCalendarDTO,
   groupDTO,
+  groupEventDTO,
   groupMemberDTO,
+  groupPreferenceReportDTO,
+  planDTO,
+  preferenceDTO,
+  ResolveTieBody,
   SimpleIdParam,
   SimpleUsernameParam,
   StatusError,
   StatusOK,
-  groupEventDTO,
-  planDTO,
-  preferenceDTO,
-  groupPreferenceReportDTO,
-  CreateEventBody,
-  EditEventBody,
-  CreatePlanBody,
-  EditPlanBody,
-  CreatePreferenceBody,
-  ResolveTieBody,
-  groupCalendarDTO,
-  eventConfirmationDTO,
   UpdateMemberRoleBody,
-  BatchInviteBody,
 } from "@baza/shared-types";
 import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
 import {
+  confirmEventAttendanceHandler,
+  getEventConfirmationsHandler,
+  revokeEventAttendanceHandler,
+} from "../handlers/confirmationHandlers";
+import {
+  createGroupEventHandler,
+  deleteGroupEventHandler,
+  editGroupEventHandler,
+  getGroupCalendarHandler,
+  getGroupEventByIdHandler,
+  getGroupEventsHandler,
+  resolveTieHandler,
+} from "../handlers/eventHandlers";
+import {
+  batchInviteUsersToGroupHandler,
   createGroupHandler,
   deleteGroupHandler,
   editGroupHandler,
@@ -34,26 +49,16 @@ import {
   getGroupMembersHandler,
   getGroupPhotoHandler,
   inviteUsersToGroupHandler,
-  batchInviteUsersToGroupHandler,
   removeUserFromGroupHandler,
   updateUserGroupRoleHandler,
 } from "../handlers/groupHandlers";
 import {
-  createGroupEventHandler,
-  getGroupEventsHandler,
-  getGroupEventByIdHandler,
-  editGroupEventHandler,
-  resolveTieHandler,
-  getGroupCalendarHandler,
-  deleteGroupEventHandler,
-} from "../handlers/eventHandlers";
-import {
   createEventPlanHandler,
-  getEventPlansHandler,
-  getEventPlanByIdHandler,
   editEventPlanHandler,
-  voteEventPlanHandler,
+  getEventPlanByIdHandler,
+  getEventPlansHandler,
   removeVoteEventPlanHandler,
+  voteEventPlanHandler,
 } from "../handlers/planHandlers";
 import {
   createOrEditEventPreferenceHandler,
@@ -61,11 +66,6 @@ import {
   getEventPreferencesHandler,
   getGroupPreferenceAggregationHandler,
 } from "../handlers/preferenceHandlers";
-import {
-  confirmEventAttendanceHandler,
-  revokeEventAttendanceHandler,
-  getEventConfirmationsHandler,
-} from "../handlers/confirmationHandlers";
 
 export const groupRoutes: FastifyPluginAsync = async (fastify) => {
   const app = fastify.withTypeProvider<TypeBoxTypeProvider>();
@@ -271,7 +271,8 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
     "/:id/group-members/batch",
     {
       schema: {
-        description: "This route allows a moderator to batch invite friends to a group",
+        description:
+          "This route allows a moderator to batch invite friends to a group",
         tags: ["groups"],
         params: SimpleIdParam(
           "The UUID of the group to which users are being invited",
