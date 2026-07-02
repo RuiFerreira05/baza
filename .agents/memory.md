@@ -188,7 +188,10 @@ A modern mobile application built with **React Native** and **Expo (SDK 55)**.
   * `profile.tsx`: Profile details screen displaying user stats (friends, events, groups count).
   * `editProfile.tsx`: User profile details editing screen.
   * `friends.tsx`: User's friends list and management screen.
-  * `groups.tsx`: Groups list screen.
+  * `groupList/`: Directory containing the group list and invites navigation flow.
+    * `_layout.tsx`: Renders top tabs navigation between Groups and Invites.
+    * `groups.tsx`: User groups list screen (fetches user groups, supports pull-to-refresh).
+    * `invites.tsx`: Pending group invitations list screen (supports accept/decline actions).
   * `settings.tsx`: App settings screen (e.g. Theme selection via button groups).
 
 ---
