@@ -85,7 +85,7 @@ export default function CreateGroupScreen() {
                 vm.setGroupName(text);
                 if (vm.error) vm.setError(null);
               }}
-              placeholder="e.g. Work_Squad or my.group"
+              placeholder="e.g. My_group"
               autoCapitalize="none"
               isCorrect={vm.isGroupNameValid && vm.groupName.length > 0}
             />

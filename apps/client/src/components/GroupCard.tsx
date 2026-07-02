@@ -28,7 +28,6 @@ export default function GroupCard({
 
   return (
     <View style={styles.card}>
-      <View style={[styles.indicator, { backgroundColor: colors.primary }]} />
       <View style={styles.cardContent}>
         <View style={styles.cardHeader}>
           <View style={styles.cardTitleRow}>
