@@ -29,9 +29,6 @@ export default function ProtectedLayout() {
       screenOptions={{
         headerShown: false,
         animation: "fade",
-        tabBarStyle: {
-          height: 70,
-        },
       }}
     >
       <Tabs.Screen

@@ -44,16 +44,22 @@ export default function UploadModal({
         {isLoading && <ActivityIndicator size={70} color={colors.primary} />}
         {!isLoading && (
           <View style={[styles.modalCard, { backgroundColor: colors.surface }]}>
-            <Text>Upload Image</Text>
+            <Text style={styles.subTitle2}>Upload Image</Text>
 
-            <View>
-              <TouchableOpacity onPress={onGalleryPress}>
-                <FontAwesome name="photo" size={30} color="black" />
+            <View style={styles.row}>
+              <TouchableOpacity
+                onPress={onGalleryPress}
+                style={styles.columnOptions}
+              >
+                <FontAwesome name="photo" size={30} color={colors.secondary} />
                 <Text>Gallery</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={onRemovePress}>
-                <FontAwesome name="trash" size={30} color="black" />
+              <TouchableOpacity
+                onPress={onRemovePress}
+                style={styles.columnOptions}
+              >
+                <FontAwesome name="trash" size={30} color={colors.secondary} />
                 <Text>Remove</Text>
               </TouchableOpacity>
             </View>

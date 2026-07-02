@@ -57,6 +57,12 @@ export const EditProfileStyles = (colors: ThemeType) =>
       alignItems: "center",
       justifyContent: "center",
     },
+    columnOptions: {
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 5,
+    },
     subTitleOnPrimary: {
       fontSize: 20,
       fontWeight: "bold",
@@ -65,9 +71,9 @@ export const EditProfileStyles = (colors: ThemeType) =>
     row: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "center",
+      justifyContent: "space-around",
       width: "100%",
-      backgroundColor: colors.secondary,
+      paddingVertical: 20,
     },
     editButton: {
       display: "flex",
@@ -144,12 +150,6 @@ export const EditProfileStyles = (colors: ThemeType) =>
       width: "80%",
       alignSelf: "center",
       justifyContent: "center",
-    },
-    modalContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 28,
     },
     overlay: {
       flex: 1,
