@@ -39,18 +39,15 @@ export default function EditProfileScreen() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
+    bypassAuth,
   );
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [image, setImage] = useState(
-    bypassAuth || !profile?.photo
-      ? require("@/assets/images/profileImg.png")
-      : profile?.photo,
-  );
 
-  const saveImage = async (image: string) => {
+  const saveImage = async (image: string | null) => {
     try {
-      setImage(image);
+      vm.setImage(image);
+      vm.editPhoto();
       setIsModalVisible(false);
     } catch (error) {
       throw error;
@@ -59,8 +56,7 @@ export default function EditProfileScreen() {
 
   const removeImage = async () => {
     try {
-      setImage(require("@/assets/images/profileImg.png"));
-      setIsModalVisible(false);
+      saveImage(null);
     } catch (error) {
       alert("Error removing image: " + (error as Error).message);
       setIsModalVisible(false);
@@ -100,7 +96,12 @@ export default function EditProfileScreen() {
             <View style={styles.profileView}>
               <Image
                 style={styles.profileImage}
-                source={typeof image === "number" ? image : { uri: image }}
+                source={
+                  // typeof vm.image === "number" ? vm.image : { uri: vm.image }
+                  vm.image
+                    ? { uri: vm.image }
+                    : require("@/assets/images/profileImg.png")
+                }
               />
             </View>
 

@@ -48,6 +48,33 @@ export const userService = {
       json: body,
     }).then(unwrapResult<ProfileDTO>),
 
+  // PATCH /v1/restricted/users/:username/photo
+  editProfilePhoto: (
+    username: string,
+    imageUri: string,
+  ): Promise<Result<ProfileDTO, StatusError>> => {
+    const formData = new FormData();
+
+    formData.append("photo", {
+      uri: imageUri,
+      type: "image/png",
+      name: `{$username}_photo.png`,
+    } as any);
+
+    return apiClient(`/v1/restricted/users/${username}/photo`, {
+      method: "PATCH",
+      body: formData,
+    }).then(unwrapResult<ProfileDTO>);
+  },
+
+  // DELETE /v1/restricted/users/:username/photo
+  deleteProfilePhoto: (
+    username: string,
+  ): Promise<Result<ProfileDTO, StatusError>> =>
+    apiClient(`/v1/restricted/users/${username}/photo`, {
+      method: "DELETE",
+    }).then(unwrapResult<ProfileDTO>),
+
   // GET /v1/restricted/users/:username/friends
   getFriends: (username: string): Promise<Result<ProfileDTO[], StatusError>> =>
     apiClient(`/v1/restricted/users/${username}/friends`).then(

@@ -1018,3 +1018,56 @@ export const editProfilePhoto = async (
     return Err(ErrorTypes.ResourceCreationError);
   }
 };
+
+export const deleteProfilePhoto = async (
+  username: string,
+): Promise<
+  Result<
+    ProfileDTO,
+    | ErrorTypes.UnknownUsernameError
+    | ErrorTypes.DeleteError
+    | ErrorTypes.ConversionError
+  >
+> => {
+  app.log.info(
+    `Received delete profile request for user with username ${username}`,
+  );
+  try {
+    const profileExists = await db.query.profiles.findFirst({
+      where: {
+        username: username,
+      },
+    });
+
+    if (!profileExists) {
+      app.log.warn(`User with username ${username} not found`);
+      return Err(ErrorTypes.UnknownUsernameError);
+    }
+
+    const [updatedProfile] = await db
+      .update(profiles)
+      .set({
+        photo: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(profiles.username, username))
+      .returning();
+
+    if (updatedProfile) {
+      const conv = Value.Convert(profileDTO, updatedProfile);
+      if (Value.Check(profileDTO, conv)) {
+        return Ok(conv);
+      } else {
+        app.log.error(Value.Errors(profileDTO, conv));
+        return Err(ErrorTypes.ConversionError);
+      }
+    } else {
+      return Err(ErrorTypes.DeleteError);
+    }
+  } catch (error) {
+    app.log.error(
+      `Failed to delete user photo with username ${username}: ${(error as Error).message}`,
+    );
+    return Err(ErrorTypes.DeleteError);
+  }
+};
