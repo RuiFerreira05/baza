@@ -1,4 +1,4 @@
-import { groupMembers, groups } from "@baza/db/schemas";
+import { friends, groupMembers, groups } from "@baza/db/schemas";
 import {
   Err,
   ErrorTypes,
@@ -12,7 +12,7 @@ import {
   type Result,
 } from "@baza/shared-types";
 import type { MultipartFile } from "@fastify/multipart";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, or } from "drizzle-orm";
 import Type from "typebox";
 import { Value } from "typebox/value";
 import { db } from "../lib/db";
@@ -61,29 +61,54 @@ export const getGroupById = async (
  */
 export const createGroup = async (
   groupName: string,
+  creatorUsername: string,
+  description?: string,
 ): Promise<
   Result<
     GroupDTO,
     ErrorTypes.ConversionError | ErrorTypes.ResourceCreationError
   >
 > => {
-  // have to do this destructuring cause drizzle returns an array with returning()
-  const [group] = await db
-    .insert(groups)
-    .values({
-      groupname: groupName,
-    })
-    .returning();
+  try {
+    const group = await db.transaction(async (tx) => {
+      const [newGroup] = await tx
+        .insert(groups)
+        .values({
+          groupname: groupName,
+          description: description,
+        })
+        .returning();
 
-  if (group) {
-    const conv = Value.Convert(groupDTO, group);
-    if (Value.Check(groupDTO, conv)) {
-      return Ok(conv);
+      if (!newGroup) {
+        throw new Error("Failed to insert group");
+      }
+
+      await tx.insert(groupMembers).values({
+        username: creatorUsername,
+        groupId: newGroup.id,
+        admin: true,
+        banned: false,
+        acceptedInvite: true,
+        acceptedAt: new Date(),
+        invitedAt: new Date(),
+      });
+
+      return newGroup;
+    });
+
+    if (group) {
+      const conv = Value.Convert(groupDTO, group);
+      if (Value.Check(groupDTO, conv)) {
+        return Ok(conv);
+      } else {
+        app.log.error(Value.Errors(groupDTO, conv));
+        return Err(ErrorTypes.ConversionError);
+      }
     } else {
-      app.log.error(Value.Errors(groupDTO, conv));
-      return Err(ErrorTypes.ConversionError);
+      return Err(ErrorTypes.ResourceCreationError);
     }
-  } else {
+  } catch (err) {
+    app.log.error(err);
     return Err(ErrorTypes.ResourceCreationError);
   }
 };
@@ -573,5 +598,132 @@ export const deleteGroupPhoto = async (
       `Failed to delete group photo with id ${groupId}: ${(error as Error).message}`,
     );
     return Err(ErrorTypes.DeleteError);
+  }
+};
+
+/**
+ * This method batch invites users to a group. It checks if the inviter is an admin,
+ * filters the requested users to only those who are friends with the inviter,
+ * ignores users who are already in the group, and inserts the remaining users into
+ * the groupMembers table.
+ *
+ * @param groupId the id of the group to invite the users to
+ * @param usernames the usernames to invite
+ * @param inviterUsername the username of the user making the batch invite
+ * @returns a promised result with an array of the newly invited groupMemberDTOs, or an error
+ */
+export const batchInviteUsersToGroup = async (
+  groupId: string,
+  usernames: string[],
+  inviterUsername: string,
+): Promise<
+  Result<
+    GroupMemberDTO[],
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.ResourceCreationError
+    | ErrorTypes.ConversionError
+    | ErrorTypes.UnauthorizedError
+  >
+> => {
+  try {
+    // 1. Verify inviter is an admin of the group
+    const [inviterMembership] = await db
+      .select()
+      .from(groupMembers)
+      .where(
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.username, inviterUsername),
+          eq(groupMembers.admin, true),
+        ),
+      )
+      .limit(1);
+
+    if (!inviterMembership) {
+      app.log.warn(
+        `User ${inviterUsername} is not an admin of group ${groupId}`,
+      );
+      return Err(ErrorTypes.UnauthorizedError);
+    }
+
+    // 2. Fetch all accepted friends of the inviter
+    const userFriends = await db
+      .select()
+      .from(friends)
+      .where(
+        and(
+          eq(friends.friendStatus, "accepted"),
+          or(
+            eq(friends.sentBy, inviterUsername),
+            eq(friends.receivedBy, inviterUsername),
+          ),
+        ),
+      );
+
+    const friendUsernames = new Set(
+      userFriends.map((f) =>
+        f.sentBy === inviterUsername ? f.receivedBy : f.sentBy,
+      ),
+    );
+
+    // 3. Filter requested usernames to only valid friends
+    const validUsernames = usernames.filter((u) => friendUsernames.has(u));
+
+    if (validUsernames.length === 0) {
+      // Return empty success if no valid friends to invite
+      return Ok([]);
+    }
+
+    // 4. Fetch existing members to avoid duplicate invites
+    const existingMembers = await db
+      .select()
+      .from(groupMembers)
+      .where(
+        and(
+          eq(groupMembers.groupId, groupId),
+          inArray(groupMembers.username, validUsernames),
+        ),
+      );
+
+    const existingUsernames = new Set(existingMembers.map((m) => m.username));
+    const toInvite = validUsernames.filter((u) => !existingUsernames.has(u));
+
+    if (toInvite.length === 0) {
+      return Ok([]);
+    }
+
+    // 5. Bulk insert invites
+    const newMembersData = toInvite.map((u) => ({
+      username: u,
+      groupId: groupId,
+      admin: false,
+      banned: false,
+      acceptedInvite: false,
+      invitedAt: new Date(),
+    }));
+
+    const insertedMembers = await db
+      .insert(groupMembers)
+      .values(newMembersData)
+      .returning();
+
+    if (insertedMembers.length > 0) {
+      updateGroupTimestamp(groupId);
+    }
+
+    const check = Type.Array(groupMemberDTO);
+    const conv = Value.Convert(check, insertedMembers);
+    if (Value.Check(check, conv)) {
+      return Ok(conv);
+    } else {
+      app.log.error(Value.Errors(check, conv));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      "Failed to batch invite users to group",
+    );
+    return Err(ErrorTypes.ResourceCreationError);
   }
 };

@@ -43,8 +43,10 @@ export default function GroupList() {
         onRefresh={vm.refetch}
         renderItem={({ item }) => (
           <GroupCard
+            id={item.id}
             groupname={item.groupname}
             description={item.description}
+            photo={item.photo}
           />
         )}
         ListEmptyComponent={

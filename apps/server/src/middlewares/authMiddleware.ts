@@ -166,7 +166,10 @@ export const authPreHandler = async (
         req.method === "GET" &&
         (routeUrl === "/v1/restricted/users/:username" ||
           routeUrl === "/:username" ||
-          routeUrl === "/users/:username");
+          routeUrl === "/users/:username" ||
+          routeUrl === "/v1/restricted/users/:username/photo" ||
+          routeUrl === "/:username/photo" ||
+          routeUrl === "/users/:username/photo");
 
       if (!isPublicProfileDetail) {
         if (req.username !== params.username) {

@@ -58,6 +58,11 @@ export const CreateGroupBody = Type.Object({
   groupName: Type.String({
     description: "The name of the group being created",
   }),
+  description: Type.Optional(
+    Type.String({
+      description: "A short description of the group",
+    }),
+  ),
 });
 export type CreateGroupBody = Type.Static<typeof CreateGroupBody>;
 
@@ -85,6 +90,14 @@ export const UpdateMemberRoleBody = Type.Object({
   }),
 });
 export type UpdateMemberRoleBody = Type.Static<typeof UpdateMemberRoleBody>;
+
+// POST /groups/:id/group-members/batch
+export const BatchInviteBody = Type.Object({
+  usernames: Type.Array(Type.String(), {
+    description: "An array of usernames to invite to the group",
+  }),
+});
+export type BatchInviteBody = Type.Static<typeof BatchInviteBody>;
 
 // PATCH /users/:username/groups/invites/:groupId
 export const RespondGroupInviteBody = Type.Object({

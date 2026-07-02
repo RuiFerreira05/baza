@@ -72,7 +72,7 @@ export const AuthStyles = (colors: ThemeType) =>
     },
     multiInput: {
       fontFamily: "Inter_400Regular",
-      height: 100,
+      // height: 100,
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: 10,

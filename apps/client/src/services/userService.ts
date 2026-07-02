@@ -11,6 +11,7 @@ import {
   StatusError,
 } from "@baza/shared-types";
 import { apiClient, unwrapResult } from "./apiClient";
+import { env } from "@/lib/env";
 
 export const userService = {
   // GET /v1/restricted/users/:username
@@ -173,4 +174,7 @@ export const userService = {
       method: "PATCH",
       json: body,
     }).then(unwrapResult<any>),
+
+  getUserPhotoUrl: (username: string): string =>
+    `${env.EXPO_PUBLIC_SERVER_URL}/v1/restricted/users/${username}/photo`,
 };

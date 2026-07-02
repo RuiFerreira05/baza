@@ -1,33 +1,48 @@
 import { useGroupListStyles } from "@/constants/styles/useGroupListStyles";
-import { useAppTheme } from "@/hooks/useAppTheme";
+import { authClient } from "@/lib/auth";
+import { groupService } from "@/services/groupService";
 import React from "react";
-import { Text, View } from "react-native";
+import { Image, Text, View } from "react-native";
 
 interface GroupCardProps {
+  id: string;
   groupname: string;
   description?: string | null;
+  photo?: string | null;
 }
 
 const getInitials = (name: string) => {
   if (!name) return "";
-  const parts = name.trim().split(/[\s_-]+/);
-  if (parts.length === 0) return "";
-  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.trim().charAt(0).toUpperCase();
 };
 
-export default function GroupCard({ groupname, description }: GroupCardProps) {
-  const { colors } = useAppTheme();
+export default function GroupCard({
+  id,
+  groupname,
+  description,
+  photo,
+}: GroupCardProps) {
   const styles = useGroupListStyles();
 
   return (
     <View style={styles.card}>
-      <View style={[styles.indicator, { backgroundColor: colors.primary }]} />
       <View style={styles.cardContent}>
         <View style={styles.cardHeader}>
           <View style={styles.cardTitleRow}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{getInitials(groupname)}</Text>
+              {photo ? (
+                <Image
+                  source={{
+                    uri: groupService.getGroupPhotoUrl(id),
+                    headers: {
+                      Cookie: authClient.getCookie() || "",
+                    },
+                  }}
+                  style={styles.avatarImage}
+                />
+              ) : (
+                <Text style={styles.avatarText}>{getInitials(groupname)}</Text>
+              )}
             </View>
             <Text style={styles.title} numberOfLines={1}>
               {groupname}

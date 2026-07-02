@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import {
   CreateGroupBody,
   EditGroupBody,
@@ -49,6 +50,16 @@ export const groupService = {
       method: "POST",
       json: { username },
     }).then(unwrapResult<GroupMemberDTO>),
+
+  // POST /v1/restricted/groups/:id/group-members/batch
+  batchInviteUsers: (
+    groupId: string,
+    usernames: string[],
+  ): Promise<Result<GroupMemberDTO[], StatusError>> =>
+    apiClient(`/v1/restricted/groups/${groupId}/group-members/batch`, {
+      method: "POST",
+      json: { usernames },
+    }).then(unwrapResult<GroupMemberDTO[]>),
 
   // DELETE /v1/restricted/groups/:id/group-members/:username
   removeUser: (
@@ -102,4 +113,18 @@ export const groupService = {
       method: "PATCH",
       json: body,
     }).then(unwrapResult<GroupMemberDTO | null>),
+
+  // PATCH /v1/restricted/groups/:id/photo
+  uploadGroupPhoto: (
+    id: string,
+    formData: FormData,
+  ): Promise<Result<GroupDTO, StatusError>> =>
+    apiClient(`/v1/restricted/groups/${id}/photo`, {
+      method: "PATCH",
+      body: formData,
+    }).then(unwrapResult<GroupDTO>),
+
+  // GET /v1/restricted/groups/:id/photo
+  getGroupPhotoUrl: (id: string): string =>
+    `${env.EXPO_PUBLIC_SERVER_URL}/v1/restricted/groups/${id}/photo`,
 };

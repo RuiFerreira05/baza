@@ -6,6 +6,7 @@ export default function GroupListLayout() {
 
   return (
     <Tabs
+      initialRouteName="groups"
       screenOptions={({ navigation }) => ({
         headerShown: false,
         animation: "fade",
@@ -28,6 +29,12 @@ export default function GroupListLayout() {
         },
       })}
     >
+      <Tabs.Screen
+        name="create"
+        options={{
+          title: "Create",
+        }}
+      />
       <Tabs.Screen
         name="groups"
         options={{
