@@ -216,6 +216,7 @@ export const editUserProfile = async (
       .returning();
 
     if (profile) {
+      console.log("Profile updated: ", profile);
       const sanitizedProfile = {
         ...profile,
         createdAt: profile?.createdAt.toISOString(),

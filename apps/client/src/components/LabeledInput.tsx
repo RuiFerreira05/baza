@@ -14,6 +14,8 @@ interface LabeledInputProps {
   autoCorrect?: boolean;
   keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
   isCorrect?: boolean;
+  isMultiLine?: boolean;
+  isEnabled?: boolean;
 }
 
 export default function LabeledInput({
@@ -27,6 +29,8 @@ export default function LabeledInput({
   autoCorrect = false,
   keyboardType = "default",
   isCorrect = false,
+  isMultiLine = false,
+  isEnabled = true,
 }: LabeledInputProps) {
   const styles = useAuthStyles();
   const { colors } = useAppTheme();
@@ -43,7 +47,11 @@ export default function LabeledInput({
     <View style={styles.inputGroup}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
-        style={[styles.input, { borderColor: focusStyle }]}
+        style={
+          !isMultiLine
+            ? [styles.input, { borderColor: focusStyle }]
+            : [styles.multiInput, { borderColor: focusStyle }]
+        }
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
@@ -54,6 +62,9 @@ export default function LabeledInput({
         keyboardType={keyboardType}
         onFocus={() => setisFieldFocused(true)}
         onBlur={() => setisFieldFocused(false)}
+        multiline={isMultiLine}
+        numberOfLines={4}
+        editable={isEnabled}
       />
       {!!tip && <Text style={styles.tip}>{tip}</Text>}
     </View>

@@ -27,6 +27,8 @@ export default function ProfileScreen() {
     updatedAt: new Date().toISOString()
   });
 
+  console.log("profile: ", profile);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.row}>

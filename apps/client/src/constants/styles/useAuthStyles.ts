@@ -70,6 +70,17 @@ export const AuthStyles = (colors: ThemeType) =>
       color: colors.onSurface,
       backgroundColor: colors.surface,
     },
+    multiInput: {
+      fontFamily: "Inter_400Regular",
+      height: 100,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 16,
+      fontSize: 15,
+      color: colors.onSurface,
+      backgroundColor: colors.surface,
+    },
     button: {
       backgroundColor: colors.primary,
       height: 48,
