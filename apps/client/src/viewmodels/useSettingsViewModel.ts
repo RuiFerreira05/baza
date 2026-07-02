@@ -15,6 +15,8 @@ export const useSettingsViewModel = (): SettingsSchema => {
   const [hiddenSetting, setHiddenSetting] = useState(true);
   const [hiddenSettingValue, setHiddenSettingValue] = useState("Hidden Value");
   const { bypassAuth } = useAuthState();
+  const authState = useAuthState();
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
 
   return [
     {
@@ -155,6 +157,57 @@ export const useSettingsViewModel = (): SettingsSchema => {
             }
             return FailableOk();
           },
+        },
+      ],
+    },
+    {
+      title: "Debug",
+      visibilityFn: () => __DEV__,
+      settings: [
+        {
+          id: "clearQueryCache",
+          label: "Clear Query Cache",
+          description: "Clear the query cache.",
+          type: SettingsType.BUTTON,
+          onClickFn: () => {
+            queryClient.clear();
+            Toast.show({
+              text1: "Query Cache Cleared",
+              text2: "The query cache has been cleared successfully.",
+              type: "success",
+              position: "bottom",
+              bottomOffset: 80,
+            });
+            return FailableOk();
+          },
+        },
+        {
+          id: "toggleDebugInfo",
+          label: "Toggle Debug Info",
+          description: "Show or hide debug information.",
+          type: SettingsType.TOGGLE,
+          value: showDebugInfo,
+          onChangeFn: (value: boolean) => {
+            setShowDebugInfo(value);
+            return FailableOk();
+          },
+          defaultValue: showDebugInfo,
+        },
+        {
+          id: "profileInfo",
+          label: "Profile Info",
+          description: "View the current profile information.",
+          type: SettingsType.INFO,
+          infoText: JSON.stringify(authState.profile, null, 2),
+          visibilityFn: () => showDebugInfo,
+        },
+        {
+          id: "sessionInfo",
+          label: "Session Info",
+          description: "View the current session information.",
+          type: SettingsType.INFO,
+          infoText: JSON.stringify(authState.session, null, 2),
+          visibilityFn: () => showDebugInfo,
         },
       ],
     },

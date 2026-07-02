@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import {
+  ScrollView,
   SectionList,
   Switch,
   Text,
@@ -16,6 +17,7 @@ import { useAppTheme } from "@/hooks/useAppTheme";
 import {} from "@/store/useSettingsStore";
 import {
   ButtonSetting,
+  InfoSetting,
   InputSetting,
   SelectSetting,
   Settings,
@@ -59,6 +61,8 @@ export default function SettingsScreen() {
         return <InputItem setting={item} styles={styles} colors={colors} />;
       case SettingsType.BUTTON:
         return <ButtonItem setting={item} styles={styles} />;
+      case SettingsType.INFO:
+        return <InfoItem setting={item} styles={styles} />;
       default:
         return null;
     }
@@ -258,6 +262,31 @@ const ButtonItem = ({
       <TouchableOpacity style={styles.button} onPress={handlePress}>
         <Text style={styles.buttonText}>Action</Text>
       </TouchableOpacity>
+    </View>
+  );
+};
+
+const InfoItem = ({
+  setting,
+  styles,
+}: {
+  setting: InfoSetting;
+  styles: any;
+}) => {
+  return (
+    <View style={styles.columnRow}>
+      <SettingHeader
+        label={setting.label}
+        description={setting.description}
+        styles={styles}
+      />
+      <ScrollView
+        horizontal
+        style={styles.infoContainer}
+        contentContainerStyle={styles.infoContentContainer}
+      >
+        <Text style={styles.infoText}>{setting.infoText}</Text>
+      </ScrollView>
     </View>
   );
 };
