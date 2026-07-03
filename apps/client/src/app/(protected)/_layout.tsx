@@ -93,9 +93,8 @@ export default function ProtectedLayout() {
           ),
         }}
       />
-
-      <Tabs.Screen name="friends" options={{ href: null }} />
       <Tabs.Screen name="editProfile" options={{ href: null }} />
+      <Tabs.Screen name="friendList" options={{ href: null }} />
     </Tabs>
   );
 }
