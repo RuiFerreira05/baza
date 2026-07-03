@@ -8,10 +8,6 @@ import { useRouter } from "expo-router";
 export function useProfileViewModel(profile: ProfileDTO) {
   const router = useRouter();
 
-  const profilePhotoUrl = profile.photo
-    ? `${userService.getUserPhotoUrl(profile.username)}?t=${new Date(profile.updatedAt).getTime()}`
-    : null;
-
   const navigateToGroups = () => router.push("/(protected)/groupList/groups");
   const navigateToFriends = () => router.push("/(protected)/friends");
   const navigateToCalendar = () => router.push("/(protected)/calendar");
@@ -48,6 +44,5 @@ export function useProfileViewModel(profile: ProfileDTO) {
     numberOfFriends,
     numberOfGroups,
     numberOfEvents,
-    profilePhotoUrl,
   };
 }
