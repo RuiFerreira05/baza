@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import {
   BlockUserBody,
   CreateProfileBody,
@@ -11,7 +12,6 @@ import {
   StatusError,
 } from "@baza/shared-types";
 import { apiClient, unwrapResult } from "./apiClient";
-import { env } from "@/lib/env";
 
 export const userService = {
   // GET /v1/restricted/users/:username
@@ -55,11 +55,14 @@ export const userService = {
     imageUri: string,
   ): Promise<Result<ProfileDTO, StatusError>> => {
     const formData = new FormData();
+    const filename = imageUri.split("/").pop() || "profile_photo.jpg";
+    const match = /\.(\w+)$/.exec(filename);
+    const type = match ? `image/${match[1]}` : `image/jpeg`;
 
     formData.append("photo", {
       uri: imageUri,
-      type: "image/png",
-      name: `{$username}_photo.png`,
+      type: type,
+      name: filename,
     } as any);
 
     return apiClient(`/v1/restricted/users/${username}/photo`, {

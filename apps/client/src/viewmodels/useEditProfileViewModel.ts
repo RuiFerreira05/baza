@@ -17,12 +17,23 @@ export function useEditProfileViewModel(
   const [descriptionInput, setDescriptionInput] = useState(profile.description);
   const [photoInput, setPhotoInput] = useState(profile.photo);
   const [error, setError] = useState<string | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [image, setImage] = useState(
     bypassAuth || !profile?.photo ? null : profile?.photo,
   );
 
   const isUsernameValid =
     usernameInput.length >= 3 && usernameInput.length <= 20;
+
+  const saveImage = async (image: string | null) => {
+    try {
+      setImage(image);
+      editPhoto(image);
+      setIsModalVisible(false);
+    } catch (error) {
+      throw error;
+    }
+  };
 
   const { mutateAsync: editProfile, isPending: isEditing } = useAppMutation({
     mutationFn: () => {
@@ -56,10 +67,10 @@ export function useEditProfileViewModel(
   });
 
   const { mutateAsync: editPhoto, isPending: isEditingPhoto } = useAppMutation({
-    mutationFn: () => {
+    mutationFn: (currentImage: string | null) => {
       setError(null);
-      if (image) {
-        return userService.editProfilePhoto(profile.username, image);
+      if (currentImage) {
+        return userService.editProfilePhoto(profile.username, currentImage);
       } else {
         return userService.deleteProfilePhoto(profile.username);
       }
@@ -98,5 +109,8 @@ export function useEditProfileViewModel(
     setImage,
     editPhoto,
     isEditingPhoto,
+    saveImage,
+    isModalVisible,
+    setIsModalVisible,
   };
 }

@@ -2,6 +2,8 @@
 import { useProfileStyles } from "@/constants/styles/useProfileStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuthState } from "@/hooks/useAuthState";
+import { authClient } from "@/lib/auth";
+import { userService } from "@/services/userService";
 import { useProfileViewModel } from "@/viewmodels/useProfileViewModel";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useRouter } from "expo-router";
@@ -26,8 +28,9 @@ export default function ProfileScreen() {
     createdAt: new Date().toISOString(), 
     updatedAt: new Date().toISOString()
   });
-
-  console.log("profile: ", profile);
+  if(profile){
+    console.log(authClient.getCookie() || "")
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -38,8 +41,13 @@ export default function ProfileScreen() {
       <View style={styles.profileView}>
         <Image
           style={styles.profileImage}
-          source={
-            require("@/assets/images/profileImg.png")
+          source={ profile?.photo?  
+            { uri: userService.getUserPhotoUrl(profile.username),
+              headers: {
+                Cookie: authClient.getCookie() || "",
+              },
+            }
+            : require("@/assets/images/profileImg.png")
           }
         />
       </View>

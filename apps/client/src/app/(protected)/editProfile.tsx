@@ -7,7 +7,6 @@ import { useEditProfileViewModel } from "@/viewmodels/useEditProfileViewModel";
 import { FontAwesome } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import { useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -42,24 +41,12 @@ export default function EditProfileScreen() {
     bypassAuth,
   );
 
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-
-  const saveImage = async (image: string | null) => {
-    try {
-      vm.setImage(image);
-      vm.editPhoto();
-      setIsModalVisible(false);
-    } catch (error) {
-      throw error;
-    }
-  };
-
   const removeImage = async () => {
     try {
-      saveImage(null);
+      vm.saveImage(null);
     } catch (error) {
       alert("Error removing image: " + (error as Error).message);
-      setIsModalVisible(false);
+      vm.setIsModalVisible(false);
     }
   };
 
@@ -67,18 +54,18 @@ export default function EditProfileScreen() {
     try {
       await ImagePicker.requestMediaLibraryPermissionsAsync();
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 1,
       });
 
       if (!result.canceled) {
-        await saveImage(result.assets[0].uri);
+        await vm.saveImage(result.assets[0].uri);
       }
     } catch (error) {
       alert("Error uploading image: " + (error as Error).message);
-      setIsModalVisible(false);
+      vm.setIsModalVisible(false);
     }
   };
 
@@ -91,13 +78,11 @@ export default function EditProfileScreen() {
         <KeyboardGestureArea
           style={{ flex: 1, width: "100%", alignItems: "center" }}
         >
-          {/* <Text>Edit Profile Screen</Text> */}
           <View style={styles.column}>
             <View style={styles.profileView}>
               <Image
                 style={styles.profileImage}
                 source={
-                  // typeof vm.image === "number" ? vm.image : { uri: vm.image }
                   vm.image
                     ? { uri: vm.image }
                     : require("@/assets/images/profileImg.png")
@@ -112,7 +97,7 @@ export default function EditProfileScreen() {
                 iconStyle={styles.editicon}
                 style={styles.editButton}
                 borderRadius={100}
-                onPress={() => setIsModalVisible(true)}
+                onPress={() => vm.setIsModalVisible(true)}
               />
             </View>
           </View>
@@ -171,11 +156,11 @@ export default function EditProfileScreen() {
             </View>
           </View>
           <UploadModal
-            modalVisible={isModalVisible}
-            onBackPress={() => setIsModalVisible(false)}
+            modalVisible={vm.isModalVisible}
+            onBackPress={() => vm.setIsModalVisible(false)}
             onGalleryPress={() => uploadImage()}
             onRemovePress={() => removeImage()}
-            onRequestClose={() => setIsModalVisible(false)}
+            onRequestClose={() => vm.setIsModalVisible(false)}
             isLoading={false}
           />
         </KeyboardGestureArea>

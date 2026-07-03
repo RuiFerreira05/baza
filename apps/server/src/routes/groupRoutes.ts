@@ -20,7 +20,7 @@ import {
   SimpleUsernameParam,
   StatusError,
   StatusOK,
-  UpdateMemberRoleBody
+  UpdateMemberRoleBody,
 } from "@baza/shared-types";
 import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import type { FastifyPluginAsync } from "fastify";
@@ -49,7 +49,7 @@ import {
   getGroupPhotoHandler,
   inviteUsersToGroupHandler,
   removeUserFromGroupHandler,
-  updateUserGroupRoleHandler
+  updateUserGroupRoleHandler,
 } from "../handlers/groupHandlers";
 import {
   createEventPlanHandler,

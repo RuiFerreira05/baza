@@ -216,7 +216,6 @@ export const editUserProfile = async (
       .returning();
 
     if (profile) {
-      console.log("Profile updated: ", profile);
       const sanitizedProfile = {
         ...profile,
         createdAt: profile?.createdAt.toISOString(),
@@ -997,7 +996,7 @@ export const editProfilePhoto = async (
     return Err(ErrorTypes.ResourceCreationError);
   }
 
-  const [profile] = await db
+  const [updatedProfile] = await db
     .update(profiles)
     .set({
       photo: result.value,
@@ -1006,8 +1005,14 @@ export const editProfilePhoto = async (
     .where(eq(profiles.username, username))
     .returning();
 
-  if (profile) {
-    const conv = Value.Convert(profileDTO, profile);
+  if (updatedProfile) {
+    const sanitizedProfile = {
+      ...updatedProfile,
+      createdAt: updatedProfile.createdAt.toISOString(),
+      updatedAt: updatedProfile.updatedAt.toISOString(),
+    };
+
+    const conv = Value.Convert(profileDTO, sanitizedProfile);
     if (Value.Check(profileDTO, conv)) {
       return Ok(conv);
     } else {
@@ -1054,7 +1059,13 @@ export const deleteProfilePhoto = async (
       .returning();
 
     if (updatedProfile) {
-      const conv = Value.Convert(profileDTO, updatedProfile);
+      const sanitizedProfile = {
+        ...updatedProfile,
+        createdAt: updatedProfile.createdAt.toISOString(),
+        updatedAt: updatedProfile.updatedAt.toISOString(),
+      };
+
+      const conv = Value.Convert(profileDTO, sanitizedProfile);
       if (Value.Check(profileDTO, conv)) {
         return Ok(conv);
       } else {
