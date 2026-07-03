@@ -108,4 +108,19 @@ export const SettingsStyles = (colors: ThemeType) =>
       fontSize: 14,
       fontWeight: "600",
     },
+    infoText: {
+      fontSize: 14,
+      color: colors.onSurfaceVariant,
+      alignContent: "center",
+    },
+    infoContainer: {
+      padding: 12,
+      backgroundColor: colors.surfaceVariant,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    infoContentContainer: {
+      paddingEnd: 24,
+    },
   });

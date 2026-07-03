@@ -10,11 +10,9 @@ import Toast from "react-native-toast-message";
 
 export const useSettingsViewModel = (): SettingsSchema => {
   const settingsStore = useSettingsStore();
-  const [testInput, setTestInput] = useState("Test Value");
-  const [testToggle, setTestToggle] = useState(false);
-  const [hiddenSetting, setHiddenSetting] = useState(true);
-  const [hiddenSettingValue, setHiddenSettingValue] = useState("Hidden Value");
   const { bypassAuth } = useAuthState();
+  const authState = useAuthState();
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
 
   return [
     {
@@ -31,90 +29,6 @@ export const useSettingsViewModel = (): SettingsSchema => {
             settingsStore.setThemeMode(value as ThemeMode);
             return FailableOk();
           },
-        },
-      ],
-    },
-    {
-      title: "Testing",
-      visibilityFn: () => __DEV__,
-      settings: [
-        {
-          id: "testButton",
-          label: "Test Button",
-          description: "This is a test button.",
-          type: SettingsType.BUTTON,
-          onClickFn: () => {
-            setHiddenSetting(!hiddenSetting);
-            Toast.show({
-              text1: "Hello",
-              text2: "This is a toast message from the Settings screen.",
-              type: "info",
-              position: "bottom",
-              bottomOffset: 80,
-            });
-            return FailableOk();
-          },
-        },
-        {
-          id: "testInput",
-          label: "Test Input",
-          description: "This is a test input.",
-          type: SettingsType.INPUT,
-          value: testInput,
-          onChangeFn: (value: string) => {
-            setTestInput(value);
-            Toast.show({
-              text1: "Input Changed",
-              text2: `New value: ${value}`,
-              type: "success",
-              position: "bottom",
-              bottomOffset: 80,
-            });
-            return FailableOk();
-          },
-          defaultValue: testInput,
-          placeholder: "Enter something...",
-        },
-        {
-          id: "testToggle",
-          label: "Test Toggle",
-          description: "This is a test toggle.",
-          type: SettingsType.TOGGLE,
-          value: testToggle,
-          onChangeFn: (value: boolean) => {
-            setTestToggle(value);
-            Toast.show({
-              text1: "Toggle Changed",
-              text2: `New value: ${value}`,
-              type: "success",
-              position: "bottom",
-              bottomOffset: 80,
-            });
-            return FailableOk();
-          },
-          defaultValue: testToggle,
-        },
-        {
-          id: "hiddenSetting",
-          label: "Hidden Setting",
-          description:
-            "This setting is hidden unless the test button is clicked.",
-          type: SettingsType.INPUT,
-          value: hiddenSettingValue,
-          onChangeFn: (value: string) => {
-            setHiddenSettingValue(value);
-            Toast.show({
-              text1: "Hidden Input Changed",
-              text2: `New value: ${value}`,
-              type: "success",
-              position: "bottom",
-              bottomOffset: 80,
-            });
-            return FailableOk();
-          },
-          defaultValue: hiddenSettingValue,
-          placeholder: "Enter something...",
-          visibilityFn: () => hiddenSetting,
         },
       ],
     },
@@ -155,6 +69,57 @@ export const useSettingsViewModel = (): SettingsSchema => {
             }
             return FailableOk();
           },
+        },
+      ],
+    },
+    {
+      title: "Debug",
+      visibilityFn: () => __DEV__,
+      settings: [
+        {
+          id: "clearQueryCache",
+          label: "Clear Query Cache",
+          description: "Clear the query cache.",
+          type: SettingsType.BUTTON,
+          onClickFn: () => {
+            queryClient.clear();
+            Toast.show({
+              text1: "Query Cache Cleared",
+              text2: "The query cache has been cleared successfully.",
+              type: "success",
+              position: "bottom",
+              bottomOffset: 80,
+            });
+            return FailableOk();
+          },
+        },
+        {
+          id: "toggleDebugInfo",
+          label: "Toggle Debug Info",
+          description: "Show or hide debug information.",
+          type: SettingsType.TOGGLE,
+          value: showDebugInfo,
+          onChangeFn: (value: boolean) => {
+            setShowDebugInfo(value);
+            return FailableOk();
+          },
+          defaultValue: showDebugInfo,
+        },
+        {
+          id: "profileInfo",
+          label: "Profile Info",
+          description: "View the current profile information.",
+          type: SettingsType.INFO,
+          infoText: JSON.stringify(authState.profile, null, 2),
+          visibilityFn: () => showDebugInfo,
+        },
+        {
+          id: "sessionInfo",
+          label: "Session Info",
+          description: "View the current session information.",
+          type: SettingsType.INFO,
+          infoText: JSON.stringify(authState.session, null, 2),
+          visibilityFn: () => showDebugInfo,
         },
       ],
     },

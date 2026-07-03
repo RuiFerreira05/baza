@@ -87,23 +87,30 @@ export function useCalendarViewModel() {
   const markedDates = useMemo(() => {
     const marked: Record<string, any> = {};
 
-    // Add dots for days that have events
+    // 1. Add dots for days that have events
     events.forEach((event) => {
-      const dateStr = event.date;
-      if (!marked[dateStr]) {
-        marked[dateStr] = {
-          marked: true,
-          dotColor: colors.primary,
-        };
+      if (!marked[event.date]) {
+        marked[event.date] = { dots: [] };
       }
+
+      // Push to the array instead of replacing it
+      marked[event.date].dots.push({
+        key: event.id,
+        color: colors.primary,
+      });
     });
 
-    // Merge/Highlight selected date styling
+    // 2. Merge/Highlight selected date styling
+    if (!marked[selectedDate]) {
+      marked[selectedDate] = { dots: [] };
+    }
+
+    // Target the date object itself, preserving any existing dots array
     marked[selectedDate] = {
       ...marked[selectedDate],
       selected: true,
-      selectedColor: colors.primary,
-      selectedTextColor: colors.onPrimary,
+      selectedColor: colors.secondary,
+      selectedTextColor: "#000",
     };
 
     return marked;

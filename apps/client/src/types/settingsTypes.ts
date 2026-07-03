@@ -12,13 +12,15 @@ export type Settings =
   | ToggleSetting
   | SelectSetting
   | InputSetting
-  | ButtonSetting;
+  | ButtonSetting
+  | InfoSetting;
 
 export enum SettingsType {
   TOGGLE = "toggle",
   SELECT = "select",
   INPUT = "input",
   BUTTON = "button",
+  INFO = "info",
 }
 
 export interface BaseSetting {
@@ -55,6 +57,11 @@ export interface InputSetting extends BaseSetting {
 export interface ButtonSetting extends BaseSetting {
   type: SettingsType.BUTTON;
   onClickFn: () => Failable<SettingsError>;
+}
+
+export interface InfoSetting extends BaseSetting {
+  type: SettingsType.INFO;
+  infoText: string;
 }
 
 export interface SettingsError {
