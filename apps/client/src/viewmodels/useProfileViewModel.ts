@@ -9,10 +9,10 @@ export function useProfileViewModel(profile: ProfileDTO) {
   const router = useRouter();
 
   const navigateToGroups = () => router.push("/(protected)/groupList/groups");
-  const navigateToFriends = () =>
-    router.push("/(protected)/friendList/friends");
+  const navigateToFriends = () => router.push("/(protected)/friendList/friends");
   const navigateToCalendar = () => router.push("/(protected)/calendar");
   const navigateToEditProfile = () => router.push("/(protected)/editProfile");
+  const navigateToSettings = () => router.push("/(protected)/settings");
 
   const friendsQuery = useAppQuery({
     queryKey: ["user-friends", profile.username],
@@ -42,6 +42,7 @@ export function useProfileViewModel(profile: ProfileDTO) {
     navigateToFriends,
     navigateToCalendar,
     navigateToEditProfile,
+    navigateToSettings,
     numberOfFriends,
     numberOfGroups,
     numberOfEvents,

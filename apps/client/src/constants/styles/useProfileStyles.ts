@@ -97,19 +97,19 @@ export const ProfileStyles = (colors: ThemeType) =>
     row: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "flex-end",
+      justifyContent: "space-between",
       width: "100%",
       paddingHorizontal: 20,
       height: 50,
     },
-    editButton: {
+    iconButton: {
       display: "flex",
       backgroundColor: colors.background,
       justifyContent: "center",
       height: 40,
       width: 40,
     },
-    editicon: {
+    icon: {
       color: colors.primary,
       marginRight: 0,
     },

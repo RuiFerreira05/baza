@@ -39,20 +39,6 @@ export default function ProtectedLayout() {
       />
 
       <Tabs.Screen
-        name="settings"
-        options={{
-          title: "Settings",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "settings" : "settings-outline"}
-              size={24}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
@@ -93,6 +79,7 @@ export default function ProtectedLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="settings" options={{ href: null }} />
       <Tabs.Screen name="editProfile" options={{ href: null }} />
       <Tabs.Screen name="friendList" options={{ href: null }} />
     </Tabs>

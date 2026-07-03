@@ -5,6 +5,7 @@ import { useAuthState } from "@/hooks/useAuthState";
 import { authClient } from "@/lib/auth";
 import { userService } from "@/services/userService";
 import { useProfileViewModel } from "@/viewmodels/useProfileViewModel";
+import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useRouter } from "expo-router";
 import { Image, Text, TouchableHighlight, View } from "react-native";
@@ -32,7 +33,8 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.row}>
-        <FontAwesome.Button name="edit" size={23}iconStyle={styles.editicon} style={styles.editButton} onPress={vm.navigateToEditProfile} />
+        <Ionicons.Button name="settings" size={23} iconStyle={styles.icon} style={styles.iconButton} onPress={vm.navigateToSettings}/>
+        <FontAwesome.Button name="edit" size={23} iconStyle={styles.icon} style={styles.iconButton} onPress={vm.navigateToEditProfile} />
       </View>
 
       <View style={styles.profileView}>
