@@ -125,6 +125,10 @@ export const groupService = {
     }).then(unwrapResult<GroupDTO>),
 
   // GET /v1/restricted/groups/:id/photo
-  getGroupPhotoUrl: (id: string): string =>
-    `${env.EXPO_PUBLIC_SERVER_URL}/v1/restricted/groups/${id}/photo`,
+  getGroupPhotoUrl: (id: string, cacheBuster?: string): string => {
+    const baseUrl = `${env.EXPO_PUBLIC_SERVER_URL}/v1/restricted/groups/${id}/photo`;
+    return cacheBuster
+      ? `${baseUrl}?v=${encodeURIComponent(cacheBuster)}`
+      : baseUrl;
+  },
 };

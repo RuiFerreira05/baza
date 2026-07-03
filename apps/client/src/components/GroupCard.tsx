@@ -33,7 +33,7 @@ export default function GroupCard({
               {photo ? (
                 <Image
                   source={{
-                    uri: groupService.getGroupPhotoUrl(id),
+                    uri: groupService.getGroupPhotoUrl(id, photo),
                     headers: {
                       Cookie: authClient.getCookie() || "",
                     },
