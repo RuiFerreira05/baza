@@ -168,6 +168,7 @@ export class FSUploadService implements FileUploadInterface {
   async getProfilePhoto(
     username: string,
   ): Promise<Result<GetImageResult, ErrorTypes>> {
+    app.log.info("Service to get profile photo called");
     const profilePhotoId = await db.query.profiles.findFirst({
       where: {
         username: username,

@@ -178,6 +178,10 @@ export const userService = {
       json: body,
     }).then(unwrapResult<any>),
 
-  getUserPhotoUrl: (username: string): string =>
-    `${env.EXPO_PUBLIC_SERVER_URL}/v1/restricted/users/${username}/photo`,
+  getUserPhotoUrl: (username: string, cacheBuster?: string): string => {
+    const baseUrl = `${env.EXPO_PUBLIC_SERVER_URL}/v1/restricted/users/${username}/photo`;
+    return cacheBuster
+      ? `${baseUrl}?v=${encodeURIComponent(cacheBuster)}`
+      : baseUrl;
+  },
 };

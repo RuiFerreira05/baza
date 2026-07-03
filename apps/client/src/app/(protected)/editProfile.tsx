@@ -3,6 +3,7 @@ import UploadModal from "@/components/UploadModal";
 import { useEditProfileStyles } from "@/constants/styles/useEditProfileStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuthState } from "@/hooks/useAuthState";
+import { authClient } from "@/lib/auth";
 import { useEditProfileViewModel } from "@/viewmodels/useEditProfileViewModel";
 import { FontAwesome } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -84,7 +85,12 @@ export default function EditProfileScreen() {
                 style={styles.profileImage}
                 source={
                   vm.image
-                    ? { uri: vm.image }
+                    ? {
+                        uri: vm.image,
+                        headers: {
+                          Cookie: authClient.getCookie() || "",
+                        },
+                      }
                     : require("@/assets/images/profileImg.png")
                 }
               />

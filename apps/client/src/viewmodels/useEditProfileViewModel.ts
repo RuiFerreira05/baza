@@ -19,7 +19,9 @@ export function useEditProfileViewModel(
   const [error, setError] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [image, setImage] = useState(
-    bypassAuth || !profile?.photo ? null : profile?.photo,
+    bypassAuth || !profile?.photo
+      ? null
+      : userService.getUserPhotoUrl(profile.username, profile.updatedAt),
   );
 
   const isUsernameValid =
@@ -76,7 +78,17 @@ export function useEditProfileViewModel(
       }
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["current-profile"] });
       queryClient.invalidateQueries({ queryKey: ["current-profile-photo"] });
+
+      if (image) {
+        setImage(
+          userService.getUserPhotoUrl(
+            profile.username,
+            new Date().toISOString(),
+          ),
+        );
+      }
       Toast.show({
         type: "success",
         text1: "Profile photo Updated!",

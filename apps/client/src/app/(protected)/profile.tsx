@@ -28,9 +28,6 @@ export default function ProfileScreen() {
     createdAt: new Date().toISOString(), 
     updatedAt: new Date().toISOString()
   });
-  if(profile){
-    console.log(authClient.getCookie() || "")
-  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -42,7 +39,7 @@ export default function ProfileScreen() {
         <Image
           style={styles.profileImage}
           source={ profile?.photo?  
-            { uri: userService.getUserPhotoUrl(profile.username),
+            { uri: userService.getUserPhotoUrl(profile.username, profile.updatedAt),
               headers: {
                 Cookie: authClient.getCookie() || "",
               },

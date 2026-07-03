@@ -625,7 +625,7 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
     editProfilePhotoHandler,
   );
 
-  // GET /profile/:id/photo
+  // GET /profile/:username/photo
   app.get(
     "/:username/photo",
     {
