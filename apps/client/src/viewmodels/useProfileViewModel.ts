@@ -9,7 +9,8 @@ export function useProfileViewModel(profile: ProfileDTO) {
   const router = useRouter();
 
   const navigateToGroups = () => router.push("/(protected)/groupList/groups");
-  const navigateToFriends = () => router.push("/(protected)/friendList/friends");
+  const navigateToFriends = () =>
+    router.push("/(protected)/friendList/friends");
   const navigateToCalendar = () => router.push("/(protected)/calendar");
   const navigateToEditProfile = () => router.push("/(protected)/editProfile");
   const navigateToSettings = () => router.push("/(protected)/settings");

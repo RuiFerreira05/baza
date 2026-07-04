@@ -159,4 +159,25 @@ export const FriendsStyles = (colors: ThemeType) =>
     buttonPressed: {
       opacity: 0.7,
     },
+    emptyStateContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingVertical: 80,
+      paddingHorizontal: 32,
+      gap: 12,
+    },
+    emptyStateTitle: {
+      fontSize: 18,
+      fontFamily: "Inter_600SemiBold",
+      color: colors.onSurface,
+      textAlign: "center",
+    },
+    emptyStateSub: {
+      fontSize: 14,
+      fontFamily: "Inter_400Regular",
+      color: colors.onSurfaceVariant,
+      textAlign: "center",
+      lineHeight: 20,
+    },
   });

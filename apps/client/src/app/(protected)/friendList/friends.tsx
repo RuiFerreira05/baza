@@ -2,8 +2,11 @@ import FriendCard from "@/components/FriendCard";
 import RemoveFriendModal from "@/components/RemoveFriendModal";
 import { useFriendsStyles } from "@/constants/styles/useFriendsStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useAuthState } from "@/hooks/useAuthState";
+import { userService } from "@/services/userService";
 import { useFriendListViewModel } from "@/viewmodels/useFriendListViewModel";
 import { ProfileDTO } from "@baza/shared-types";
+import FontAwesome from "@expo/vector-icons/FontAwesome5";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -18,6 +21,7 @@ export default function FriendsScreen() {
   const styles = useFriendsStyles();
   const { colors } = useAppTheme();
   const vm = useFriendListViewModel();
+  const { profile, bypassAuth } = useAuthState();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selected, setSelected] = useState<string>("");
@@ -31,6 +35,12 @@ export default function FriendsScreen() {
       return RegExp(formattedQuery, "gim").exec(friend.username);
     });
     setSearchResults(filteredData);
+  };
+
+  const removeFriend = (user: string, friend: string) => {
+    userService.removeFriend(user, friend);
+    setIsModalVisible(false);
+    vm.refetch();
   };
 
   if (vm.isLoading && vm.friends.length === 0) {
@@ -57,7 +67,6 @@ export default function FriendsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <Text>Friends Screen</Text> */}
       <TextInput
         placeholder="Search"
         autoCapitalize="none"
@@ -80,12 +89,27 @@ export default function FriendsScreen() {
             />
           </View>
         )}
+        ListEmptyComponent={
+          <View style={styles.emptyStateContainer}>
+            <FontAwesome name="sad-cry" size={48} color={colors.placeholder} />
+            <Text style={styles.emptyStateTitle}>No Friends Yet</Text>
+            <Text style={styles.emptyStateSub}>
+              {
+                "You don't have any friends yet. When users accept your friend requests or when you accept theirs , they will show up here."
+              }
+            </Text>
+          </View>
+        }
       ></FlatList>
       <RemoveFriendModal
         friendName={selected}
         modalVisible={isModalVisible}
         onBackPress={() => setIsModalVisible(false)}
-        onRemovePress={() => setIsModalVisible(false)}
+        onRemovePress={() =>
+          bypassAuth || !profile
+            ? setIsModalVisible(false)
+            : removeFriend(profile.username, selected)
+        }
         onCancelPress={() => setIsModalVisible(false)}
         onRequestClose={() => setIsModalVisible(false)}
         isLoading={false}
