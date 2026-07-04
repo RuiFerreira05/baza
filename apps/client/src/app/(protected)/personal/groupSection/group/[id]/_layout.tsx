@@ -1,7 +1,7 @@
 import { useGlobalStyles } from "@/constants/styles/useGlobalStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useGroupInfo } from "@/hooks/useGroupInfo";
-import { Stack } from "expo-router";
+import { Stack, Tabs } from "expo-router";
 import React from "react";
 import { ActivityIndicator, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -33,23 +33,49 @@ export default function GroupLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        headerTitle: data?.groupname,
-        headerTitleAlign: "center",
-      }}
-      initialRouteName="calendar"
-    >
-      <Stack.Screen name="profile" options={{ headerShown: true }} />
+    <>
       <Stack.Screen
-        name="calendar"
         options={{
           headerShown: true,
-          headerBackVisible: false,
+          title: data?.groupname,
+          headerTitleAlign: "center",
+          headerStyle: {
+            backgroundColor: colors.surface,
+          },
         }}
       />
-      <Stack.Screen name="events" options={{ headerShown: true }} />
-    </Stack>
+      <Tabs
+        screenOptions={({ navigation }) => ({
+          headerShown: false,
+          tabBarPosition: "top",
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.placeholder,
+          tabBarItemStyle: {
+            paddingVertical: 0,
+            borderBottomWidth: navigation.isFocused() ? 2 : 0,
+            borderBottomColor: colors.primary,
+          },
+          tabBarIconStyle: {
+            display: "none",
+          },
+          tabBarStyle: {
+            backgroundColor: colors.surface,
+            elevation: 0,
+            height: 48,
+            paddingTop: 8,
+          },
+          tabBarLabelStyle: {
+            fontSize: 16,
+            fontWeight: "bold",
+          },
+        })}
+        initialRouteName="calendar"
+      >
+        <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+        <Tabs.Screen name="calendar" options={{ title: "Calendar" }} />
+        <Tabs.Screen name="events" options={{ title: "Events" }} />
+        <Tabs.Screen name="event/[eventId]" options={{ href: null }} />
+      </Tabs>
+    </>
   );
 }
