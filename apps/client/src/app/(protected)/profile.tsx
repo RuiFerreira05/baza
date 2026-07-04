@@ -7,7 +7,8 @@ import { userService } from "@/services/userService";
 import { useProfileViewModel } from "@/viewmodels/useProfileViewModel";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback } from "react";
 import { Image, Text, TouchableHighlight, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -29,6 +30,14 @@ export default function ProfileScreen() {
     createdAt: new Date().toISOString(), 
     updatedAt: new Date().toISOString()
   });
+
+  useFocusEffect(
+    useCallback(() => {
+      vm.refetchFriends();
+      vm.refetchEvents();
+      vm.refetchGroups();
+    }, [])
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -93,23 +102,6 @@ export default function ProfileScreen() {
           {bypassAuth? "Just a developer profile" : profile?.description}
         </Text>
       </View>
-
-      {/* <Text style={[styles.text, { marginTop: 10 }]}>
-        Current Theme Mode: {themeMode}
-      </Text>
-      <Button
-        title="Change to dark"
-        onPress={() => settingsStore.setThemeMode(ThemeMode.DARK)}
-      ></Button>
-      <Button
-        title="Change to light"
-        onPress={() => settingsStore.setThemeMode(ThemeMode.LIGHT)}
-      ></Button>
-      <Button
-        title="Change to system"
-        onPress={() => settingsStore.setThemeMode(ThemeMode.SYSTEM)}
-      ></Button>
-      <Button title="Back to Calendar" onPress={() => router.back()} /> */}
     </SafeAreaView>
   );
 }

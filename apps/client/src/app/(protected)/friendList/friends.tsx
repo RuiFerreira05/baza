@@ -7,7 +7,8 @@ import { userService } from "@/services/userService";
 import { useFriendListViewModel } from "@/viewmodels/useFriendListViewModel";
 import { ProfileDTO } from "@baza/shared-types";
 import FontAwesome from "@expo/vector-icons/FontAwesome5";
-import { useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -27,6 +28,12 @@ export default function FriendsScreen() {
   const [selected, setSelected] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<ProfileDTO[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      vm.refetch();
+    }, []),
+  );
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);

@@ -47,5 +47,8 @@ export function useProfileViewModel(profile: ProfileDTO) {
     numberOfFriends,
     numberOfGroups,
     numberOfEvents,
+    refetchFriends: friendsQuery.refetch,
+    refetchGroups: groupsQuery.refetch,
+    refetchEvents: eventsQuery.refetch,
   };
 }
