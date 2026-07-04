@@ -4,9 +4,9 @@ import { useState } from "react";
 import { Text, TextInput, View } from "react-native";
 
 interface LabeledInputProps {
-  label: string;
   value: string;
   onChangeText: (text: string) => void;
+  label?: string;
   tip?: string;
   placeholder?: string;
   secureTextEntry?: boolean;
@@ -19,11 +19,11 @@ interface LabeledInputProps {
 }
 
 export default function LabeledInput({
-  label,
   value,
   onChangeText,
-  tip = "",
-  placeholder = "",
+  label = undefined,
+  tip = undefined,
+  placeholder = undefined,
   secureTextEntry = false,
   autoCapitalize = "none",
   autoCorrect = false,
@@ -45,7 +45,7 @@ export default function LabeledInput({
 
   return (
     <View style={styles.inputGroup}>
-      <Text style={styles.label}>{label}</Text>
+      {label && <Text style={styles.label}>{label}</Text>}
       <TextInput
         style={
           !isMultiLine

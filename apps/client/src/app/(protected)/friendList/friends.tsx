@@ -1,4 +1,5 @@
 import FriendCard from "@/components/FriendCard";
+import LabeledInput from "@/components/LabeledInput";
 import RemoveFriendModal from "@/components/RemoveFriendModal";
 import { useFriendsStyles } from "@/constants/styles/useFriendsStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
@@ -9,13 +10,7 @@ import { ProfileDTO } from "@baza/shared-types";
 import FontAwesome from "@expo/vector-icons/FontAwesome5";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function FriendsScreen() {
@@ -74,15 +69,18 @@ export default function FriendsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TextInput
-        placeholder="Search"
-        autoCapitalize="none"
-        autoCorrect={false}
+      <LabeledInput
+        // label="search"
+        onChangeText={handleSearch}
         value={searchQuery}
-        onChangeText={(query) => handleSearch(query)}
-        style={styles.searchBar}
+        autoCorrect={false}
+        autoCapitalize="none"
+        placeholder="Search for friends"
+        isCorrect={false}
+        isEnabled={true}
       />
       <FlatList
+        style={{ paddingTop: 32 }}
         data={searchQuery ? searchResults : vm.friends}
         keyExtractor={(item) => item.username}
         renderItem={({ item }) => (
