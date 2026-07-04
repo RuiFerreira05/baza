@@ -83,16 +83,16 @@ export default function FriendsScreen() {
         style={{ paddingTop: 32 }}
         data={searchQuery ? searchResults : vm.friends}
         keyExtractor={(item) => item.username}
+        refreshing={vm.isLoading}
+        onRefresh={vm.refetch}
         renderItem={({ item }) => (
-          <View>
-            <FriendCard
-              username={item.username}
-              photo={item.photo}
-              updatedAt={item.updatedAt}
-              setModalVisible={setIsModalVisible}
-              setSelected={setSelected}
-            />
-          </View>
+          <FriendCard
+            username={item.username}
+            photo={item.photo}
+            updatedAt={item.updatedAt}
+            setModalVisible={setIsModalVisible}
+            setSelected={setSelected}
+          />
         )}
         ListEmptyComponent={
           vm.friends.length === 0 ? (

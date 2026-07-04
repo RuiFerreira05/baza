@@ -13,10 +13,10 @@ export const GroupListStyles = (colors: ThemeType) =>
   StyleSheet.create({
     container: {
       flex: 1,
+      paddingHorizontal: 20,
       backgroundColor: colors.background,
     },
     listContent: {
-      paddingHorizontal: 16,
       paddingTop: 16,
       paddingBottom: 24,
     },
