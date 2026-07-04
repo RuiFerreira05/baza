@@ -30,6 +30,13 @@ export default function FriendListLayout() {
       })}
     >
       <Tabs.Screen
+        name="sendRequest"
+        options={{
+          title: "add friend",
+        }}
+      />
+
+      <Tabs.Screen
         name="friends"
         options={{
           title: "friends",

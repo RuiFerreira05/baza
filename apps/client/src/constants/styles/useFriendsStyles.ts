@@ -239,4 +239,48 @@ export const FriendsStyles = (colors: ThemeType) =>
     disabledButton: {
       opacity: 0.5,
     },
+    form: {
+      gap: 30,
+      width: "100%",
+    },
+    button: {
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      borderRadius: 8,
+      backgroundColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      minWidth: 80,
+    },
+    buttonText: {
+      fontFamily: "Inter_600SemiBold",
+      color: colors.onPrimary,
+      fontSize: 16,
+    },
+    inputCard: {
+      backgroundColor: colors.surface,
+      padding: 28,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      width: "100%",
+      maxWidth: 600,
+      alignSelf: "center",
+    },
+    buttonDisabled: {
+      backgroundColor: colors.disabled,
+    },
+    titleContainer: {
+      justifyContent: "center",
+      alignItems: "center",
+      paddingVertical: 40,
+      paddingHorizontal: 32,
+      gap: 20,
+    },
+    titleFriends: {
+      fontSize: 25,
+      fontFamily: "Inter_600SemiBold",
+      color: colors.onSurface,
+      textAlign: "center",
+    },
   });
