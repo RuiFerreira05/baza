@@ -180,4 +180,63 @@ export const FriendsStyles = (colors: ThemeType) =>
       textAlign: "center",
       lineHeight: 20,
     },
+    indicator: {
+      width: 5,
+      height: "100%",
+    },
+    avatarText: {
+      color: colors.primary,
+      fontSize: 14,
+      fontFamily: "Inter_600SemiBold",
+    },
+    sentAt: {
+      fontSize: 14,
+      fontFamily: "Inter_400Regular",
+      lineHeight: 18,
+      color: colors.onSurfaceVariant,
+    },
+    requestNote: {
+      fontSize: 12,
+      fontFamily: "Inter_500Medium",
+      color: colors.primary,
+      marginTop: 2,
+    },
+    declineButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.error,
+      alignItems: "center",
+      justifyContent: "center",
+      minWidth: 80,
+    },
+    declineButtonText: {
+      fontSize: 13,
+      fontFamily: "Inter_600SemiBold",
+      color: colors.error,
+    },
+    acceptButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      borderRadius: 8,
+      backgroundColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      minWidth: 80,
+    },
+    acceptButtonText: {
+      fontSize: 13,
+      fontFamily: "Inter_600SemiBold",
+      color: colors.onPrimary,
+    },
+    actions: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      gap: 12,
+      marginTop: 10,
+    },
+    disabledButton: {
+      opacity: 0.5,
+    },
   });

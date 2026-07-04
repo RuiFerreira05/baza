@@ -35,6 +35,13 @@ export default function FriendListLayout() {
           title: "friends",
         }}
       />
+
+      <Tabs.Screen
+        name="requests"
+        options={{
+          title: "requests",
+        }}
+      />
     </Tabs>
   );
 }
