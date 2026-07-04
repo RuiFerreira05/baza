@@ -84,7 +84,7 @@ export default function EditProfileScreen() {
               <Image
                 style={styles.profileImage}
                 source={
-                  vm.image
+                  profile?.photo
                     ? {
                         uri: vm.image,
                         headers: {

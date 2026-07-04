@@ -18,14 +18,12 @@ export function useEditProfileViewModel(
   const [photoInput, setPhotoInput] = useState(profile.photo);
   const [error, setError] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+
   const [image, setImage] = useState(
     bypassAuth || !profile?.photo
       ? null
       : userService.getUserPhotoUrl(profile.username, profile.updatedAt),
   );
-
-  const isUsernameValid =
-    usernameInput.length >= 3 && usernameInput.length <= 20;
 
   const saveImage = async (image: string | null) => {
     try {
@@ -36,6 +34,9 @@ export function useEditProfileViewModel(
       throw error;
     }
   };
+
+  const isUsernameValid =
+    usernameInput.length >= 3 && usernameInput.length <= 20;
 
   const { mutateAsync: editProfile, isPending: isEditing } = useAppMutation({
     mutationFn: () => {
@@ -117,12 +118,12 @@ export function useEditProfileViewModel(
     error,
     editProfile,
     isEditing,
-    image,
-    setImage,
     editPhoto,
     isEditingPhoto,
-    saveImage,
     isModalVisible,
     setIsModalVisible,
+    saveImage,
+    image,
+    setImage,
   };
 }
