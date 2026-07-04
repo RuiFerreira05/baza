@@ -1,17 +1,24 @@
+import { useGlobalStyles } from "@/constants/styles/useGlobalStyles";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuthState } from "@/hooks/useAuthState";
 import { Ionicons } from "@expo/vector-icons"; // Standard vector icons bundled with Expo
 import { Redirect, Tabs } from "expo-router";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProtectedLayout() {
   const { session, hasNoProfile, bypassAuth, isLoading } = useAuthState();
+  const { colors } = useAppTheme();
+  const styles = useGlobalStyles();
 
   if (isLoading) {
     return (
-      <ActivityIndicator
-        size="large"
-        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-      />
+      <SafeAreaView style={styles.container}>
+        <Text style={{ margin: 32 }}>
+          Please wait while we establish a connection with the server...
+        </Text>
+        <ActivityIndicator size={72} color={colors.primary} />
+      </SafeAreaView>
     );
   }
 
