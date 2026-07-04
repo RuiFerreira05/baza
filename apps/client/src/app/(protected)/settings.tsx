@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 // Imports from the existing codebase
@@ -69,7 +68,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <View style={styles.container}>
       <KeyboardAvoidingView behavior="padding">
         <KeyboardGestureArea>
           <SectionList
@@ -84,7 +83,7 @@ export default function SettingsScreen() {
           />
         </KeyboardGestureArea>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 

@@ -194,6 +194,18 @@ A modern mobile application built with **React Native** and **Expo (SDK 55)**.
     * `_layout.tsx`: Renders top tabs navigation between Groups and Invites.
     * `groups.tsx`: User groups list screen (fetches user groups, supports pull-to-refresh).
     * `invites.tsx`: Pending group invitations list screen (supports accept/decline actions).
+  * `group/`: Nested Group Space and Event Workspace routes (hidden from global tab bar).
+    * `[id]/`: Selected group workspace.
+      * `_layout.tsx`: Nested bottom tab layout (Calendar, Events, Profile, and hidden event route).
+      * `calendar.tsx`: Group Calendar placeholder screen (main entry point).
+      * `events.tsx`: Group Events flat list placeholder screen.
+      * `profile.tsx`: Group Profile details/settings placeholder screen.
+      * `event/`: Event Workspace subfolder.
+        * `[eventId]/`: Individual event workspace.
+          * `_layout.tsx`: Nested top tab layout (Details, Proposals, Preferences).
+          * `details.tsx`: Event Details dashboard placeholder screen.
+          * `proposals.tsx`: Event Proposals list placeholder screen.
+          * `preferences.tsx`: Event Preferences input placeholder screen.
   * `settings.tsx`: App settings screen (e.g. Theme selection via button groups).
 
 ---

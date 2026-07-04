@@ -29,7 +29,7 @@ export default function CreateProfileScreen() {
       return <Redirect href="/auth/login" />;
     }
     if (!hasNoProfile) {
-      return <Redirect href="/(protected)/calendar" />;
+      return <Redirect href="/(protected)/personal/calendar" />;
     }
   }
 
