@@ -1,4 +1,5 @@
 import FriendCard from "@/components/FriendCard";
+import RemoveFriendModal from "@/components/RemoveFriendModal";
 import { useFriendsStyles } from "@/constants/styles/useFriendsStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useFriendListViewModel } from "@/viewmodels/useFriendListViewModel";
@@ -18,9 +19,10 @@ export default function FriendsScreen() {
   const { colors } = useAppTheme();
   const vm = useFriendListViewModel();
 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selected, setSelected] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<ProfileDTO[]>([]);
-  console.log("search: " + searchResults);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -73,10 +75,21 @@ export default function FriendsScreen() {
               username={item.username}
               photo={item.photo}
               updatedAt={item.updatedAt}
+              setModalVisible={setIsModalVisible}
+              setSelected={setSelected}
             />
           </View>
         )}
       ></FlatList>
+      <RemoveFriendModal
+        friendName={selected}
+        modalVisible={isModalVisible}
+        onBackPress={() => setIsModalVisible(false)}
+        onRemovePress={() => setIsModalVisible(false)}
+        onCancelPress={() => setIsModalVisible(false)}
+        onRequestClose={() => setIsModalVisible(false)}
+        isLoading={false}
+      />
     </SafeAreaView>
   );
 }
