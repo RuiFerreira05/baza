@@ -14,7 +14,7 @@ export default function ProtectedLayout() {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={{ margin: 32 }}>
+        <Text style={{ margin: 32, color: colors.onBackground }}>
           Please wait while we establish a connection with the server...
         </Text>
         <ActivityIndicator size={72} color={colors.primary} />
