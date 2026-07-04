@@ -6,7 +6,7 @@ import { useAuthState } from "@/hooks/useAuthState";
 import { userService } from "@/services/userService";
 import { useFriendListViewModel } from "@/viewmodels/useFriendListViewModel";
 import { ProfileDTO } from "@baza/shared-types";
-import FontAwesome from "@expo/vector-icons/FontAwesome5";
+import FontAwesome from "@expo/vector-icons/FontAwesome6";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
@@ -97,15 +97,33 @@ export default function FriendsScreen() {
           </View>
         )}
         ListEmptyComponent={
-          <View style={styles.emptyStateContainer}>
-            <FontAwesome name="sad-cry" size={48} color={colors.placeholder} />
-            <Text style={styles.emptyStateTitle}>No Friends Yet</Text>
-            <Text style={styles.emptyStateSub}>
-              {
-                "You don't have any friends yet. When users accept your friend requests or when you accept theirs , they will show up here."
-              }
-            </Text>
-          </View>
+          vm.friends.length === 0 ? (
+            <View style={styles.emptyStateContainer}>
+              <FontAwesome
+                name="sad-cry"
+                size={48}
+                color={colors.placeholder}
+              />
+              <Text style={styles.emptyStateTitle}>No Friends Yet</Text>
+              <Text style={styles.emptyStateSub}>
+                {
+                  "You don't have any friends yet. When users accept your friend requests or when you accept theirs , they will show up here."
+                }
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.emptyStateContainer}>
+              <FontAwesome
+                name="face-meh"
+                size={48}
+                color={colors.placeholder}
+              />
+              <Text style={styles.emptyStateTitle}>No results</Text>
+              <Text style={styles.emptyStateSub}>
+                {"No friends matched your search. Try a different one!"}
+              </Text>
+            </View>
+          )
         }
       ></FlatList>
       <RemoveFriendModal
