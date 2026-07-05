@@ -10,7 +10,7 @@ export const useFriendListViewModel = () => {
 
   const navigateToFriend = (username: string) =>
     router.push({
-      pathname: "/(protected)/personal/[username]",
+      pathname: "/(protected)/personal/friendSection/[username]",
       params: { username: username },
     });
 

@@ -13,7 +13,7 @@ import Toast from "react-native-toast-message";
 // Imports from the existing codebase
 import { useSettingsStyles } from "@/constants/styles/useSettingsStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import {} from "@/store/useSettingsStore";
+import { } from "@/store/useSettingsStore";
 import {
   ButtonSetting,
   InfoSetting,
@@ -28,6 +28,7 @@ import {
   KeyboardAvoidingView,
   KeyboardGestureArea,
 } from "react-native-keyboard-controller";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
   const { colors } = useAppTheme();
@@ -68,7 +69,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView behavior="padding">
         <KeyboardGestureArea>
           <SectionList
@@ -83,7 +84,7 @@ export default function SettingsScreen() {
           />
         </KeyboardGestureArea>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 }
 

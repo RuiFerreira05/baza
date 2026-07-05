@@ -52,7 +52,7 @@ export default function personalLayout() {
       />
       <Tabs.Screen name="editProfile" options={{ href: null }} />
       <Tabs.Screen name="friendList" options={{ href: null }} />
-      <Tabs.Screen name="[username]" options={{ href: null }} />
+      <Tabs.Screen name="friendSection" options={{ href: null }} />
     </Tabs>
   );
 }
