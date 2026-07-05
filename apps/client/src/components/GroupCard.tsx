@@ -1,8 +1,9 @@
 import { useGroupListStyles } from "@/constants/styles/useGroupListStyles";
 import { authClient } from "@/lib/auth";
 import { groupService } from "@/services/groupService";
+import { useRouter } from "expo-router";
 import React from "react";
-import { Image, Text, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface GroupCardProps {
   id: string;
@@ -23,9 +24,18 @@ export default function GroupCard({
   photo,
 }: GroupCardProps) {
   const styles = useGroupListStyles();
+  const router = useRouter();
+
+  const handlePress = () => {
+    router.push(`/(protected)/personal/groupSection/group/${id}/calendar`);
+  };
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={handlePress}
+      activeOpacity={0.7}
+    >
       <View style={styles.cardContent}>
         <View style={styles.cardHeader}>
           <View style={styles.cardTitleRow}>
@@ -56,6 +66,6 @@ export default function GroupCard({
           </Text>
         ) : null}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

@@ -228,8 +228,7 @@ export function useCreateGroupScreenViewModel() {
       setSelectedFriends([]);
       setPhotoUri(null);
 
-      // Redirect back to groups tab
-      router.replace("/groupList/groups");
+      router.replace(`/(protected)/personal/groupSection/groupList/groups`);
     } catch {
       // Error handled by onError mutation option
     }

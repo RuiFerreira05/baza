@@ -8,11 +8,14 @@ import { useRouter } from "expo-router";
 export function useProfileViewModel(profile: ProfileDTO) {
   const router = useRouter();
 
-  const navigateToGroups = () => router.push("/(protected)/groupList/groups");
+  const navigateToGroups = () =>
+    router.push("/(protected)/personal/groupSection/groupList/groups");
   const navigateToFriends = () =>
-    router.push("/(protected)/friendList/friends");
-  const navigateToCalendar = () => router.push("/(protected)/calendar");
-  const navigateToEditProfile = () => router.push("/(protected)/editProfile");
+    router.push("/(protected)/personal/friendList/friends");
+  const navigateToCalendar = () =>
+    router.push("/(protected)/personal/calendar");
+  const navigateToEditProfile = () =>
+    router.push("/(protected)/personal/editProfile");
   const navigateToSettings = () => router.push("/(protected)/settings");
 
   const friendsQuery = useAppQuery({

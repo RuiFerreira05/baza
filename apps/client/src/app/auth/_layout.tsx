@@ -17,7 +17,11 @@ export default function AuthLayout() {
   }
 
   if (!bypassAuth && session) {
-    return <Redirect href={(returnUrl || "/(protected)/calendar") as Href} />;
+    return (
+      <Redirect
+        href={(returnUrl || "/(protected)/personal/calendar") as Href}
+      />
+    );
   }
 
   return (
