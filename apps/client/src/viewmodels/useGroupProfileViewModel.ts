@@ -12,6 +12,11 @@ export function useGroupProfileViewModel(groupId: string) {
       pathname: "/(protected)/personal/groupSection/group/[id]/calendar",
       params: { id: groupId },
     });
+  const navigateToEditProfile = () =>
+    router.push({
+      pathname: "/(protected)/personal/groupSection/group/[id]/editProfile",
+      params: { id: groupId },
+    });
 
   const groupQuery = useAppQuery({
     queryKey: ["group", groupId],
@@ -49,6 +54,7 @@ export function useGroupProfileViewModel(groupId: string) {
 
   return {
     navigateToCalendar,
+    navigateToEditProfile,
     groupProfile: groupQuery.data,
     numberOfMembers,
     numberOfEvents,

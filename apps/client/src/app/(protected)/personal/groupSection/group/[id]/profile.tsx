@@ -79,7 +79,7 @@ export default function GroupProfileScreen() {
           size={23}
           iconStyle={styles.icon}
           style={styles.iconButton}
-          // onPress={}
+          onPress={vm.navigateToEditProfile}
         />
       </View>
 
