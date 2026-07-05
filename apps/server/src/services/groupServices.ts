@@ -38,7 +38,13 @@ export const getGroupById = async (
   });
 
   if (group) {
-    const conv = Value.Convert(groupDTO, group);
+    const sanitizedGroup = {
+      ...group,
+      createdAt: group.createdAt.toISOString(),
+      updatedAt: group.updatedAt.toISOString(),
+    };
+
+    const conv = Value.Convert(groupDTO, sanitizedGroup);
     if (Value.Check(groupDTO, conv)) {
       return Ok(conv);
     } else {

@@ -313,6 +313,8 @@ export const getUserGroups = async (
         groupname: groups.groupname,
         description: groups.description,
         photo: groups.photo,
+        createdAt: groups.createdAt,
+        updatedAt: groups.updatedAt,
       })
       .from(groupMembers)
       .innerJoin(groups, eq(groupMembers.groupId, groups.id))
@@ -324,7 +326,19 @@ export const getUserGroups = async (
         ),
       );
 
-    const checkSchema = Value.Convert(Type.Array(groupDTO), rows);
+    const sanitizedGroups = [];
+    if (rows) {
+      for (const group of rows) {
+        const sanitizedGroup = {
+          ...group,
+          createdAt: group.createdAt.toISOString(),
+          updatedAt: group.updatedAt.toISOString(),
+        };
+        sanitizedGroups.push(sanitizedGroup);
+      }
+    }
+
+    const checkSchema = Value.Convert(Type.Array(groupDTO), sanitizedGroups);
     if (Value.Check(Type.Array(groupDTO), checkSchema)) {
       return Ok(checkSchema as GroupDTO[]);
     } else {
@@ -353,6 +367,8 @@ export const getUserGroupInvites = async (
         groupname: groups.groupname,
         description: groups.description,
         photo: groups.photo,
+        createdAt: groups.createdAt,
+        updatedAt: groups.updatedAt,
       })
       .from(groupMembers)
       .innerJoin(groups, eq(groupMembers.groupId, groups.id))
@@ -364,7 +380,19 @@ export const getUserGroupInvites = async (
         ),
       );
 
-    const checkSchema = Value.Convert(Type.Array(groupDTO), rows);
+    const sanitizedGroups = [];
+    if (rows) {
+      for (const group of rows) {
+        const sanitizedGroup = {
+          ...group,
+          createdAt: group.createdAt.toISOString(),
+          updatedAt: group.updatedAt.toISOString(),
+        };
+        sanitizedGroups.push(sanitizedGroup);
+      }
+    }
+
+    const checkSchema = Value.Convert(Type.Array(groupDTO), sanitizedGroups);
     if (Value.Check(Type.Array(groupDTO), checkSchema)) {
       return Ok(checkSchema as GroupDTO[]);
     } else {

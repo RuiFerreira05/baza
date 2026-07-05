@@ -20,6 +20,12 @@ export const groupDTO = Type.Object({
       description: "A URL to the group's photo",
     }),
   ),
+  createdAt: Type.String({
+      description: "The date and time when the group was created",
+  }),
+  updatedAt: Type.String({
+    description: "The date and time when the group was last updated",
+  }),
 });
 export type GroupDTO = Type.Static<typeof groupDTO>;
 

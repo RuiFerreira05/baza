@@ -42,7 +42,7 @@ export default function FriendProfileScreen() {
 
   useEffect(() => {
     if (vm.isError) {
-      router.push("/(protected)/friendList/friends");
+      router.push("/(protected)/personal/friendSection/friendList/friends");
     }
   }, [vm.isError]);
 
