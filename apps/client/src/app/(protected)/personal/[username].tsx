@@ -94,7 +94,6 @@ export default function FriendProfileScreen() {
         <TouchableHighlight
           underlayColor={colors.background}
           activeOpacity={0.5}
-          // onPress={vm.navigateToFriends}
         >
           <View style={styles.column}>
             <Text style={styles.subTitle2}>Friends</Text>
@@ -105,7 +104,6 @@ export default function FriendProfileScreen() {
         <TouchableHighlight
           underlayColor={colors.background}
           activeOpacity={0.5}
-          // onPress={vm.navigateToCalendar}
         >
           <View style={styles.column}>
             <Text style={styles.subTitle2}>Events</Text>
@@ -116,7 +114,6 @@ export default function FriendProfileScreen() {
         <TouchableHighlight
           underlayColor={colors.background}
           activeOpacity={0.5}
-          // onPress={vm.navigateToGroups}
         >
           <View style={styles.column}>
             <Text style={styles.subTitle2}>Groups</Text>
