@@ -3,15 +3,19 @@ import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuthState } from "@/hooks/useAuthState";
 import { authClient } from "@/lib/auth";
 import { userService } from "@/services/userService";
-import { useProfileViewModel } from "@/viewmodels/useProfileViewModel";
-import { Ionicons } from "@expo/vector-icons";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback } from "react";
-import { Image, Text, TouchableHighlight, View } from "react-native";
+import { useFriendProfileViewModel } from "@/viewmodels/useFriendProfileViewModel";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Text,
+  TouchableHighlight,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function ProfileScreen() {
+export default function FriendProfileScreen() {
   const styles = useProfileStyles();
   const router = useRouter();
   const { colors } = useAppTheme();
@@ -21,7 +25,10 @@ export default function ProfileScreen() {
   if (!profile && !bypassAuth) {
     router.push("/(onboarding)/createProfile");
   }
-  const vm = useProfileViewModel(
+
+  const params = useLocalSearchParams<{ username: string }>();
+
+  const vm = useFriendProfileViewModel(
     profile ?? {
       username: "Developer",
       photo: null,
@@ -30,44 +37,45 @@ export default function ProfileScreen() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
+    params.username,
   );
+
+  useEffect(() => {
+    if (vm.isError) {
+      router.push("/(protected)/friendList/friends");
+    }
+  }, [vm.isError]);
 
   useFocusEffect(
     useCallback(() => {
+      vm.refetchProfile();
       vm.refetchFriends();
       vm.refetchEvents();
       vm.refetchGroups();
     }, []),
   );
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.row}>
-        <Ionicons.Button
-          name="settings"
-          size={23}
-          iconStyle={styles.icon}
-          style={styles.iconButton}
-          onPress={vm.navigateToSettings}
-        />
-        <FontAwesome.Button
-          name="edit"
-          size={23}
-          iconStyle={styles.icon}
-          style={styles.iconButton}
-          onPress={vm.navigateToEditProfile}
-        />
+  if (vm.isLoading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
       </View>
+    );
+  }
 
+  return (
+    <SafeAreaView style={styles.friendContainer}>
       <View style={styles.profileView}>
         <Image
           style={styles.profileImage}
           source={
-            profile?.photo
+            vm.friendProfile?.photo
               ? {
                   uri: userService.getUserPhotoUrl(
-                    profile.username,
-                    profile.updatedAt,
+                    vm.friendProfile.username,
+                    vm.friendProfile.updatedAt,
                   ),
                   headers: {
                     Cookie: authClient.getCookie() || "",
@@ -79,47 +87,49 @@ export default function ProfileScreen() {
       </View>
 
       <Text style={styles.title}>
-        {bypassAuth ? "Developer" : profile?.username}
+        {bypassAuth ? "Developer" : vm.friendProfile?.username}
       </Text>
 
       <View style={styles.profileStats}>
         <TouchableHighlight
           underlayColor={colors.background}
           activeOpacity={0.5}
-          onPress={vm.navigateToFriends}
+          // onPress={vm.navigateToFriends}
         >
           <View style={styles.column}>
             <Text style={styles.subTitle2}>Friends</Text>
-            <Text style={styles.subTitle}>{vm.numberOfFriends}</Text>
+            <Text style={styles.subTitle}>{vm.numberOfFriends.toString()}</Text>
           </View>
         </TouchableHighlight>
         <View style={styles.columnDivider}></View>
         <TouchableHighlight
           underlayColor={colors.background}
           activeOpacity={0.5}
-          onPress={vm.navigateToCalendar}
+          // onPress={vm.navigateToCalendar}
         >
           <View style={styles.column}>
             <Text style={styles.subTitle2}>Events</Text>
-            <Text style={styles.subTitle}>{vm.numberOfEvents}</Text>
+            <Text style={styles.subTitle}>{vm.numberOfEvents.toString()}</Text>
           </View>
         </TouchableHighlight>
         <View style={styles.columnDivider}></View>
         <TouchableHighlight
           underlayColor={colors.background}
           activeOpacity={0.5}
-          onPress={vm.navigateToGroups}
+          // onPress={vm.navigateToGroups}
         >
           <View style={styles.column}>
             <Text style={styles.subTitle2}>Groups</Text>
-            <Text style={styles.subTitle}>{vm.numberOfGroups}</Text>
+            <Text style={styles.subTitle}>{vm.numberOfGroups.toString()}</Text>
           </View>
         </TouchableHighlight>
       </View>
       <View style={styles.description}>
         <Text style={styles.subTitleOnPrimary}>About me</Text>
         <Text style={styles.textOnPrimary}>
-          {bypassAuth ? "Just a developer profile" : profile?.description}
+          {bypassAuth
+            ? "Just a developer profile"
+            : vm.friendProfile?.description}
         </Text>
       </View>
     </SafeAreaView>

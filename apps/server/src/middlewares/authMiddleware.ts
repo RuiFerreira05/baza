@@ -169,7 +169,10 @@ export const authPreHandler = async (
           routeUrl === "/users/:username" ||
           routeUrl === "/v1/restricted/users/:username/photo" ||
           routeUrl === "/:username/photo" ||
-          routeUrl === "/users/:username/photo");
+          routeUrl === "/users/:username/photo" ||
+          routeUrl === "/v1/restricted/users/:username/numberEvents" ||
+          routeUrl === "/v1/restricted/users/:username/friendsNumber" ||
+          routeUrl === "/v1/restricted/users/:username/groupsNumber");
 
       if (!isPublicProfileDetail) {
         if (req.username !== params.username) {

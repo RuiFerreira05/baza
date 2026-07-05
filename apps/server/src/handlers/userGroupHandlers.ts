@@ -1,17 +1,17 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
-import {
-  getUserGroups,
-  getUserGroupInvites,
-  acceptGroupInvite,
-  declineGroupInvite,
-} from "../services/profileServices";
 import {
   createStatusError,
   createStatusOK,
   ErrorTypes,
-  type SimpleUsernameParam,
   RespondGroupInviteBody,
+  type SimpleUsernameParam,
 } from "@baza/shared-types";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import {
+  acceptGroupInvite,
+  declineGroupInvite,
+  getUserGroupInvites,
+  getUserGroups,
+} from "../services/profileServices";
 import { app } from "../setup";
 
 // GET /users/:username/groups
@@ -126,5 +126,30 @@ export const respondGroupInviteHandler = async (
     } else {
       return res.status(200).send(createStatusOK(result.value));
     }
+  }
+};
+
+// GET /users/:username/groups
+export const getUserGroupsNumberHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  app.log.info("Received get user's groups number request");
+  const { username } = req.params as SimpleUsernameParam;
+
+  const result = await getUserGroups(username);
+
+  if (!result.ok) {
+    return res
+      .status(500)
+      .send(
+        createStatusError(
+          ErrorTypes.ConversionError,
+          "Failed to retrieve groups list.",
+        ),
+      );
+  } else {
+    const groupsNumber = result.value.length;
+    return res.status(200).send(createStatusOK(groupsNumber));
   }
 };

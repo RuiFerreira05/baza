@@ -1,31 +1,31 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
-import { getAuthenticatedUsername } from "../lib/auth";
-import {
-  createGroupEvent,
-  getGroupEvents,
-  getGroupEventById,
-  editGroupEvent,
-  getGroupCalendar,
-  getUserEvents,
-  createPersonalEvent,
-  editPersonalEvent,
-  getPersonalEventById,
-  deletePersonalEvent,
-  deleteGroupEvent,
-} from "../services/eventServices";
-import { resolveTie } from "../services/finalizationService";
 import {
   createStatusError,
   createStatusOK,
   ErrorTypes,
-  type SimpleUsernameParam,
+  type CreateEventBody,
+  type CreatePersonalEventBody,
+  type EditEventBody,
+  type EditPersonalEventBody,
   type GetPersonalEventsParams,
   type SimpleIdParam,
-  type CreateEventBody,
-  type EditEventBody,
-  type CreatePersonalEventBody,
-  type EditPersonalEventBody,
+  type SimpleUsernameParam,
 } from "@baza/shared-types";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import { getAuthenticatedUsername } from "../lib/auth";
+import {
+  createGroupEvent,
+  createPersonalEvent,
+  deleteGroupEvent,
+  deletePersonalEvent,
+  editGroupEvent,
+  editPersonalEvent,
+  getGroupCalendar,
+  getGroupEventById,
+  getGroupEvents,
+  getPersonalEventById,
+  getUserEvents,
+} from "../services/eventServices";
+import { resolveTie } from "../services/finalizationService";
 import { app } from "../setup";
 
 // POST /groups/:id/events/create
@@ -582,5 +582,48 @@ export const deleteGroupEventHandler = async (
     }
   } else {
     return res.status(200).send(createStatusOK(result.value));
+  }
+};
+
+// GET /users/:username/eventsNumber
+export const getPersonalEventsNumberHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  app.log.info(
+    "Recieved get user's personal events number by username request",
+  );
+  const { username } = req.params as SimpleUsernameParam;
+  const { startDate, endDate } = req.query as GetPersonalEventsParams;
+
+  const result = await getUserEvents(username, startDate, endDate);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownUsernameError:
+        app.log.warn("User not found");
+        return res
+          .status(404)
+          .send(
+            createStatusError(
+              ErrorTypes.UnknownUsernameError,
+              "A user with the provided username was not found",
+            ),
+          );
+
+      case ErrorTypes.ConversionError:
+        app.log.error("Failed to get number of events");
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.ConversionError,
+              "An error occurred while getting the number of events",
+            ),
+          );
+    }
+  } else {
+    const numberEvents = result.value.length;
+    return res.status(200).send(createStatusOK(numberEvents));
   }
 };

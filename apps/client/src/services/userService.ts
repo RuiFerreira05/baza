@@ -11,6 +11,7 @@ import {
   SentFriendRequestDTO,
   StatusError,
 } from "@baza/shared-types";
+import Type from "typebox";
 import { apiClient, unwrapResult } from "./apiClient";
 
 export const userService = {
@@ -83,6 +84,14 @@ export const userService = {
   getFriends: (username: string): Promise<Result<ProfileDTO[], StatusError>> =>
     apiClient(`/v1/restricted/users/${username}/friends`).then(
       unwrapResult<ProfileDTO[]>,
+    ),
+
+  // GET /v1/restricted/users/:username/friends
+  getFriendsNumber: (
+    username: string,
+  ): Promise<Result<Type.TInteger, StatusError>> =>
+    apiClient(`/v1/restricted/users/${username}/friendsNumber`).then(
+      unwrapResult<Type.TInteger>,
     ),
 
   // GET /v1/restricted/users/:username/friends/:friendUsername

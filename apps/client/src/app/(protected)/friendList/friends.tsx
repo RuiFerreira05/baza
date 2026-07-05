@@ -90,6 +90,9 @@ export default function FriendsScreen() {
             username={item.username}
             photo={item.photo}
             updatedAt={item.updatedAt}
+            onPress={() => {
+              vm.navigateToFriend(item.username);
+            }}
             setModalVisible={setIsModalVisible}
             setSelected={setSelected}
           />

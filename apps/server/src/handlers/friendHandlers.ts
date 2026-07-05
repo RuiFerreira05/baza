@@ -1,25 +1,25 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
 import {
-  getFriends,
-  getFriendProfile,
-  removeFriend,
-  sendFriendRequest,
-  getPendingFriendRequests,
-  acceptFriendRequest,
-  declineFriendRequest,
-  blockUser,
-  unblockUser,
-  getPendingSentFriendRequests,
-} from "../services/profileServices";
-import {
+  BlockUserBody,
   createStatusError,
   createStatusOK,
   ErrorTypes,
-  type SimpleUsernameParam,
-  type SendFriendRequestBody,
   RespondFriendRequestBody,
-  BlockUserBody,
+  type SendFriendRequestBody,
+  type SimpleUsernameParam,
 } from "@baza/shared-types";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import {
+  acceptFriendRequest,
+  blockUser,
+  declineFriendRequest,
+  getFriendProfile,
+  getFriends,
+  getPendingFriendRequests,
+  getPendingSentFriendRequests,
+  removeFriend,
+  sendFriendRequest,
+  unblockUser,
+} from "../services/profileServices";
 import { app } from "../setup";
 
 // GET /users/:username/friends
@@ -362,5 +362,30 @@ export const getPendingSentFriendRequestsHandler = async (
       );
   } else {
     return res.status(200).send(createStatusOK(result.value));
+  }
+};
+
+// GET /users/:username/friendsNumber
+export const getFriendsNumberHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  app.log.info("Received get user's number of friends request");
+  const { username } = req.params as SimpleUsernameParam;
+
+  const result = await getFriends(username);
+
+  if (!result.ok) {
+    return res
+      .status(500)
+      .send(
+        createStatusError(
+          ErrorTypes.ConversionError,
+          "An error occurred while converting the friends data",
+        ),
+      );
+  } else {
+    const numberFriends = result.value.length;
+    return res.status(200).send(createStatusOK(numberFriends));
   }
 };

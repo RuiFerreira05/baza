@@ -9,6 +9,7 @@ import {
   StatusError,
   UpdateMemberRoleBody,
 } from "@baza/shared-types";
+import Type from "typebox";
 import { apiClient, unwrapResult } from "./apiClient";
 
 export const groupService = {
@@ -93,6 +94,14 @@ export const groupService = {
   getUserGroups: (username: string): Promise<Result<GroupDTO[], StatusError>> =>
     apiClient(`/v1/restricted/users/${username}/groups`).then(
       unwrapResult<GroupDTO[]>,
+    ),
+
+  // GET /v1/restricted/users/:username/groups
+  getUserGroupsNumber: (
+    username: string,
+  ): Promise<Result<Type.TInteger, StatusError>> =>
+    apiClient(`/v1/restricted/users/${username}/groupsNumber`).then(
+      unwrapResult<Type.TInteger>,
     ),
 
   // GET /v1/restricted/users/:username/groups/invites

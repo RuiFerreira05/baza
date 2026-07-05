@@ -110,7 +110,20 @@ export const ProfileStyles = (colors: ThemeType) =>
       width: 40,
     },
     icon: {
-      color: colors.primary,
+      color: colors.onBackground,
       marginRight: 0,
+    },
+    loaderContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingVertical: 60,
+    },
+    friendContainer: {
+      flex: 1,
+      alignItems: "center",
+      paddingTop: 75,
+      gap: 16,
+      backgroundColor: colors.background,
     },
   });

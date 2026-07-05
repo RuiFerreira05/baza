@@ -1,20 +1,21 @@
 import {
-  PersonalEventDTO,
-  CreatePersonalEventBody,
-  EditPersonalEventBody,
-  GetPersonalEventsParams,
-  GroupEventDTO,
   CreateEventBody,
-  EditEventBody,
-  GroupCalendarDTO,
-  EventConfirmationDTO,
-  GroupPreferenceReportDTO,
-  PreferenceDTO,
+  CreatePersonalEventBody,
   CreatePreferenceBody,
+  EditEventBody,
+  EditPersonalEventBody,
+  EventConfirmationDTO,
+  GetPersonalEventsParams,
+  GroupCalendarDTO,
+  GroupEventDTO,
+  GroupPreferenceReportDTO,
+  PersonalEventDTO,
+  PreferenceDTO,
   ResolveTieBody,
   Result,
   StatusError,
 } from "@baza/shared-types";
+import Type from "typebox";
 import { apiClient, unwrapResult } from "./apiClient";
 
 export const eventService = {
@@ -30,6 +31,15 @@ export const eventService = {
     apiClient(`/v1/restricted/users/${username}/events`, {
       params: query,
     }).then(unwrapResult<PersonalEventDTO[]>),
+
+  // GET /v1/restricted/users/:username/numberEvents
+  getPersonalEventsNumber: (
+    username: string,
+    query?: GetPersonalEventsParams,
+  ): Promise<Result<Type.TInteger, StatusError>> =>
+    apiClient(`/v1/restricted/users/${username}/numberEvents`, {
+      params: query,
+    }).then(unwrapResult<Type.TInteger>),
 
   // GET /v1/restricted/users/:username/events/:idEvent
   getPersonalEvent: (

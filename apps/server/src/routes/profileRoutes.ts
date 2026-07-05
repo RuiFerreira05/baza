@@ -28,11 +28,13 @@ import {
   editPersonalEventHandler,
   getPersonalEventByIdHandler,
   getPersonalEventsHandler,
+  getPersonalEventsNumberHandler,
 } from "../handlers/eventHandlers";
 import {
   blockUserHandler,
   getFriendProfileHandler,
   getFriendsHandler,
+  getFriendsNumberHandler,
   getPendingFriendRequestsHandler,
   getPendingSentFriendRequestsHandler,
   removeFriendHandler,
@@ -57,6 +59,7 @@ import {
 import {
   getUserGroupInvitesHandler,
   getUserGroupsHandler,
+  getUserGroupsNumberHandler,
   respondGroupInviteHandler,
 } from "../handlers/userGroupHandlers";
 
@@ -680,5 +683,72 @@ export const userRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     deleteProfilePhotoHandler,
+  );
+
+  // GET /users/:username/numberEvents?startDate,endDate
+  app.get(
+    "/:username/numberEvents",
+    {
+      schema: {
+        description:
+          "This route fetches the number of events a user went to. This information is used on their profile.",
+        tags: ["users"],
+        params: SimpleUsernameParam(
+          "The username of the user whose number of events is being fetched",
+        ),
+        querystring: GetPersonalEventsParams,
+        response: {
+          200: StatusOK(
+            Type.Integer(),
+            "if the number of events was successfully fetched before sending the response",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownUsernameError,
+            "if no personal events from the user with the provided username was found",
+          ),
+          500: StatusError(
+            ErrorTypes.ConversionError,
+            "if there was an error getting the number of events before sending the response",
+          ),
+        },
+      },
+    },
+    getPersonalEventsNumberHandler,
+  );
+
+  // GET /users/:username/friendsNumber
+  app.get(
+    "/:username/friendsNumber",
+    {
+      schema: {
+        description:
+          "This route fetches the number of all accepted friends of the user.",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username"),
+        response: {
+          200: StatusOK(Type.Integer(), "Success"),
+          500: StatusError(ErrorTypes.ConversionError, "Error"),
+        },
+      },
+    },
+    getFriendsNumberHandler,
+  );
+
+  // GET /users/:username/groupsNumber
+  app.get(
+    "/:username/groupsNumber",
+    {
+      schema: {
+        description:
+          "This route fetches the number of groups that the user is an active member of.",
+        tags: ["users"],
+        params: SimpleUsernameParam("The username"),
+        response: {
+          200: StatusOK(Type.Integer(), "Success"),
+          500: StatusError(ErrorTypes.ConversionError, "Error"),
+        },
+      },
+    },
+    getUserGroupsNumberHandler,
   );
 };
