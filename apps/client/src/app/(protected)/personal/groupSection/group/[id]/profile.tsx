@@ -46,18 +46,28 @@ export default function GroupProfileScreen() {
     return name.trim().charAt(0).toUpperCase();
   };
 
+  const leaveGroup = (groupId: string, username: string) => {
+    groupService.removeUser(groupId, username);
+    setIsModalVisible(false);
+    router.replace("/(protected)/personal/groupSection/groupList/groups");
+  };
+
+  const isAdmin = () => {
+    let isAdmin = false;
+    vm.members?.forEach((member) => {
+      if (member.username === profile?.username && member.admin) {
+        isAdmin = true;
+      }
+    });
+    return isAdmin;
+  };
+
   useFocusEffect(
     useCallback(() => {
       vm.refetchMembers();
       vm.refetchEvents();
     }, []),
   );
-
-  const leaveGroup = (groupId: string, username: string) => {
-    groupService.removeUser(groupId, username);
-    setIsModalVisible(false);
-    router.replace("/(protected)/personal/groupSection/groupList/groups");
-  };
 
   if (isLoading) {
     return (
@@ -91,13 +101,15 @@ export default function GroupProfileScreen() {
           style={styles.iconButton}
           onPress={() => setIsModalVisible(true)}
         />
-        <FontAwesome.Button
-          name="edit"
-          size={23}
-          iconStyle={styles.icon}
-          style={styles.iconButton}
-          onPress={vm.navigateToEditProfile}
-        />
+        {isAdmin() ? (
+          <FontAwesome.Button
+            name="edit"
+            size={23}
+            iconStyle={styles.icon}
+            style={styles.iconButton}
+            onPress={vm.navigateToEditProfile}
+          />
+        ) : null}
       </View>
 
       <View style={styles.profileView}>
