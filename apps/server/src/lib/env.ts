@@ -52,6 +52,16 @@ const serverEnvSchema = Type.Object({
       default: "false",
     }),
   ),
+  GOOGLE_CLIENT_ID: Type.Optional(
+    Type.String({
+      description: "Google Client ID for OAuth login",
+    }),
+  ),
+  GOOGLE_CLIENT_SECRET: Type.Optional(
+    Type.String({
+      description: "Google Client Secret for OAuth login",
+    }),
+  ),
 });
 
 export type ServerEnv = Type.Static<typeof serverEnvSchema>;

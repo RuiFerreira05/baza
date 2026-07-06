@@ -1,4 +1,5 @@
 import { authClient } from "@/lib/auth";
+import { env } from "@/lib/env";
 import { useState } from "react";
 
 export const useRegisterViewModel = () => {
@@ -45,6 +46,66 @@ export const useRegisterViewModel = () => {
     }
   };
 
+  const onGoogleSignIn = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const webClientId = env.EXPO_PUBLIC_GOOGLE_CLIENT_ID;
+
+      // 1. If Web Client ID is present, attempt Native Google Sign-in
+      if (webClientId) {
+        const { GoogleOneTapSignIn, isSuccessResponse, isNoSavedCredentialFoundResponse } = 
+          require("react-native-nitro-google-signin");
+
+        GoogleOneTapSignIn.configure({ webClientId });
+
+        let response = await GoogleOneTapSignIn.signIn();
+
+        if (isNoSavedCredentialFoundResponse(response)) {
+          response = await GoogleOneTapSignIn.createAccount();
+        }
+
+        if (isSuccessResponse(response) && response.data?.idToken) {
+          const { error: authError } = await authClient.signIn.social({
+            provider: "google",
+            idToken: {
+              token: response.data.idToken,
+            },
+          });
+
+          if (authError) {
+            setError(authError.message || "Better-Auth verification failed.");
+          }
+          return;
+        }
+      }
+
+      // 2. Browser-based OAuth redirect fallback (for web, simulators, or if no client ID is set)
+      const { error: authError } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "baza://",
+      });
+
+      if (authError) {
+        setError(authError.message || "An error occurred during Google sign-in.");
+      }
+    } catch (err: any) {
+      try {
+        const { error: authError } = await authClient.signIn.social({
+          provider: "google",
+          callbackURL: "baza://",
+        });
+        if (authError) {
+          setError(authError.message || "An error occurred during fallback Google sign-in.");
+        }
+      } catch (fallbackErr: any) {
+        setError(err.message || "Google sign-in failed.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     name,
     setName,
@@ -57,6 +118,7 @@ export const useRegisterViewModel = () => {
     error,
     setError,
     onSignUp,
+    onGoogleSignIn,
     loading,
     setLoading,
     isNameValid,

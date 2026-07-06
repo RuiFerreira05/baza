@@ -110,4 +110,37 @@ export const AuthStyles = (colors: ThemeType) =>
       fontSize: 14,
       color: colors.primary,
     },
+    googleButton: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      height: 48,
+      borderRadius: 10,
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 8,
+      gap: 8,
+    },
+    googleButtonText: {
+      fontFamily: "Inter_600SemiBold",
+      color: colors.onSurface,
+      fontSize: 16,
+    },
+    dividerContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginVertical: 12,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: colors.border,
+    },
+    dividerText: {
+      fontFamily: "Inter_400Regular",
+      fontSize: 12,
+      color: colors.onSurfaceVariant,
+      marginHorizontal: 12,
+    },
   });

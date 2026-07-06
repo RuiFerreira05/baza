@@ -1,6 +1,7 @@
 import { useAuthStyles } from "@/constants/styles/useAuthStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useRegisterViewModel } from "@/viewmodels/useRegisterViewModel";
+import { Ionicons } from "@expo/vector-icons";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -100,6 +101,26 @@ export default function RegisterScreen() {
                   <ActivityIndicator color={colors.onPrimary} size={"small"} />
                 )}
               </Pressable>
+
+              <View style={styles.dividerContainer}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>OR</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.googleButton,
+                  pressed && styles.buttonPressed,
+                ]}
+                onPress={() => {
+                  vm.onGoogleSignIn();
+                }}
+              >
+                <Ionicons name="logo-google" size={20} color={colors.onSurface} />
+                <Text style={styles.googleButtonText}>Continue with Google</Text>
+              </Pressable>
+
               {vm.error ? (
                 <Text style={{ color: colors.error, marginTop: 8 }}>
                   {vm.error}
