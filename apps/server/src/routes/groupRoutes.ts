@@ -1,4 +1,5 @@
 import {
+  BatchInviteBody,
   CreateEventBody,
   CreateGroupBody,
   CreatePlanBody,
@@ -39,6 +40,7 @@ import {
   resolveTieHandler,
 } from "../handlers/eventHandlers";
 import {
+  batchInviteUsersToGroupHandler,
   createGroupHandler,
   deleteGroupHandler,
   deleteGroupPhotoHandler,
@@ -263,6 +265,41 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     inviteUsersToGroupHandler,
+  );
+
+  // POST /groups/:id/group-members/batch
+  app.post(
+    "/:id/group-members/batch",
+    {
+      schema: {
+        description:
+          "This route allows batch inviting multiple users to a group. Only group admins can use this route. Users must be friends with the inviter to be invited.",
+        tags: ["groups"],
+        params: SimpleIdParam(
+          "The UUID of the group to which users are being invited",
+        ),
+        body: BatchInviteBody,
+        response: {
+          201: StatusOK(
+            Type.Array(groupMemberDTO),
+            "Indicates that the users were successfully invited to the group",
+          ),
+          403: StatusError(
+            ErrorTypes.UnauthorizedError,
+            "if the caller is not a group admin",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "if no group with the provided id was found",
+          ),
+          500: StatusError(
+            ErrorTypes.ResourceCreationError,
+            "if there was an error creating the batch group invitations",
+          ),
+        },
+      },
+    },
+    batchInviteUsersToGroupHandler,
   );
 
   // DELETE /groups/:id/group-members/:username
