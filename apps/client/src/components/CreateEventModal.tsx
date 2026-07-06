@@ -15,6 +15,7 @@ import {
 } from "react-native";
 
 import LabeledInput from "@/components/LabeledInput";
+import GooglePlacesMapInput from "./GooglePlacesMapInput";
 import { useCreateEventStyles } from "@/constants/styles/useCreateEventStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useCreateEventViewModel } from "@/viewmodels/useCreateEventViewModel";
@@ -167,12 +168,10 @@ export default function CreateEventModal({
               />
 
               {/* Event Location */}
-              <LabeledInput
+              <GooglePlacesMapInput
                 label="Location"
                 value={formVm.location}
                 onChangeText={formVm.setLocation}
-                placeholder="e.g. Conference Room B or Zoom link"
-                autoCapitalize="sentences"
               />
 
               {/* Event Description */}

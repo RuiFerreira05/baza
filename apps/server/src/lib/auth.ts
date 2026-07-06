@@ -12,9 +12,18 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { db } from "./db";
 import { env } from "./env";
 
+const providers: any = {};
+if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
+  providers.google = {
+    clientId: env.GOOGLE_CLIENT_ID,
+    clientSecret: env.GOOGLE_CLIENT_SECRET,
+  };
+}
+
 export const auth = betterAuth({
   trustedOrigins: ["baza://", `http://10.0.2.2:${env.SERVER_PORT}`], // 10.0.2.2 is the special IP for localhost in Android emulators
   plugins: [expo(), openAPI()],
+  socialProviders: providers,
   database: drizzleAdapter(db, {
     provider: "pg",
     usePlural: true,

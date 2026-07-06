@@ -170,6 +170,8 @@ A modern mobile application built with **React Native** and **Expo (SDK 55)**.
   - A global `errorReporter` (in `src/services/errorReporter.ts`) hooks into JavaScript's `PromiseRejectionTracking` to catch uncaught async exceptions and promise rejections.
   - A reusable fallback `ErrorBoundary` UI component (in `src/components/ErrorBoundary.tsx`) is exported from the root `_layout.tsx` to catch rendering crashes via Expo Router's native error routing boundaries.
 * **Storage**: Session persistence uses `expo-secure-store`.
+* **Google Sign-In**: Native Google Sign-in on Android using Android Credential Manager via `react-native-nitro-google-signin`. The client retrieves the `idToken` and exchanges it for a session via Better-Auth's client `signIn.social` method. Web, iOS, and simulator environments fall back automatically to the standard web-browser redirect flow.
+* **Maps & Places Autocomplete**: Location inputs in event scheduling use the custom `GooglePlacesMapInput` component. It uses Google Places API for autocomplete suggestion and coordinates fetching, `expo-maps` for native interactive map display (Apple Maps on iOS, Google Maps on Android), and Google Geocoding API for reverse-lookup on map pin placement. Mapped locations are saved to the database as serialized JSON strings containing coordinates and names, while manually-typed plain text strings are supported with a fallback layout.
 * **Fonts & Typography**: Standardized Google Fonts (*Inter* - Regular, Medium, SemiBold, Bold) loaded dynamically using `@expo-google-fonts/inter`. Hiding of the native splash screen is coordinated to delay until both fonts are loaded and session state has resolved.
 * **Global Notifications**: Standardized `react-native-toast-message` integration rendered in the root layout, supporting imperative alerts from anywhere (such as within apiClient error catch blocks).
 * **Aesthetics & Styling**: Theme-aware custom layouts styled using stylesheet hooks (e.g. `useGlobalStyles`, `useCalendarStyles`, `useCreateEventStyles`, `useProfileStyles`) dynamically pulling variables from `useAppTheme()` which supports light and dark modes (defined in `constants/theme.ts`).
@@ -197,8 +199,8 @@ A modern mobile application built with **React Native** and **Expo (SDK 55)**.
   * `group/`: Nested Group Space and Event Workspace routes (hidden from global tab bar).
     * `[id]/`: Selected group workspace.
       * `_layout.tsx`: Nested bottom tab layout (Calendar, Events, Profile, and hidden event route).
-      * `calendar.tsx`: Group Calendar placeholder screen (main entry point).
-      * `events.tsx`: Group Events flat list placeholder screen.
+      * `calendar.tsx`: Group Calendar showing member schedules and group planning/resolved spans (using Wix Calendar multi-dot marking).
+      * `events.tsx`: Group Events Hub flat list displaying active planning countdowns, tiebreakers, and completed group events.
       * `profile.tsx`: Group Profile details/settings placeholder screen.
       * `event/`: Event Workspace subfolder.
         * `[eventId]/`: Individual event workspace.
@@ -302,3 +304,5 @@ Tests run sequentially against separate test setups:
 16. **Event Creation/Editing Modal Consolidation**: The event creation and editing logic is unified in `CreateEventModal.tsx` and driven by `useCreateEventViewModel.ts`. The modal hydrates and validates the form, and manages the edit workflow seamlessly if `eventToEdit` is supplied.
 17. **All-Day Event Temporal Normalization**: When `allDay` is set to true (for personal events or group plans), both the client and server force the event boundaries to cover the entire day (start time at `00:00:00`/`00:00:00.000Z` and end time at `23:59:59`/`23:59:59.999Z`), ensuring clean database constraint validations and timezone parity.
 18. **Repeat-Until Boundaries**: For repeating events with a set limit, `repeatUntil` (saved in YYYY-MM-DD date format) enforces bounds during expansion, preventing infinite loop hazards. During database queries or local event expansions (via `expandRepeatingEvents`), events are constrained to stop at `repeatUntil`.
+19. **Winning Plan Time Normalization**: When serializing `winningPlan` for group events on the server side, format its `startTime` and `endTime` fields by appending `"Z"` if they do not contain it. This ensures they satisfy the `planDTO` `format: "time"` schema verification and avoids `ConversionError` (HTTP 500) failures when fetching events for groups with finalized plans.
+

@@ -14,6 +14,7 @@ export function useGroupInfo() {
   });
 
   return {
+    groupId,
     data: query.data,
     isLoading: query.isLoading,
     error: query.error?.error,
