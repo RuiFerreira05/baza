@@ -22,6 +22,7 @@ export default function MembersScreen() {
 
   const [isRemoveModalVisible, setIsRemoveModalVisible] = useState(false);
   const [isBanModalVisible, setIsBanModalVisible] = useState(false);
+  const [isUnBanModalVisible, setIsUnBanModalVisible] = useState(false);
   const [selected, setSelected] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<GroupMemberDTO[]>([]);
@@ -61,6 +62,7 @@ export default function MembersScreen() {
   const updateBanStatus = (member: string, banned: boolean) => {
     groupService.updateMemberBan(data!.id, member, { banned: banned });
     setIsBanModalVisible(false);
+    setIsUnBanModalVisible(false);
     vm.refetch();
   };
 
@@ -119,8 +121,10 @@ export default function MembersScreen() {
             username={item.username}
             isMemberAdmin={item.admin}
             isAdmin={isAdmin()}
+            isBanned={item.banned}
             setRemoteModalVisible={setIsRemoveModalVisible}
             setBanModalVisible={setIsBanModalVisible}
+            setUnBanModalVisible={setIsUnBanModalVisible}
             setSelected={setSelected}
           />
         )}
@@ -160,6 +164,20 @@ export default function MembersScreen() {
         }
         onCancelPress={() => setIsBanModalVisible(false)}
         onRequestClose={() => setIsBanModalVisible(false)}
+        isLoading={false}
+      />
+      <BasicModal
+        modalText={`Unban ${selected} from group?`}
+        actionText="Unban"
+        modalVisible={isUnBanModalVisible}
+        onBackPress={() => setIsUnBanModalVisible(false)}
+        onActionPress={() =>
+          bypassAuth || !profile
+            ? setIsUnBanModalVisible(false)
+            : updateBanStatus(selected, false)
+        }
+        onCancelPress={() => setIsUnBanModalVisible(false)}
+        onRequestClose={() => setIsUnBanModalVisible(false)}
         isLoading={false}
       />
     </SafeAreaView>
