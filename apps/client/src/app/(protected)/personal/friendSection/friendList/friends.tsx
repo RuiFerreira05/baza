@@ -1,6 +1,6 @@
+import BasicModal from "@/components/BasicModal";
 import FriendCard from "@/components/FriendCard";
 import LabeledInput from "@/components/LabeledInput";
-import RemoveFriendModal from "@/components/RemoveFriendModal";
 import { useFriendsStyles } from "@/constants/styles/useFriendsStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuthState } from "@/hooks/useAuthState";
@@ -127,11 +127,12 @@ export default function FriendsScreen() {
           )
         }
       ></FlatList>
-      <RemoveFriendModal
-        friendName={selected}
+      <BasicModal
+        modalText={`Remove ${selected} from friends?`}
+        actionText="Remove"
         modalVisible={isModalVisible}
         onBackPress={() => setIsModalVisible(false)}
-        onRemovePress={() =>
+        onActionPress={() =>
           bypassAuth || !profile
             ? setIsModalVisible(false)
             : removeFriend(profile.username, selected)

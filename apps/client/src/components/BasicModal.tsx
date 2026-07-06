@@ -1,27 +1,29 @@
-import { useFriendsStyles } from "@/constants/styles/useFriendsStyles";
+import { useBasicModalStyles } from "@/constants/styles/useBasicModalStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { ActivityIndicator, Modal, Pressable, Text, View } from "react-native";
 
-interface RemoveFriendModalProps {
-  friendName: string;
+interface BasicModalProps {
+  modalText: string;
+  actionText: string;
   modalVisible: boolean;
   onBackPress: () => void;
-  onRemovePress: () => void;
+  onActionPress: () => void;
   onCancelPress: () => void;
   onRequestClose: () => void;
   isLoading: boolean;
 }
 
-export default function RemoveFriendModal({
-  friendName,
+export default function BasicModal({
+  modalText,
+  actionText,
   modalVisible,
   onBackPress,
-  onRemovePress,
+  onActionPress,
   onCancelPress,
   onRequestClose,
   isLoading = false,
-}: RemoveFriendModalProps) {
-  const styles = useFriendsStyles();
+}: BasicModalProps) {
+  const styles = useBasicModalStyles();
   const { colors } = useAppTheme();
 
   return (
@@ -38,19 +40,17 @@ export default function RemoveFriendModal({
         {isLoading && <ActivityIndicator size={70} color={colors.primary} />}
         {!isLoading && (
           <View style={[styles.modalCard, { backgroundColor: colors.surface }]}>
-            <Text style={styles.subTitle}>
-              Remove {friendName} from friends?
-            </Text>
+            <Text style={styles.subTitle}>{modalText}</Text>
 
             <View style={styles.row}>
               <Pressable
-                onPress={onRemovePress}
+                onPress={onActionPress}
                 style={({ pressed }) => [
-                  styles.removeButton,
+                  styles.actionButton,
                   pressed && styles.buttonPressed,
                 ]}
               >
-                <Text style={{ color: colors.onPrimary }}>Remove</Text>
+                <Text style={{ color: colors.onPrimary }}>{actionText}</Text>
               </Pressable>
 
               <Pressable
