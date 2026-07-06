@@ -140,7 +140,7 @@ export default function GroupProfileScreen() {
             underlayColor={colors.background}
             activeOpacity={0.5}
             style={{ width: "100%" }}
-            // onPress={}
+            onPress={vm.navigateToMembers}
           >
             <View style={styles.column}>
               <Text style={styles.subTitle2}>Members</Text>

@@ -7,6 +7,7 @@ import {
   RespondGroupInviteBody,
   Result,
   StatusError,
+  UpdateMemberBanBody,
   UpdateMemberRoleBody,
 } from "@baza/shared-types";
 import Type from "typebox";
@@ -119,6 +120,20 @@ export const groupService = {
       method: "PATCH",
       json: body,
     }).then(unwrapResult<GroupMemberDTO>),
+
+  // PATCH /v1/restricted/groups/:id/group-members/:username/updateBan
+  updateMemberBan: (
+    groupId: string,
+    username: string,
+    body: UpdateMemberBanBody,
+  ): Promise<Result<GroupMemberDTO, StatusError>> =>
+    apiClient(
+      `/v1/restricted/groups/${groupId}/group-members/${username}/updateBan`,
+      {
+        method: "PATCH",
+        json: body,
+      },
+    ).then(unwrapResult<GroupMemberDTO>),
 
   // GET /v1/restricted/users/:username/groups
   getUserGroups: (username: string): Promise<Result<GroupDTO[], StatusError>> =>

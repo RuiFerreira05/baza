@@ -1,4 +1,5 @@
 import {
+  BatchInviteBody,
   CreateGroupBody,
   createStatusError,
   createStatusOK,
@@ -6,13 +7,15 @@ import {
   ErrorTypes,
   SimpleIdParam,
   SimpleUsernameParam,
+  UpdateMemberBanBody,
   UpdateMemberRoleBody,
-  BatchInviteBody,
 } from "@baza/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { FSUploadService } from "../lib/FSUploadService";
 import { getAuthenticatedUsername } from "../lib/auth";
 import {
+  banUserFromGroup,
+  batchInviteUsersToGroup,
   createGroup,
   deleteGroup,
   deleteGroupPhoto,
@@ -22,9 +25,9 @@ import {
   getGroupById,
   getGroupMembers,
   inviteUserToGroup,
-  batchInviteUsersToGroup,
   promoteUserToAdmin,
   removeUserFromGroup,
+  unbanUserFromGroup,
 } from "../services/groupServices";
 import { app, fileUploadService } from "../setup";
 
@@ -523,6 +526,57 @@ export const updateUserGroupRoleHandler = async (
             createStatusError(
               ErrorTypes.UpdateError,
               "An error occurred while updating the user's role",
+            ),
+          );
+    }
+  } else {
+    return res.status(200).send(createStatusOK(result.value));
+  }
+};
+
+// PATCH /groups/:id/group-members/:username
+export const updateUserGroupBanHandler = async (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => {
+  const { id: groupId, username } = req.params as {
+    id: string;
+    username: string;
+  };
+  const { banned } = req.body as UpdateMemberBanBody;
+
+  const result = banned
+    ? await banUserFromGroup(groupId, username)
+    : await unbanUserFromGroup(groupId, username);
+
+  if (!result.ok) {
+    switch (result.error) {
+      case ErrorTypes.UnknownIdError:
+        return res
+          .status(404)
+          .send(
+            createStatusError(
+              ErrorTypes.UnknownIdError,
+              "A group or user with the provided id/username was not found",
+            ),
+          );
+      case ErrorTypes.ConversionError:
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.ConversionError,
+              "An error occurred while converting the updated member data",
+            ),
+          );
+      case ErrorTypes.UpdateError:
+      default:
+        return res
+          .status(500)
+          .send(
+            createStatusError(
+              ErrorTypes.UpdateError,
+              "An error occurred while updating the user's",
             ),
           );
     }

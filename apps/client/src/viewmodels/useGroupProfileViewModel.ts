@@ -18,6 +18,12 @@ export function useGroupProfileViewModel(group: GroupDTO) {
       params: { id: group.id },
     });
 
+  const navigateToMembers = () =>
+    router.push({
+      pathname: "/(protected)/personal/groupSection/group/[id]/members",
+      params: { id: group.id },
+    });
+
   const groupMembersQuery = useAppQuery({
     queryKey: ["group-members", group.id],
     queryFn: () => groupService.listMembers(group.id),
@@ -48,6 +54,7 @@ export function useGroupProfileViewModel(group: GroupDTO) {
   return {
     navigateToCalendar,
     navigateToEditProfile,
+    navigateToMembers,
     numberOfMembers,
     numberOfEvents,
     members: groupMembersQuery.data,

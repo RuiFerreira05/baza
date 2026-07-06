@@ -20,6 +20,7 @@ import {
   SimpleUsernameParam,
   StatusError,
   StatusOK,
+  UpdateMemberBanBody,
   UpdateMemberRoleBody,
 } from "@baza/shared-types";
 import { Type, type TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
@@ -49,6 +50,7 @@ import {
   getGroupPhotoHandler,
   inviteUsersToGroupHandler,
   removeUserFromGroupHandler,
+  updateUserGroupBanHandler,
   updateUserGroupRoleHandler,
 } from "../handlers/groupHandlers";
 import {
@@ -356,6 +358,39 @@ export const groupRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     updateUserGroupRoleHandler,
+  );
+
+  // ###### MEMBER BAN/UNBAN ENDPOINTS ######
+
+  // PATCH /groups/:id/group-members/:username/updateBan
+  app.patch(
+    "/:id/group-members/:username/updateBan",
+    {
+      schema: {
+        description: "Update a group member's ban status",
+        tags: ["groups"],
+        params: Type.Object({
+          id: Type.String({ format: "uuid" }),
+          username: Type.String(),
+        }),
+        body: UpdateMemberBanBody,
+        response: {
+          200: StatusOK(
+            groupMemberDTO,
+            "If the member's ban was successfully updated",
+          ),
+          404: StatusError(
+            ErrorTypes.UnknownIdError,
+            "If the group or user was not found",
+          ),
+          500: StatusError(
+            ErrorTypes.UpdateError,
+            "If the database update failed",
+          ),
+        },
+      },
+    },
+    updateUserGroupBanHandler,
   );
 
   // ###### GROUP EVENTS ENDPOINTS ######

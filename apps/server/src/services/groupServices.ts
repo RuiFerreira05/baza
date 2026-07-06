@@ -438,6 +438,112 @@ export const removeUserFromGroup = async (
 };
 
 /**
+ * This method bans a user from a group by deleting their entry in the groupMembers
+ * table. If successful, it returns the ban group member as a groupMemberDTO and
+ * updates the group's timestamp. If the group member record is not found, it returns
+ * an UnknownIdError. If there is an error converting the data, it returns a ConversionError.
+ *
+ * @param groupId the id of the group to ban the user from
+ * @param username the username of the user to ban
+ * @returns a promised result with the ban groupMemberDTO, or an error
+ */
+export const banUserFromGroup = async (
+  groupId: string,
+  username: string,
+): Promise<
+  Result<
+    GroupMemberDTO,
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.ConversionError
+    | ErrorTypes.UpdateError
+  >
+> => {
+  try {
+    const [groupMember] = await db
+      .update(groupMembers)
+      .set({ banned: true, bannedAt: new Date() })
+      .where(
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.username, username),
+        ),
+      )
+      .returning();
+
+    if (!groupMember) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+
+    const conv = Value.Convert(groupMemberDTO, groupMember);
+    if (Value.Check(groupMemberDTO, conv)) {
+      updateGroupTimestamp(groupId);
+      return Ok(conv);
+    } else {
+      app.log.error(Value.Errors(groupMemberDTO, conv));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(
+      `Failed to promote user to admin: ${(error as Error).message}`,
+    );
+    return Err(ErrorTypes.UpdateError);
+  }
+};
+
+/**
+ * This method unbans a user from a group by deleting their entry in the groupMembers
+ * table. If successful, it returns the unban group member as a groupMemberDTO and
+ * updates the group's timestamp. If the group member record is not found, it returns
+ * an UnknownIdError. If there is an error converting the data, it returns a ConversionError.
+ *
+ * @param groupId the id of the group to ban the user from
+ * @param username the username of the user to ban
+ * @returns a promised result with the ban groupMemberDTO, or an error
+ */
+export const unbanUserFromGroup = async (
+  groupId: string,
+  username: string,
+): Promise<
+  Result<
+    GroupMemberDTO,
+    | ErrorTypes.UnknownIdError
+    | ErrorTypes.ConversionError
+    | ErrorTypes.UpdateError
+  >
+> => {
+  try {
+    const [groupMember] = await db
+      .update(groupMembers)
+      .set({ banned: false, bannedAt: null })
+      .where(
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.username, username),
+        ),
+      )
+      .returning();
+
+    if (!groupMember) {
+      return Err(ErrorTypes.UnknownIdError);
+    }
+
+    const conv = Value.Convert(groupMemberDTO, groupMember);
+    if (Value.Check(groupMemberDTO, conv)) {
+      updateGroupTimestamp(groupId);
+      return Ok(conv);
+    } else {
+      app.log.error(Value.Errors(groupMemberDTO, conv));
+      return Err(ErrorTypes.ConversionError);
+    }
+  } catch (error) {
+    app.log.error(
+      `Failed to promote user to admin: ${(error as Error).message}`,
+    );
+    return Err(ErrorTypes.UpdateError);
+  }
+};
+
+/**
  * This internal method updates the updatedAt timestamp of a group in the database.
  * If the update fails, it logs the error and returns an UpdateError.
  *

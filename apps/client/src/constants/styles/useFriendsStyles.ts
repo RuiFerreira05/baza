@@ -283,4 +283,20 @@ export const FriendsStyles = (colors: ThemeType) =>
       color: colors.onSurface,
       textAlign: "center",
     },
+    profileView: {
+      height: 100,
+      width: 100,
+      borderRadius: 100,
+      borderWidth: 5,
+      borderColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.surfaceVariant,
+    },
+    admin: {
+      fontSize: 14,
+      fontFamily: "Inter_400Regular",
+      lineHeight: 18,
+      color: colors.onSurfaceVariant,
+    },
   });

@@ -76,6 +76,7 @@ export default function GroupLayout() {
         <Tabs.Screen name="events" options={{ title: "Events" }} />
         <Tabs.Screen name="event/[eventId]" options={{ href: null }} />
         <Tabs.Screen name="editProfile" options={{ href: null }} />
+        <Tabs.Screen name="members" options={{ href: null }} />
       </Tabs>
     </>
   );

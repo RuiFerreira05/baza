@@ -97,6 +97,14 @@ export const UpdateMemberRoleBody = Type.Object({
 });
 export type UpdateMemberRoleBody = Type.Static<typeof UpdateMemberRoleBody>;
 
+// PATCH /groups/:id/group-members/:username
+export const UpdateMemberBanBody = Type.Object({
+  banned: Type.Boolean({
+    description: "Whether the member should be banned (true) or unbanned (false).",
+  }),
+});
+export type UpdateMemberBanBody = Type.Static<typeof UpdateMemberBanBody>;
+
 // POST /groups/:id/group-members/batch
 export const BatchInviteBody = Type.Object({
   usernames: Type.Array(Type.String(), {
