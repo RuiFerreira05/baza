@@ -1,3 +1,4 @@
+import BasicModal from "@/components/BasicModal";
 import { useGroupProfileStyles } from "@/constants/styles/useGroupProfileStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuthState } from "@/hooks/useAuthState";
@@ -8,7 +9,7 @@ import { useGroupProfileViewModel } from "@/viewmodels/useGroupProfileViewModel"
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -23,6 +24,7 @@ export default function GroupProfileScreen() {
   const { colors } = useAppTheme();
   const { data, error, isLoading } = useGroupInfo();
   const { profile, bypassAuth } = useAuthState();
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   if (!profile && !bypassAuth) {
     router.push("/(onboarding)/createProfile");
@@ -50,6 +52,12 @@ export default function GroupProfileScreen() {
       vm.refetchEvents();
     }, []),
   );
+
+  const leaveGroup = (groupId: string, username: string) => {
+    groupService.removeUser(groupId, username);
+    setIsModalVisible(false);
+    router.replace("/(protected)/personal/groupSection/groupList/groups");
+  };
 
   if (isLoading) {
     return (
@@ -81,7 +89,7 @@ export default function GroupProfileScreen() {
           size={25}
           iconStyle={styles.icon}
           style={styles.iconButton}
-          // onPress={}
+          onPress={() => setIsModalVisible(true)}
         />
         <FontAwesome.Button
           name="edit"
@@ -154,6 +162,20 @@ export default function GroupProfileScreen() {
             : data?.description}
         </Text>
       </View>
+      <BasicModal
+        modalText={`Leave ${data?.groupname ?? "group"}?`}
+        actionText="Leave"
+        modalVisible={isModalVisible}
+        onBackPress={() => setIsModalVisible(false)}
+        onActionPress={() =>
+          bypassAuth || !profile || !data
+            ? setIsModalVisible(false)
+            : leaveGroup(data.id, profile.username)
+        }
+        onCancelPress={() => setIsModalVisible(false)}
+        onRequestClose={() => setIsModalVisible(false)}
+        isLoading={false}
+      />
     </View>
   );
 }
