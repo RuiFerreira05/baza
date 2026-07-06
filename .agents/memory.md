@@ -197,8 +197,8 @@ A modern mobile application built with **React Native** and **Expo (SDK 55)**.
   * `group/`: Nested Group Space and Event Workspace routes (hidden from global tab bar).
     * `[id]/`: Selected group workspace.
       * `_layout.tsx`: Nested bottom tab layout (Calendar, Events, Profile, and hidden event route).
-      * `calendar.tsx`: Group Calendar placeholder screen (main entry point).
-      * `events.tsx`: Group Events flat list placeholder screen.
+      * `calendar.tsx`: Group Calendar showing member schedules and group planning/resolved spans (using Wix Calendar multi-dot marking).
+      * `events.tsx`: Group Events Hub flat list displaying active planning countdowns, tiebreakers, and completed group events.
       * `profile.tsx`: Group Profile details/settings placeholder screen.
       * `event/`: Event Workspace subfolder.
         * `[eventId]/`: Individual event workspace.
@@ -302,3 +302,5 @@ Tests run sequentially against separate test setups:
 16. **Event Creation/Editing Modal Consolidation**: The event creation and editing logic is unified in `CreateEventModal.tsx` and driven by `useCreateEventViewModel.ts`. The modal hydrates and validates the form, and manages the edit workflow seamlessly if `eventToEdit` is supplied.
 17. **All-Day Event Temporal Normalization**: When `allDay` is set to true (for personal events or group plans), both the client and server force the event boundaries to cover the entire day (start time at `00:00:00`/`00:00:00.000Z` and end time at `23:59:59`/`23:59:59.999Z`), ensuring clean database constraint validations and timezone parity.
 18. **Repeat-Until Boundaries**: For repeating events with a set limit, `repeatUntil` (saved in YYYY-MM-DD date format) enforces bounds during expansion, preventing infinite loop hazards. During database queries or local event expansions (via `expandRepeatingEvents`), events are constrained to stop at `repeatUntil`.
+19. **Winning Plan Time Normalization**: When serializing `winningPlan` for group events on the server side, format its `startTime` and `endTime` fields by appending `"Z"` if they do not contain it. This ensures they satisfy the `planDTO` `format: "time"` schema verification and avoids `ConversionError` (HTTP 500) failures when fetching events for groups with finalized plans.
+

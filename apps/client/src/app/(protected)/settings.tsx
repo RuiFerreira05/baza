@@ -13,7 +13,7 @@ import Toast from "react-native-toast-message";
 // Imports from the existing codebase
 import { useSettingsStyles } from "@/constants/styles/useSettingsStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { } from "@/store/useSettingsStore";
+import {} from "@/store/useSettingsStore";
 import {
   ButtonSetting,
   InfoSetting,

@@ -210,6 +210,12 @@ export const getGroupEvents = async (
       if (row.winningPlanId && row.winningPlan && row.winningPlan.id) {
         winningPlan = {
           ...row.winningPlan,
+          startTime: row.winningPlan.startTime.includes("Z")
+            ? row.winningPlan.startTime
+            : `${row.winningPlan.startTime}Z`,
+          endTime: row.winningPlan.endTime.includes("Z")
+            ? row.winningPlan.endTime
+            : `${row.winningPlan.endTime}Z`,
           createdAt: row.winningPlan.createdAt.toISOString(),
           updatedAt: row.winningPlan.updatedAt.toISOString(),
         };
@@ -321,6 +327,12 @@ export const getGroupEventById = async (
       if (row.winningPlanId && row.winningPlan && row.winningPlan.id) {
         winningPlan = {
           ...row.winningPlan,
+          startTime: row.winningPlan.startTime.includes("Z")
+            ? row.winningPlan.startTime
+            : `${row.winningPlan.startTime}Z`,
+          endTime: row.winningPlan.endTime.includes("Z")
+            ? row.winningPlan.endTime
+            : `${row.winningPlan.endTime}Z`,
           createdAt: row.winningPlan.createdAt.toISOString(),
           updatedAt: row.winningPlan.updatedAt.toISOString(),
         };
