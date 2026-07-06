@@ -1,4 +1,5 @@
 import BasicModal from "@/components/BasicModal";
+import InviteFriendsModal from "@/components/InviteFriendsModal";
 import LabeledInput from "@/components/LabeledInput";
 import MemberCard from "@/components/MemberCard";
 import { useFriendsStyles } from "@/constants/styles/useFriendsStyles";
@@ -8,10 +9,17 @@ import { useGroupInfo } from "@/hooks/useGroupInfo";
 import { groupService } from "@/services/groupService";
 import { useGroupMembersViewModel } from "@/viewmodels/useGroupMembersViewModel";
 import { GroupMemberDTO } from "@baza/shared-types";
+import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome6";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MembersScreen() {
@@ -23,6 +31,7 @@ export default function MembersScreen() {
   const [isRemoveModalVisible, setIsRemoveModalVisible] = useState(false);
   const [isBanModalVisible, setIsBanModalVisible] = useState(false);
   const [isUnBanModalVisible, setIsUnBanModalVisible] = useState(false);
+  const [isInviteModalVisible, setIsInviteModalVisible] = useState(false);
   const [selected, setSelected] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<GroupMemberDTO[]>([]);
@@ -138,6 +147,17 @@ export default function MembersScreen() {
           </View>
         }
       ></FlatList>
+      <Pressable
+        style={({ pressed }) => [
+          styles.floatingButton,
+          pressed && { opacity: 0.8 },
+        ]}
+        onPress={() => {
+          setIsInviteModalVisible(true);
+        }}
+      >
+        <Ionicons name="add" size={30} color={colors.onPrimary} />
+      </Pressable>
       <BasicModal
         modalText={`Remove ${selected} from group?`}
         actionText="Remove"
@@ -180,6 +200,14 @@ export default function MembersScreen() {
         onRequestClose={() => setIsUnBanModalVisible(false)}
         isLoading={false}
       />
+      {data ? (
+        <InviteFriendsModal
+          group={data}
+          userFriends={vm.userfriends}
+          isModalVisible={isInviteModalVisible}
+          setModalVisible={setIsInviteModalVisible}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

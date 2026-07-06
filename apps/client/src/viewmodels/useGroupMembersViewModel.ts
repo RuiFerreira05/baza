@@ -1,6 +1,7 @@
 import { useAppQuery } from "@/hooks/useAppQuery";
 import { useAuthState } from "@/hooks/useAuthState";
 import { groupService } from "@/services/groupService";
+import { userService } from "@/services/userService";
 import { GroupDTO } from "@baza/shared-types";
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
@@ -24,8 +25,19 @@ export const useGroupMembersViewModel = (group: GroupDTO) => {
     return groupMembersQuery.data ?? [];
   }, [groupMembersQuery.data]);
 
+  const friendsQuery = useAppQuery({
+    queryKey: ["user-friends", profile?.username],
+    queryFn: () => userService.getFriends(profile!.username),
+    enabled: !!profile,
+  });
+
+  const userfriends = useMemo(() => {
+    return friendsQuery.data ?? [];
+  }, [friendsQuery.data]);
+
   return {
     members,
+    userfriends,
     navigateToFriend,
     isLoading: groupMembersQuery.isLoading,
     isError: groupMembersQuery.isError,
