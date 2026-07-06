@@ -42,6 +42,36 @@ export const groupService = {
       json: body,
     }).then(unwrapResult<GroupDTO>),
 
+  // PATCH /v1/restricted/goups/:id/photo
+  editGroupProfilePhoto: (
+    groupId: string,
+    imageUri: string,
+  ): Promise<Result<GroupDTO, StatusError>> => {
+    const formData = new FormData();
+    const filename = imageUri.split("/").pop() || "group_photo.jpg";
+    const match = /\.(\w+)$/.exec(filename);
+    const type = match ? `image/${match[1]}` : `image/jpeg`;
+
+    formData.append("photo", {
+      uri: imageUri,
+      type: type,
+      name: filename,
+    } as any);
+
+    return apiClient(`/v1/restricted/groups/${groupId}/photo`, {
+      method: "PATCH",
+      body: formData,
+    }).then(unwrapResult<GroupDTO>);
+  },
+
+  // DELETE /v1/restricted/groups/:id/photo
+  deleteProfilePhoto: (
+    groupId: string,
+  ): Promise<Result<GroupDTO, StatusError>> =>
+    apiClient(`/v1/restricted/groups/${groupId}/photo`, {
+      method: "DELETE",
+    }).then(unwrapResult<GroupDTO>),
+
   // POST /v1/restricted/groups/:id/group-members
   inviteUser: (
     groupId: string,

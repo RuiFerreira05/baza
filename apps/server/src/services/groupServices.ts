@@ -103,7 +103,13 @@ export const createGroup = async (
     });
 
     if (group) {
-      const conv = Value.Convert(groupDTO, group);
+      const sanitizedGroup = {
+        ...group,
+        createdAt: group.createdAt.toISOString(),
+        updatedAt: group.updatedAt.toISOString(),
+      };
+
+      const conv = Value.Convert(groupDTO, sanitizedGroup);
       if (Value.Check(groupDTO, conv)) {
         return Ok(conv);
       } else {
@@ -156,7 +162,12 @@ export const deleteGroup = async (
     });
 
     if (deleted) {
-      const conv = Value.Convert(groupDTO, deleted);
+      const sanitizedGroup = {
+        ...deleted,
+        createdAt: deleted.createdAt.toISOString(),
+        updatedAt: deleted.updatedAt.toISOString(),
+      };
+      const conv = Value.Convert(groupDTO, sanitizedGroup);
       if (Value.Check(groupDTO, conv)) {
         return Ok(conv);
       } else {
@@ -228,7 +239,13 @@ export const editGroupPhoto = async (
     .returning();
 
   if (group) {
-    const conv = Value.Convert(groupDTO, group);
+    const sanitizedGroup = {
+      ...group,
+      createdAt: group.createdAt.toISOString(),
+      updatedAt: group.updatedAt.toISOString(),
+    };
+
+    const conv = Value.Convert(groupDTO, sanitizedGroup);
     if (Value.Check(groupDTO, conv)) {
       return Ok(conv);
     } else {
@@ -278,7 +295,13 @@ export const editGroup = async (
     return Err(ErrorTypes.UnknownIdError);
   }
 
-  const conv = Value.Convert(groupDTO, group);
+  const sanitizedGroup = {
+    ...group,
+    createdAt: group.createdAt.toISOString(),
+    updatedAt: group.updatedAt.toISOString(),
+  };
+
+  const conv = Value.Convert(groupDTO, sanitizedGroup);
   if (Value.Check(groupDTO, conv)) {
     return Ok(conv);
   } else {
@@ -589,7 +612,13 @@ export const deleteGroupPhoto = async (
       .returning();
 
     if (updatedGroup) {
-      const conv = Value.Convert(groupDTO, updatedGroup);
+      const sanitizedGroup = {
+        ...updatedGroup,
+        createdAt: updatedGroup.createdAt.toISOString(),
+        updatedAt: updatedGroup.updatedAt.toISOString(),
+      };
+
+      const conv = Value.Convert(groupDTO, sanitizedGroup);
       if (Value.Check(groupDTO, conv)) {
         return Ok(conv);
       } else {

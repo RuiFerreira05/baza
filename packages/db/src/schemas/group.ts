@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, varchar, check, primaryKey, uuid } from "drizzle-orm/pg-core";
+import { boolean, check, pgTable, primaryKey, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { profiles } from "./profile";
 
 export const groups = pgTable("groups", {

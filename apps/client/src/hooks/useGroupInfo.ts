@@ -1,9 +1,9 @@
 import { groupService } from "@/services/groupService";
-import { useLocalSearchParams } from "expo-router";
+import { useGlobalSearchParams } from "expo-router";
 import { useAppQuery } from "./useAppQuery";
 
 export function useGroupInfo() {
-  const { id: groupId } = useLocalSearchParams<{
+  const { id: groupId } = useGlobalSearchParams<{
     id: string;
   }>();
 

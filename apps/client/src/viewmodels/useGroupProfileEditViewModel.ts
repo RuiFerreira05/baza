@@ -1,25 +1,20 @@
 import { useAppMutation } from "@/hooks/useAppMutation";
 import { queryClient } from "@/lib/queryClient";
-import { userService } from "@/services/userService";
-import { ErrorTypes } from "@baza/shared-types";
-import { ProfileDTO } from "@baza/shared-types/src/protocol/users";
+import { groupService } from "@/services/groupService";
+import { ErrorTypes, GroupDTO } from "@baza/shared-types";
 import { useState } from "react";
 import Toast from "react-native-toast-message";
 
-export function useEditProfileViewModel(
-  profile: ProfileDTO,
-  bypassAuth: boolean,
-) {
-  const [usernameInput, setUsernameInput] = useState(profile.username);
-  const [descriptionInput, setDescriptionInput] = useState(profile.description);
-  const [photoInput, setPhotoInput] = useState(profile.photo);
+export function useGroupEditProfileViewModel(group: GroupDTO) {
+  const [groupNameInput, setGroupNameInput] = useState(group.groupname);
+  const [descriptionInput, setDescriptionInput] = useState(group.description);
   const [error, setError] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
   const [image, setImage] = useState(
-    bypassAuth || !profile?.photo
+    !group.photo
       ? null
-      : userService.getUserPhotoUrl(profile.username, profile.updatedAt),
+      : groupService.getGroupPhotoUrl(group.id, group.updatedAt),
   );
 
   const saveImage = async (image: string | null) => {
@@ -32,34 +27,38 @@ export function useEditProfileViewModel(
     }
   };
 
-  const isUsernameValid =
-    usernameInput.length >= 3 && usernameInput.length <= 20;
+  const groupNameRegex = /^[A-Za-z0-9_\-\.]{3,64}$/;
+  const isGroupNameValid = groupNameRegex.test(groupNameInput!);
 
   const { mutateAsync: editProfile, isPending: isEditing } = useAppMutation({
     mutationFn: () => {
       setError(null);
-      return userService.editProfile(profile.username, {
-        newUsername:
-          usernameInput !== profile.username ? usernameInput.trim() : undefined,
-        newDescription:
-          descriptionInput !== profile.description
+      return groupService.editGroup(group.id, {
+        groupName:
+          groupNameInput !== group.groupname
+            ? groupNameInput!.trim()
+            : undefined,
+        description:
+          descriptionInput !== group.description
             ? descriptionInput?.trim()
             : undefined,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["current-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["group", group.id] });
       Toast.show({
         type: "success",
-        text1: "Profile Updated!",
-        text2: "Your profile has been updated successfully.",
+        text1: "Group Updated!",
+        text2: "Your group has been updated successfully.",
         position: "bottom",
         bottomOffset: 80,
       });
     },
     onError: (err) => {
       if (err.error.type === ErrorTypes.ExistingResourceError) {
-        setError("This username is already taken. Please choose another one.");
+        setError(
+          "This group name is already taken. Please choose another one.",
+        );
         return;
       }
       setError(err.error.message || "Please try a different username");
@@ -70,27 +69,24 @@ export function useEditProfileViewModel(
     mutationFn: (currentImage: string | null) => {
       setError(null);
       if (currentImage) {
-        return userService.editProfilePhoto(profile.username, currentImage);
+        return groupService.editGroupProfilePhoto(group.id, currentImage);
       } else {
-        return userService.deleteProfilePhoto(profile.username);
+        return groupService.deleteProfilePhoto(group.id);
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["current-profile"] });
-      queryClient.invalidateQueries({ queryKey: ["current-profile-photo"] });
+      queryClient.invalidateQueries({ queryKey: ["group", group.id] });
+      queryClient.invalidateQueries({ queryKey: ["group-photo", group.id] });
 
       if (image) {
         setImage(
-          userService.getUserPhotoUrl(
-            profile.username,
-            new Date().toISOString(),
-          ),
+          groupService.getGroupPhotoUrl(group.id, new Date().toISOString()),
         );
       }
       Toast.show({
         type: "success",
-        text1: "Profile photo Updated!",
-        text2: "Your profile photo has been updated successfully.",
+        text1: "Group photo Updated!",
+        text2: "Your group profile photo has been updated successfully.",
         position: "bottom",
         bottomOffset: 80,
       });
@@ -105,13 +101,11 @@ export function useEditProfileViewModel(
   });
 
   return {
-    usernameInput,
-    setUsernameInput,
+    groupNameInput,
+    setGroupNameInput,
     descriptionInput,
     setDescriptionInput,
-    photoInput,
-    setPhotoInput,
-    isUsernameValid,
+    isGroupNameValid,
     error,
     editProfile,
     isEditing,

@@ -132,7 +132,7 @@ export default function EditProfileScreen() {
               />
 
               <Pressable
-                testID="createProfileButton"
+                testID="editProfileButton"
                 style={({ pressed }) => [
                   styles.button,
                   pressed && styles.buttonPressed,

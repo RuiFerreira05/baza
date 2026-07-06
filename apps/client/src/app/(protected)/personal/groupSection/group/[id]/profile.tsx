@@ -1,12 +1,13 @@
 import { useGroupProfileStyles } from "@/constants/styles/useGroupProfileStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuthState } from "@/hooks/useAuthState";
+import { useGroupInfo } from "@/hooks/useGroupInfo";
 import { authClient } from "@/lib/auth";
 import { groupService } from "@/services/groupService";
 import { useGroupProfileViewModel } from "@/viewmodels/useGroupProfileViewModel";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useFocusEffect, useGlobalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback } from "react";
 import {
   ActivityIndicator,
@@ -20,14 +21,23 @@ export default function GroupProfileScreen() {
   const styles = useGroupProfileStyles();
   const router = useRouter();
   const { colors } = useAppTheme();
-  const { id } = useGlobalSearchParams<{ id: string }>();
+  const { data, error, isLoading } = useGroupInfo();
   const { profile, bypassAuth } = useAuthState();
 
   if (!profile && !bypassAuth) {
     router.push("/(onboarding)/createProfile");
   }
 
-  const vm = useGroupProfileViewModel(id);
+  const vm = useGroupProfileViewModel(
+    data ?? {
+      groupname: "Developers",
+      photo: null,
+      description: "Just a developer profile",
+      id: "fKagbUx7LwvE72kxf0PL7cdd7AjncKBT",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  );
 
   const getInitials = (name: string) => {
     if (!name) return "";
@@ -36,13 +46,12 @@ export default function GroupProfileScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      vm.refetchGroup();
       vm.refetchMembers();
       vm.refetchEvents();
     }, []),
   );
 
-  if (vm.isLoading && !vm.groupProfile) {
+  if (isLoading) {
     return (
       <View style={styles.container}>
         <View style={styles.loaderContainer}>
@@ -52,12 +61,12 @@ export default function GroupProfileScreen() {
     );
   }
 
-  if (vm.isError) {
+  if (error) {
     return (
       <View style={styles.container}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>
-            {vm.error?.message || "Failed to load group."}
+            {error?.message || "Failed to load group."}
           </Text>
         </View>
       </View>
@@ -84,10 +93,10 @@ export default function GroupProfileScreen() {
       </View>
 
       <View style={styles.profileView}>
-        {vm.groupProfile?.photo ? (
+        {data?.photo ? (
           <Image
             source={{
-              uri: groupService.getGroupPhotoUrl(id, vm.groupProfile.updatedAt),
+              uri: groupService.getGroupPhotoUrl(data!.id, data?.updatedAt),
               headers: {
                 Cookie: authClient.getCookie() || "",
               },
@@ -96,13 +105,13 @@ export default function GroupProfileScreen() {
           />
         ) : (
           <Text style={styles.avatarText}>
-            {getInitials(vm.groupProfile!.groupname)}
+            {getInitials(data?.groupname ?? "")}
           </Text>
         )}
       </View>
 
       <Text style={styles.title}>
-        {bypassAuth ? "Developers Group" : vm.groupProfile?.groupname}
+        {bypassAuth ? "Developers Group" : data?.groupname}
       </Text>
 
       <View style={styles.profileStats}>
@@ -142,7 +151,7 @@ export default function GroupProfileScreen() {
         <Text style={styles.textOnPrimary}>
           {bypassAuth
             ? "Just a group of developers suffering"
-            : vm.groupProfile?.description}
+            : data?.description}
         </Text>
       </View>
     </View>
