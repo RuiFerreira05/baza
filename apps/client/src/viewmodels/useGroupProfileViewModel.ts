@@ -50,6 +50,7 @@ export function useGroupProfileViewModel(group: GroupDTO) {
     navigateToEditProfile,
     numberOfMembers,
     numberOfEvents,
+    members: groupMembersQuery.data,
     refetchMembers: groupMembersQuery.refetch,
     refetchEvents: eventsQuery.refetch,
   };
