@@ -147,17 +147,20 @@ export default function MembersScreen() {
           </View>
         }
       ></FlatList>
-      <Pressable
-        style={({ pressed }) => [
-          styles.floatingButton,
-          pressed && { opacity: 0.8 },
-        ]}
-        onPress={() => {
-          setIsInviteModalVisible(true);
-        }}
-      >
-        <Ionicons name="add" size={30} color={colors.onPrimary} />
-      </Pressable>
+      {isAdmin() ? (
+        <Pressable
+          style={({ pressed }) => [
+            styles.floatingButton,
+            pressed && { opacity: 0.8 },
+          ]}
+          onPress={() => {
+            setIsInviteModalVisible(true);
+          }}
+        >
+          <Ionicons name="add" size={30} color={colors.onPrimary} />
+        </Pressable>
+      ) : null}
+
       <BasicModal
         modalText={`Remove ${selected} from group?`}
         actionText="Remove"

@@ -32,7 +32,6 @@ export default function InviteFriendsModal({
   const { colors } = useAppTheme();
   const vm = useGroupMembersViewModel(group);
 
-  const [selectedFriends, setSelectedFriends] = useState<ProfileDTO[]>([]);
   const [tempSelectedFriendUsernames, setTempSelectedFriendUsernames] =
     useState<Set<string>>(new Set());
 
@@ -47,18 +46,12 @@ export default function InviteFriendsModal({
   };
 
   const confirmFriendSelection = async () => {
-    const newlySelected = userFriends.filter((f) =>
-      tempSelectedFriendUsernames.has(f.username),
-    );
-    setSelectedFriends(newlySelected);
-    if (selectedFriends.length > 0) {
-      const inviteUsernames = selectedFriends.map((f) => f.username);
+    const inviteUsernames = Array.from(tempSelectedFriendUsernames);
+    if (inviteUsernames.length > 0) {
       const inviteResult = await groupService.batchInviteUsers(
         group.id,
         inviteUsernames,
       );
-
-      console.log("heyy");
 
       if (!inviteResult.ok) {
         Toast.show({
@@ -84,9 +77,18 @@ export default function InviteFriendsModal({
             position: "bottom",
             bottomOffset: 80,
           });
+        } else {
+          Toast.show({
+            type: "success",
+            text1: "Success",
+            text2: "Invitations sent successfully!",
+            position: "bottom",
+            bottomOffset: 80,
+          });
         }
       }
     }
+    setTempSelectedFriendUsernames(new Set());
     setModalVisible(false);
   };
 
