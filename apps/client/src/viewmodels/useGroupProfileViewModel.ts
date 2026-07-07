@@ -30,7 +30,7 @@ export function useGroupProfileViewModel(group: GroupDTO) {
   });
   const acceptedMembers =
     groupMembersQuery.data?.filter((member) => {
-      return member.acceptedInvite;
+      return member.acceptedInvite && !member.banned;
     }) ?? [];
 
   const eventsQuery = useAppQuery({
