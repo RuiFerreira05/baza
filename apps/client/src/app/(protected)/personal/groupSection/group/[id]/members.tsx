@@ -31,6 +31,8 @@ export default function MembersScreen() {
   const [isRemoveModalVisible, setIsRemoveModalVisible] = useState(false);
   const [isBanModalVisible, setIsBanModalVisible] = useState(false);
   const [isUnBanModalVisible, setIsUnBanModalVisible] = useState(false);
+  const [isPromoteModalVisible, setIsPromoteModalVisible] = useState(false);
+  const [isDemoteModalVisible, setIsDemoteModalVisible] = useState(false);
   const [isInviteModalVisible, setIsInviteModalVisible] = useState(false);
   const [selected, setSelected] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,6 +74,13 @@ export default function MembersScreen() {
     groupService.updateMemberBan(data!.id, member, { banned: banned });
     setIsBanModalVisible(false);
     setIsUnBanModalVisible(false);
+    vm.refetch();
+  };
+
+  const updateAdminStatus = (member: string, isAdmin: boolean) => {
+    groupService.updateMemberRole(data!.id, member, { admin: isAdmin });
+    setIsPromoteModalVisible(false);
+    setIsDemoteModalVisible(false);
     vm.refetch();
   };
 
@@ -134,6 +143,8 @@ export default function MembersScreen() {
             setRemoteModalVisible={setIsRemoveModalVisible}
             setBanModalVisible={setIsBanModalVisible}
             setUnBanModalVisible={setIsUnBanModalVisible}
+            setPromoteAdminModalVisible={setIsPromoteModalVisible}
+            setDemoteAdminModalVisible={setIsDemoteModalVisible}
             setSelected={setSelected}
           />
         )}
@@ -201,6 +212,34 @@ export default function MembersScreen() {
         }
         onCancelPress={() => setIsUnBanModalVisible(false)}
         onRequestClose={() => setIsUnBanModalVisible(false)}
+        isLoading={false}
+      />
+      <BasicModal
+        modalText={`Promote ${selected} to admin?`}
+        actionText="Promote"
+        modalVisible={isPromoteModalVisible}
+        onBackPress={() => setIsPromoteModalVisible(false)}
+        onActionPress={() =>
+          bypassAuth || !profile
+            ? setIsPromoteModalVisible(false)
+            : updateAdminStatus(selected, true)
+        }
+        onCancelPress={() => setIsPromoteModalVisible(false)}
+        onRequestClose={() => setIsPromoteModalVisible(false)}
+        isLoading={false}
+      />
+      <BasicModal
+        modalText={`Demote ${selected} from admin?`}
+        actionText="Demote"
+        modalVisible={isDemoteModalVisible}
+        onBackPress={() => setIsDemoteModalVisible(false)}
+        onActionPress={() =>
+          bypassAuth || !profile
+            ? setIsDemoteModalVisible(false)
+            : updateAdminStatus(selected, false)
+        }
+        onCancelPress={() => setIsDemoteModalVisible(false)}
+        onRequestClose={() => setIsDemoteModalVisible(false)}
         isLoading={false}
       />
       {data ? (

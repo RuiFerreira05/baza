@@ -14,6 +14,8 @@ interface MemberCardProps {
   setRemoteModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setBanModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setUnBanModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setPromoteAdminModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setDemoteAdminModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSelected: (username: string) => void;
 }
 
@@ -26,6 +28,8 @@ export default function MemberCard({
   setRemoteModalVisible,
   setBanModalVisible,
   setUnBanModalVisible,
+  setPromoteAdminModalVisible,
+  setDemoteAdminModalVisible,
   setSelected,
 }: MemberCardProps) {
   const { colors } = useAppTheme();
@@ -64,6 +68,30 @@ export default function MemberCard({
               <Text style={styles.title} numberOfLines={1}>
                 {username}
               </Text>
+              {isAdmin && !isBanned && !isMemberAdmin ? (
+                <Ionicons.Button
+                  name="shield-outline"
+                  size={20}
+                  iconStyle={styles.icon}
+                  style={styles.iconButton}
+                  onPress={() => {
+                    setPromoteAdminModalVisible(true);
+                    setSelected(username);
+                  }}
+                />
+              ) : null}
+              {isAdmin && !isBanned && isMemberAdmin ? (
+                <Ionicons.Button
+                  name="shield-sharp"
+                  size={20}
+                  iconStyle={styles.icon}
+                  style={styles.iconButton}
+                  onPress={() => {
+                    setDemoteAdminModalVisible(true);
+                    setSelected(username);
+                  }}
+                />
+              ) : null}
               {isAdmin && !isBanned ? (
                 <FontAwesome.Button
                   name="ban"
@@ -92,7 +120,7 @@ export default function MemberCard({
                   }}
                 />
               ) : null}
-              {isBanned ? (
+              {isAdmin && isBanned ? (
                 <FontAwesome.Button
                   name="user-check"
                   size={20}
