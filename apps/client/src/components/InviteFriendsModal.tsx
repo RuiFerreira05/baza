@@ -36,6 +36,8 @@ export default function InviteFriendsModal({
   const [tempSelectedFriendUsernames, setTempSelectedFriendUsernames] =
     useState<Set<string>>(new Set());
 
+  console.log(userFriends);
+
   const toggleFriendSelection = (friendUsername: string) => {
     const nextSet = new Set(tempSelectedFriendUsernames);
     if (nextSet.has(friendUsername)) {
@@ -141,7 +143,7 @@ export default function InviteFriendsModal({
             </View>
           ) : (
             <FlatList
-              data={vm.members}
+              data={userFriends}
               keyExtractor={(item) => item.username}
               contentContainerStyle={styles.modalList}
               showsVerticalScrollIndicator={true}
