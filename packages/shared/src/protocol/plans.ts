@@ -18,6 +18,7 @@ export const planDTO = Type.Object({
   createdAt: Type.String({ format: "date-time" }),
   updatedAt: Type.String({ format: "date-time" }),
   votesCount: Type.Optional(Type.Integer({ description: "Total votes casted for this plan" })),
+  hasVoted: Type.Optional(Type.Boolean({ description: "Expresses if the requesting user voted for this plan" })),
 }, {
   description: "Group proposed plan data.",
   title: "PlanDTO",

@@ -49,7 +49,6 @@ export const ProfileStyles = (colors: ThemeType) =>
       height: 95,
       width: 95,
       borderRadius: 100,
-      // elevation: 10,
       boxShadow: `0px 4px 10px rgba(0, 0, 0, 0.15)`,
     },
     profileStats: {
@@ -78,7 +77,6 @@ export const ProfileStyles = (colors: ThemeType) =>
       borderRadius: 8,
       paddingHorizontal: 20,
       gap: 5,
-      // elevation: 3,
       boxShadow: `0px 4px 10px rgba(0, 0, 0, 0.15)`,
     },
     columnDivider: {

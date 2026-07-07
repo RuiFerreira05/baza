@@ -1,5 +1,8 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useAppTheme } from "@/hooks/useAppTheme";
+import { env } from "@/lib/env";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -9,9 +12,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { env } from "@/lib/env";
-import { useAppTheme } from "@/hooks/useAppTheme";
 
 // Graceful import of expo-maps in case it's run in environments where it isn't linked
 let AppleMaps: any = null;
@@ -493,11 +493,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 4,
     zIndex: 10,
-    elevation: 3,
+    elevation: 0,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
     overflow: "hidden",
   },
   suggestionItem: {

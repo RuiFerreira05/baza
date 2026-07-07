@@ -144,7 +144,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 2,
+    elevation: 0,
+    boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)",
   },
   cardHeader: {
     flexDirection: "row",

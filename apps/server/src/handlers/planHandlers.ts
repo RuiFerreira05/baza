@@ -92,7 +92,7 @@ export const getEventPlansHandler = async (
     idevent: string;
   };
 
-  const result = await getEventPlans(groupId, eventId);
+  const result = await getEventPlans(groupId, eventId, username);
 
   if (!result.ok) {
     switch (result.error) {
@@ -135,7 +135,7 @@ export const getEventPlanByIdHandler = async (
     idplan: planId,
   } = req.params as { id: string; idevent: string; idplan: string };
 
-  const result = await getEventPlanById(groupId, eventId, planId);
+  const result = await getEventPlanById(groupId, eventId, planId, username);
 
   if (!result.ok) {
     switch (result.error) {

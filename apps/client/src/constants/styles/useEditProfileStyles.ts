@@ -50,7 +50,8 @@ export const EditProfileStyles = (colors: ThemeType) =>
       height: 95,
       width: 95,
       borderRadius: 100,
-      elevation: 10,
+      elevation: 0,
+      boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
     },
     column: {
       flexDirection: "column",

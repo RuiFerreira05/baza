@@ -150,6 +150,7 @@ export const createEventPlan = async (
 export const getEventPlans = async (
   groupId: string,
   eventId: string,
+  requesterUsername?: string,
 ): Promise<
   Result<PlanDTO[], ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>
 > => {
@@ -163,6 +164,20 @@ export const getEventPlans = async (
     if (!event) {
       return Err(ErrorTypes.UnknownIdError);
     }
+
+    const userVotes = requesterUsername
+      ? await db
+          .select({ planId: votes.planId })
+          .from(votes)
+          .innerJoin(plans, eq(votes.planId, plans.id))
+          .where(
+            and(
+              eq(plans.groupEventId, eventId),
+              eq(votes.username, requesterUsername),
+            ),
+          )
+      : [];
+    const votedPlanIds = new Set(userVotes.map((v) => v.planId));
 
     const proposals = await db
       .select({
@@ -193,6 +208,7 @@ export const getEventPlans = async (
         ? plan.startTime
         : `${plan.startTime}Z`,
       endTime: plan.endTime.includes("Z") ? plan.endTime : `${plan.endTime}Z`,
+      hasVoted: votedPlanIds.has(plan.id),
       createdAt: plan.createdAt.toISOString(),
       updatedAt: plan.updatedAt.toISOString(),
     }));
@@ -223,6 +239,7 @@ export const getEventPlanById = async (
   groupId: string,
   eventId: string,
   planId: string,
+  requesterUsername?: string,
 ): Promise<
   Result<PlanDTO, ErrorTypes.ConversionError | ErrorTypes.UnknownIdError>
 > => {
@@ -236,6 +253,21 @@ export const getEventPlanById = async (
     if (!event) {
       return Err(ErrorTypes.UnknownIdError);
     }
+
+    const userVoted = requesterUsername
+      ? (
+          await db
+            .select({ planId: votes.planId })
+            .from(votes)
+            .where(
+              and(
+                eq(votes.planId, planId),
+                eq(votes.username, requesterUsername),
+              ),
+            )
+            .limit(1)
+        ).length > 0
+      : false;
 
     const [plan] = await db
       .select({
@@ -271,6 +303,7 @@ export const getEventPlanById = async (
         ? plan.startTime
         : `${plan.startTime}Z`,
       endTime: plan.endTime.includes("Z") ? plan.endTime : `${plan.endTime}Z`,
+      hasVoted: userVoted,
       createdAt: plan.createdAt.toISOString(),
       updatedAt: plan.updatedAt.toISOString(),
     };
