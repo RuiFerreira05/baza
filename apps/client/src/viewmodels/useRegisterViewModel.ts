@@ -54,8 +54,11 @@ export const useRegisterViewModel = () => {
 
       // 1. If Web Client ID is present, attempt Native Google Sign-in
       if (webClientId) {
-        const { GoogleOneTapSignIn, isSuccessResponse, isNoSavedCredentialFoundResponse } = 
-          require("react-native-nitro-google-signin");
+        const {
+          GoogleOneTapSignIn,
+          isSuccessResponse,
+          isNoSavedCredentialFoundResponse,
+        } = require("react-native-nitro-google-signin");
 
         GoogleOneTapSignIn.configure({ webClientId });
 
@@ -87,7 +90,9 @@ export const useRegisterViewModel = () => {
       });
 
       if (authError) {
-        setError(authError.message || "An error occurred during Google sign-in.");
+        setError(
+          authError.message || "An error occurred during Google sign-in.",
+        );
       }
     } catch (err: any) {
       try {
@@ -96,7 +101,10 @@ export const useRegisterViewModel = () => {
           callbackURL: "baza://",
         });
         if (authError) {
-          setError(authError.message || "An error occurred during fallback Google sign-in.");
+          setError(
+            authError.message ||
+              "An error occurred during fallback Google sign-in.",
+          );
         }
       } catch (fallbackErr: any) {
         setError(err.message || "Google sign-in failed.");

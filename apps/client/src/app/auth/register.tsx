@@ -117,8 +117,14 @@ export default function RegisterScreen() {
                   vm.onGoogleSignIn();
                 }}
               >
-                <Ionicons name="logo-google" size={20} color={colors.onSurface} />
-                <Text style={styles.googleButtonText}>Continue with Google</Text>
+                <Ionicons
+                  name="logo-google"
+                  size={20}
+                  color={colors.onSurface}
+                />
+                <Text style={styles.googleButtonText}>
+                  Continue with Google
+                </Text>
               </Pressable>
 
               {vm.error ? (

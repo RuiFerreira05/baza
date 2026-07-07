@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import React from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -38,6 +38,7 @@ export default function CreateEventModal({
 }: CreateEventModalProps) {
   const { colors, isDark } = useAppTheme();
   const formStyles = useCreateEventStyles();
+  const [scrollEnabled, setScrollEnabled] = useState(true);
 
   const formVm = useCreateEventViewModel({
     initialDate,
@@ -156,6 +157,7 @@ export default function CreateEventModal({
               contentContainerStyle={formStyles.formScroll}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
+              scrollEnabled={scrollEnabled}
             >
               {/* Event Title */}
               <LabeledInput
@@ -172,6 +174,7 @@ export default function CreateEventModal({
                 label="Location"
                 value={formVm.location}
                 onChangeText={formVm.setLocation}
+                onMapInteraction={(active) => setScrollEnabled(!active)}
               />
 
               {/* Event Description */}
