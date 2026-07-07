@@ -36,8 +36,6 @@ export default function InviteFriendsModal({
   const [tempSelectedFriendUsernames, setTempSelectedFriendUsernames] =
     useState<Set<string>>(new Set());
 
-  console.log(userFriends);
-
   const toggleFriendSelection = (friendUsername: string) => {
     const nextSet = new Set(tempSelectedFriendUsernames);
     if (nextSet.has(friendUsername)) {
@@ -59,6 +57,8 @@ export default function InviteFriendsModal({
         group.id,
         inviteUsernames,
       );
+
+      console.log("heyy");
 
       if (!inviteResult.ok) {
         Toast.show({

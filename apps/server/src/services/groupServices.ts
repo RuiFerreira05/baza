@@ -767,6 +767,9 @@ export const batchInviteUsersToGroup = async (
   >
 > => {
   try {
+    app.log.info(
+      `Received batch invite users request for group with id ${groupId}`,
+    );
     // 1. Verify inviter is an admin of the group
     const [inviterMembership] = await db
       .select()

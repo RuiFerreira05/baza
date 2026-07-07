@@ -28,6 +28,10 @@ export function useGroupProfileViewModel(group: GroupDTO) {
     queryKey: ["group-members", group.id],
     queryFn: () => groupService.listMembers(group.id),
   });
+  const acceptedMembers =
+    groupMembersQuery.data?.filter((member) => {
+      return member.acceptedInvite;
+    }) ?? [];
 
   const eventsQuery = useAppQuery({
     queryKey: ["group-events", group.id],
@@ -48,8 +52,8 @@ export function useGroupProfileViewModel(group: GroupDTO) {
     return finished;
   };
 
-  const numberOfMembers = groupMembersQuery.data?.length ?? 0;
-  const numberOfEvents = getFinishedEvents().length ?? 0;
+  const numberOfMembers = acceptedMembers.length;
+  const numberOfEvents = acceptedMembers.length;
 
   return {
     navigateToCalendar,

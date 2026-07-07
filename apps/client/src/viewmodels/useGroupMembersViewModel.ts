@@ -25,6 +25,10 @@ export const useGroupMembersViewModel = (group: GroupDTO) => {
     return groupMembersQuery.data ?? [];
   }, [groupMembersQuery.data]);
 
+  const acceptedMembers = members.filter((member) => {
+    return member.acceptedInvite;
+  });
+
   const friendsQuery = useAppQuery({
     queryKey: ["user-friends", profile?.username],
     queryFn: () => userService.getFriends(profile!.username),
@@ -36,7 +40,7 @@ export const useGroupMembersViewModel = (group: GroupDTO) => {
   }, [friendsQuery.data]);
 
   return {
-    members,
+    members: acceptedMembers,
     userfriends,
     navigateToFriend,
     isLoading: groupMembersQuery.isLoading,
