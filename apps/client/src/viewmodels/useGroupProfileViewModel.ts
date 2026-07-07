@@ -53,7 +53,7 @@ export function useGroupProfileViewModel(group: GroupDTO) {
   };
 
   const numberOfMembers = acceptedMembers.length;
-  const numberOfEvents = acceptedMembers.length;
+  const numberOfEvents = getFinishedEvents().length;
 
   return {
     navigateToCalendar,
