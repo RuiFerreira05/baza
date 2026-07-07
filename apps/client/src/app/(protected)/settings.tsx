@@ -28,7 +28,6 @@ import {
   KeyboardAvoidingView,
   KeyboardGestureArea,
 } from "react-native-keyboard-controller";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
   const { colors } = useAppTheme();
@@ -69,7 +68,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <KeyboardAvoidingView behavior="padding">
         <KeyboardGestureArea>
           <SectionList
@@ -84,7 +83,7 @@ export default function SettingsScreen() {
           />
         </KeyboardGestureArea>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
