@@ -19,7 +19,7 @@ export const AuthStyles = (colors: ThemeType) =>
     },
     authCard: {
       backgroundColor: colors.surface,
-      padding: 28,
+      padding: 24,
       borderRadius: 16,
       borderWidth: 1,
       borderColor: colors.border,
@@ -28,7 +28,7 @@ export const AuthStyles = (colors: ThemeType) =>
       alignSelf: "center",
     },
     header: {
-      marginBottom: 32,
+      marginBottom: 24,
       alignItems: "center",
     },
     title: {
@@ -44,7 +44,7 @@ export const AuthStyles = (colors: ThemeType) =>
       textAlign: "center",
     },
     form: {
-      gap: 20,
+      gap: 16,
     },
     inputGroup: {
       gap: 6,

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -92,10 +93,15 @@ export default function GooglePlacesMapInput({
       : null,
   );
 
-  const [cameraPosition, setCameraPosition] = useState<{ coordinates: Coordinates; zoom: number }>(() => {
+  const [cameraPosition, setCameraPosition] = useState<{
+    coordinates: Coordinates;
+    zoom: number;
+  }>(() => {
     const freshLoc = parseLocation(value);
     return {
-      coordinates: freshLoc ? { latitude: freshLoc.latitude, longitude: freshLoc.longitude } : DEFAULT_COORDS,
+      coordinates: freshLoc
+        ? { latitude: freshLoc.latitude, longitude: freshLoc.longitude }
+        : DEFAULT_COORDS,
       zoom: freshLoc ? 15 : 12,
     };
   });
@@ -107,7 +113,10 @@ export default function GooglePlacesMapInput({
   useEffect(() => {
     const freshLoc = parseLocation(value);
     if (freshLoc) {
-      const newCoords = { latitude: freshLoc.latitude, longitude: freshLoc.longitude };
+      const newCoords = {
+        latitude: freshLoc.latitude,
+        longitude: freshLoc.longitude,
+      };
       setSearchText(freshLoc.name);
       setCoords(newCoords);
       if (!isMapClickUpdate.current) {
@@ -122,6 +131,44 @@ export default function GooglePlacesMapInput({
     }
     isMapClickUpdate.current = false;
   }, [value]);
+
+  const fetchSuggestions = useCallback(
+    async (input: string) => {
+      setLoadingSuggestions(true);
+      try {
+        const url = `https://places.googleapis.com/v1/places:autocomplete`;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Goog-Api-Key": apiKey || "",
+            "X-Goog-FieldMask":
+              "suggestions.placePrediction.text,suggestions.placePrediction.placeId",
+          },
+          body: JSON.stringify({
+            input,
+          }),
+        });
+        const data = await res.json();
+
+        if (data && data.suggestions) {
+          const formattedSuggestions = data.suggestions.map((s: any) => ({
+            place_id: s.placePrediction.placeId,
+            description: s.placePrediction.text.text,
+          }));
+          setSuggestions(formattedSuggestions);
+        } else {
+          setSuggestions([]);
+        }
+      } catch (err) {
+        console.error("Error fetching places autocomplete suggestions:", err);
+        setSuggestions([]);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    },
+    [apiKey],
+  );
 
   // Debounced search for Places Autocomplete
   useEffect(() => {
@@ -141,41 +188,7 @@ export default function GooglePlacesMapInput({
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [searchText, displayName]);
-
-  const fetchSuggestions = async (input: string) => {
-    setLoadingSuggestions(true);
-    try {
-      const url = `https://places.googleapis.com/v1/places:autocomplete`;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": apiKey || "",
-          "X-Goog-FieldMask": "suggestions.placePrediction.text,suggestions.placePrediction.placeId",
-        },
-        body: JSON.stringify({
-          input,
-        }),
-      });
-      const data = await res.json();
-
-      if (data && data.suggestions) {
-        const formattedSuggestions = data.suggestions.map((s: any) => ({
-          place_id: s.placePrediction.placeId,
-          description: s.placePrediction.text.text,
-        }));
-        setSuggestions(formattedSuggestions);
-      } else {
-        setSuggestions([]);
-      }
-    } catch (err) {
-      console.error("Error fetching places autocomplete suggestions:", err);
-      setSuggestions([]);
-    } finally {
-      setLoadingSuggestions(false);
-    }
-  };
+  }, [searchText, displayName, apiKey, fetchSuggestions]);
 
   const handleSelectSuggestion = async (
     placeId: string,
@@ -198,7 +211,11 @@ export default function GooglePlacesMapInput({
       const data = await res.json();
 
       const location = data?.location;
-      if (location && typeof location.latitude === "number" && typeof location.longitude === "number") {
+      if (
+        location &&
+        typeof location.latitude === "number" &&
+        typeof location.longitude === "number"
+      ) {
         const newCoords: Coordinates = {
           latitude: location.latitude,
           longitude: location.longitude,

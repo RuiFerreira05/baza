@@ -56,9 +56,9 @@ export default function LoginScreen() {
                 style={({ pressed }) => [
                   styles.button,
                   pressed && styles.buttonPressed,
-                  !vm.isFormValid && styles.buttonDisabled,
+                  (!vm.isFormValid || vm.loading) && styles.buttonDisabled,
                 ]}
-                disabled={!vm.isFormValid}
+                disabled={!vm.isFormValid || vm.loading}
                 onPress={() => {
                   vm.onSignIn();
                 }}
@@ -80,19 +80,27 @@ export default function LoginScreen() {
                 style={({ pressed }) => [
                   styles.googleButton,
                   pressed && styles.buttonPressed,
+                  vm.loading && styles.buttonDisabled,
                 ]}
+                disabled={vm.loading}
                 onPress={() => {
                   vm.onGoogleSignIn();
                 }}
               >
-                <Ionicons
-                  name="logo-google"
-                  size={20}
-                  color={colors.onSurface}
-                />
-                <Text style={styles.googleButtonText}>
-                  Continue with Google
-                </Text>
+                {vm.loading ? (
+                  <ActivityIndicator color={colors.onSurface} size="small" />
+                ) : (
+                  <>
+                    <Ionicons
+                      name="logo-google"
+                      size={20}
+                      color={colors.onSurface}
+                    />
+                    <Text style={styles.googleButtonText}>
+                      Continue with Google
+                    </Text>
+                  </>
+                )}
               </Pressable>
 
               {vm.error && (

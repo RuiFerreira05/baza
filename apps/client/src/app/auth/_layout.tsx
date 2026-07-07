@@ -4,10 +4,11 @@ import { Href, Redirect, Tabs, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator } from "react-native";
 
 export default function AuthLayout() {
-  const { session, bypassAuth, isLoading } = useAuthState();
+  const { session, bypassAuth, isLoading, hasNoProfile } = useAuthState();
   const { returnUrl } = useLocalSearchParams<{ returnUrl?: string }>();
 
-  if (isLoading) {
+  // Only show full-screen spinner during initial app load when session is unknown
+  if (isLoading && !session) {
     return (
       <ActivityIndicator
         size="large"
@@ -16,7 +17,10 @@ export default function AuthLayout() {
     );
   }
 
-  if (!bypassAuth && session) {
+  if (!bypassAuth && session && !isLoading) {
+    if (hasNoProfile) {
+      return <Redirect href="/(onboarding)/createProfile" />;
+    }
     return (
       <Redirect
         href={(returnUrl || "/(protected)/personal/calendar") as Href}
