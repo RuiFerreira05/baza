@@ -1,3 +1,4 @@
+import { formatLocation } from "@/lib/location";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -124,17 +125,25 @@ export default function EventCard({
           ) : null}
 
           {location ? (
-            <View style={[styles.infoRow, { marginLeft: timeRange ? 16 : 0 }]}>
+            <View
+              style={[
+                styles.infoRow,
+                { marginLeft: timeRange ? 16 : 0, flexShrink: 1 },
+              ]}
+            >
               <Ionicons
                 name="location-outline"
                 size={14}
                 color={colors.onSurfaceVariant}
               />
               <Text
-                style={[styles.infoText, { color: colors.onSurfaceVariant }]}
+                style={[
+                  styles.infoText,
+                  { color: colors.onSurfaceVariant, flexShrink: 1 },
+                ]}
                 numberOfLines={1}
               >
-                {location}
+                {formatLocation(location)}
               </Text>
             </View>
           ) : null}

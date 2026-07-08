@@ -1,3 +1,4 @@
+import { formatLocation } from "@/lib/location";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { GroupEventDTO } from "@baza/shared-types";
 import { Ionicons } from "@expo/vector-icons";
@@ -95,7 +96,7 @@ export default function GroupCalendarEventCard({
           >
             Location:{" "}
             <Text style={{ color: colors.onSurface, fontWeight: "600" }}>
-              {event.winningPlan.location}
+              {formatLocation(event.winningPlan.location)}
             </Text>
           </Text>
         </View>

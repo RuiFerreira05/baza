@@ -1,3 +1,4 @@
+import { formatLocation } from "@/lib/location";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { FormattedGroupEvent } from "@/viewmodels/useGroupEventsViewModel";
 import { Ionicons } from "@expo/vector-icons";
@@ -96,7 +97,7 @@ export default function GroupEventHubCard({
             >
               Location:{" "}
               <Text style={{ color: colors.onSurface, fontWeight: "600" }}>
-                {evt.winningPlan.location}
+                {formatLocation(evt.winningPlan.location)}
               </Text>
             </Text>
           </View>

@@ -1,3 +1,4 @@
+import { formatLocation } from "@/lib/location";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { getUsernameColor } from "@/viewmodels/useGroupCalendarViewModel";
 import { PersonalEventDTO } from "@baza/shared-types";
@@ -63,7 +64,12 @@ export default function MemberEventCard({ event }: MemberEventCardProps) {
           </View>
           {event.location && !isPrivate ? (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 4,
+                flexShrink: 1,
+              }}
             >
               <Ionicons
                 name="location-outline"
@@ -71,10 +77,16 @@ export default function MemberEventCard({ event }: MemberEventCardProps) {
                 color={colors.onSurfaceVariant}
               />
               <Text
-                style={[{ color: colors.onSurfaceVariant, fontSize: 12 }]}
+                style={[
+                  {
+                    color: colors.onSurfaceVariant,
+                    fontSize: 12,
+                    flexShrink: 1,
+                  },
+                ]}
                 numberOfLines={1}
               >
-                {event.location}
+                {formatLocation(event.location)}
               </Text>
             </View>
           ) : null}

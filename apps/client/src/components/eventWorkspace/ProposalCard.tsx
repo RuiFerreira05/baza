@@ -1,3 +1,4 @@
+import { formatLocation } from "@/lib/location";
 import { useEventProposalsStyles } from "@/constants/styles/useEventProposalsStyles";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { Ionicons } from "@expo/vector-icons";
@@ -109,7 +110,7 @@ export default function ProposalCard({
             style={[styles.detailText, { color: colors.onSurface }]}
             numberOfLines={1}
           >
-            {plan.location}
+            {formatLocation(plan.location)}
           </Text>
         </View>
 

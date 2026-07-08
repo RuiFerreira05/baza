@@ -1,3 +1,4 @@
+import { formatLocation } from "@/lib/location";
 import { useEventDetailsStyles } from "@/constants/styles/useEventDetailsStyles";
 import { useEventWorkspaceViewModel } from "@/viewmodels/useEventWorkspaceViewModel";
 import { Ionicons } from "@expo/vector-icons";
@@ -191,7 +192,7 @@ export default function EventDetailsTab({
               color={colors.onSurfaceVariant}
             />
             <Text style={[styles.infoText, { color: colors.onSurface }]}>
-              {winningPlan.location}
+              {formatLocation(winningPlan.location)}
             </Text>
           </View>
 
