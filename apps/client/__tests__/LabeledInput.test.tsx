@@ -6,7 +6,9 @@ jest.mock("@/constants/styles/useAuthStyles", () => ({
   useAuthStyles: () => ({
     inputGroup: {},
     label: {},
-    input: { borderColor: "default" },
+    inputContainer: { borderColor: "default" },
+    textInput: {},
+    revealButton: {},
     tip: {},
   }),
 }));
@@ -57,13 +59,15 @@ describe("LabeledInput", () => {
         value=""
         onChangeText={jest.fn()}
         placeholder="Test Placeholder"
+        testID="labeled-input-container"
       />,
     );
 
-    let input = screen.getByPlaceholderText("Test Placeholder");
+    const container = screen.getByTestId("labeled-input-container");
+    const input = screen.getByPlaceholderText("Test Placeholder");
 
     // initially blur (border)
-    expect(input.props.style).toEqual(
+    expect(container.props.style).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ borderColor: "#border" }),
       ]),
@@ -73,8 +77,7 @@ describe("LabeledInput", () => {
     await act(async () => {
       input.props.onFocus();
     });
-    input = screen.getByPlaceholderText("Test Placeholder");
-    expect(input.props.style).toEqual(
+    expect(container.props.style).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ borderColor: "#primary" }),
       ]),
@@ -84,8 +87,7 @@ describe("LabeledInput", () => {
     await act(async () => {
       input.props.onBlur();
     });
-    input = screen.getByPlaceholderText("Test Placeholder");
-    expect(input.props.style).toEqual(
+    expect(container.props.style).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ borderColor: "#border" }),
       ]),
@@ -100,23 +102,64 @@ describe("LabeledInput", () => {
         onChangeText={jest.fn()}
         placeholder="Test Placeholder"
         isCorrect={true}
+        testID="labeled-input-container"
       />,
     );
 
+    const container = screen.getByTestId("labeled-input-container");
     const input = screen.getByPlaceholderText("Test Placeholder");
 
     // should override focus/blur styles
-    expect(input.props.style).toEqual(
+    expect(container.props.style).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ borderColor: "#success" }),
       ]),
     );
 
     fireEvent(input, "focus");
-    expect(input.props.style).toEqual(
+    expect(container.props.style).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ borderColor: "#success" }),
       ]),
     );
+  });
+
+  it("should toggle secureTextEntry when eye toggle button is pressed", async () => {
+    const mockOnChange = jest.fn();
+    await render(
+      <LabeledInput
+        label="Password"
+        value="myPassword"
+        onChangeText={mockOnChange}
+        placeholder="Enter password"
+        secureTextEntry={true}
+      />,
+    );
+
+    let input = screen.getByPlaceholderText("Enter password");
+    // Secure input should initially hide the text
+    expect(input.props.secureTextEntry).toBe(true);
+
+    // Toggle button should be present
+    const toggleButton = screen.getByTestId("password-visibility-toggle");
+    expect(toggleButton).toBeTruthy();
+
+    // Tap toggle button
+    await act(async () => {
+      fireEvent.press(toggleButton);
+    });
+
+    // secureTextEntry should now be false (visible)
+    input = screen.getByPlaceholderText("Enter password");
+    expect(input.props.secureTextEntry).toBe(false);
+
+    // Tap toggle button again
+    await act(async () => {
+      fireEvent.press(toggleButton);
+    });
+
+    // secureTextEntry should be true again (hidden)
+    input = screen.getByPlaceholderText("Enter password");
+    expect(input.props.secureTextEntry).toBe(true);
   });
 });
