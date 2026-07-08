@@ -105,7 +105,7 @@ export default function RegisterScreen() {
                   }}
                 >
                   {!vm.loading ? (
-                    <Text style={styles.buttonText}>Sign In</Text>
+                    <Text style={styles.buttonText}>Sign up</Text>
                   ) : (
                     <ActivityIndicator
                       color={colors.onPrimary}

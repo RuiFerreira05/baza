@@ -1,6 +1,11 @@
 import { authClient } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { useState } from "react";
+import {
+  GoogleOneTapSignIn,
+  isNoSavedCredentialFoundResponse,
+  isSuccessResponse,
+} from "react-native-nitro-google-signin";
 
 export const useRegisterViewModel = () => {
   const [name, setName] = useState("");
@@ -54,12 +59,6 @@ export const useRegisterViewModel = () => {
 
       // 1. If Web Client ID is present, attempt Native Google Sign-in
       if (webClientId) {
-        const {
-          GoogleOneTapSignIn,
-          isSuccessResponse,
-          isNoSavedCredentialFoundResponse,
-        } = require("react-native-nitro-google-signin");
-
         GoogleOneTapSignIn.configure({ webClientId });
 
         let response = await GoogleOneTapSignIn.signIn();
