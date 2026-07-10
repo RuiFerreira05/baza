@@ -144,7 +144,7 @@ export const CreatePersonalEventBody = Type.Object({
   endTime: Type.Optional(Type.String({ format: "date-time" })),
   allDay: Type.Optional(Type.Boolean()),
   repeat: Type.Union([Type.Literal("day"), Type.Literal("week"), Type.Literal("month"), Type.Literal("year"), Type.Literal("never")]),
-  repeatUntil: Type.Optional(Type.String({ format: "date" })),
+  repeatUntil: Type.Optional(nullable(Type.String({ format: "date" }))),
   public: Type.Boolean(),
 });
 export type CreatePersonalEventBody = Type.Static<typeof CreatePersonalEventBody>;

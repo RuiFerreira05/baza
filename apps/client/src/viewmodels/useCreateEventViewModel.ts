@@ -321,7 +321,7 @@ export function useCreateEventViewModel({
       repeatUntil:
         repeat !== "never" && repeatUntil
           ? formatDateToString(repeatUntil)
-          : undefined,
+          : null,
       public: isPublic,
     };
 

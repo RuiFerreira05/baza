@@ -237,6 +237,46 @@ describe("Profile Routes", () => {
     expect(allDayBody.data.allDay).toBe(true);
     expect(allDayBody.data.startTime).toContain("2026-06-12T00:00:00");
     expect(allDayBody.data.endTime).toContain("2026-06-12T23:59:59");
+
+    // 7. Create repeating event with repeatUntil, then edit to repeat forever
+    const repeatCreateRes = await app.inject({
+      method: "POST",
+      url: "/v1/restricted/users/johndoe/events",
+      payload: {
+        title: "Weekly team meeting",
+        date: "2026-06-15",
+        startTime: "2026-06-15T09:00:00.000Z",
+        endTime: "2026-06-15T10:00:00.000Z",
+        repeat: "week",
+        repeatUntil: "2026-07-15",
+        public: false,
+      },
+    });
+    expect(repeatCreateRes.statusCode).toBe(201);
+    const repeatCreateBody = repeatCreateRes.json();
+    expect(repeatCreateBody.data.repeat).toBe("week");
+    expect(repeatCreateBody.data.repeatUntil).toBe("2026-07-15");
+    const repeatEventId = repeatCreateBody.data.id;
+
+    // Edit it to repeat forever (repeatUntil: null)
+    const repeatEditRes = await app.inject({
+      method: "PATCH",
+      url: `/v1/restricted/users/johndoe/events/${repeatEventId}`,
+      payload: {
+        repeatUntil: null,
+      },
+    });
+    expect(repeatEditRes.statusCode).toBe(200);
+    const repeatEditBody = repeatEditRes.json();
+    expect(repeatEditBody.data.repeatUntil).toBeNull();
+
+    // Retrieve and verify it is indeed null in database
+    const repeatGetRes = await app.inject({
+      method: "GET",
+      url: `/v1/restricted/users/johndoe/events/${repeatEventId}`,
+    });
+    expect(repeatGetRes.statusCode).toBe(200);
+    expect(repeatGetRes.json().data.repeatUntil).toBeNull();
   });
 
   it("should handle settings retrieval and update", async () => {
