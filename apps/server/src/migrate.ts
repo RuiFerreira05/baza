@@ -13,7 +13,7 @@ const runMigrations = async () => {
   console.log("Database connection string present. Initializing database client...");
   const db = createDbClient(env.DATABASE_URL);
 
-  const migrationsFolder = path.resolve(__dirname, "../../packages/db/src/migrations");
+  const migrationsFolder = path.resolve(__dirname, "../../../packages/db/src/migrations");
   console.log(`Resolving migrations folder path: ${migrationsFolder}`);
 
   try {
