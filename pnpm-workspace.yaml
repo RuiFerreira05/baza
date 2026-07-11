@@ -5,10 +5,14 @@ packages:
 allowBuilds:
   '@swc/core': true
   esbuild: true
-  unrs-resolver: set this to true or false
+  unrs-resolver: true
 
 nodeLinker: hoisted
 
 onlyBuiltDependencies:
+  - '@swc/core'
   - esbuild
   - unrs-resolver
+
+strictDepBuilds: false
+

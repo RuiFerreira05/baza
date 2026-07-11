@@ -7,7 +7,7 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   // The entry point of the server, so tsup knows where to start bundling.
-  entry: ["src/server.ts"],
+  entry: ["src/server.ts", "src/migrate.ts"],
   // The format of the output files. We are using ESM (ECMAScript Modules) because it is the modern
   // standard for JavaScript modules, and it allows us to use the import/export syntax.
   format: ["esm"],
